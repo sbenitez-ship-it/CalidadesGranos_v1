@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIAG - Análisis v5.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .tab-button.active { border-bottom: 2px solid #4F46E5; color: #4F46E5; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">🌾 LIAG - Análisis de Granos v5.0</h1>
+                    <p class="text-indigo-100">Dashboard Inteligente con IA</p>
+                </div>
+                <div id="headerStats" class="text-right hidden">
+                    <div class="text-sm text-indigo-200">Base de Datos</div>
+                    <div id="totalRegistros" class="text-4xl font-bold">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-6 flex gap-4">
+            <button onclick="showTab('upload')" id="tab-upload" class="tab-button active px-4 py-3 font-semibold">📤 Cargar</button>
+            <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-button px-4 py-3 font-semibold">📊 Dashboard</button>
+            <button onclick="showTab('table')" id="tab-table" class="tab-button px-4 py-3 font-semibold">📋 Tabla</button>
+            <button onclick="showTab('commercial')" id="tab-commercial" class="tab-button px-4 py-3 font-semibold">💰 Comercial</button>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- TAB: Upload -->
+        <div id="content-upload" class="tab-content active">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-4">📤 Cargar Excel</h2>
+                <div class="border-4 border-dashed border-indigo-300 rounded-xl p-12 text-center cursor-pointer hover:border-indigo-500" id="dropZone">
+                    <p class="text-xl font-semibold text-gray-700 mb-2">Arrastra archivos aquí</p>
+                    <p class="text-sm text-indigo-600">✓ Cargill  ✓ ACA  ✓ COFCO</p>
+                    <input type="file" id="fileInput" multiple accept=".xlsx,.xls" class="hidden">
+                </div>
+                <div id="fileList" class="mt-6 space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- TAB: Dashboard -->
+        <div id="content-dashboard" class="tab-content">
+            <div class="grid grid-cols-4 gap-6 mb-6">
+                <div class="bg-blue-500 rounded-xl p-6 text-white">
+                    <div class="text-sm mb-2">Total Cartas</div>
+                    <div id="dash-total" class="text-4xl font-bold">0</div>
+                </div>
+                <div class="bg-green-500 rounded-xl p-6 text-white">
+                    <div class="text-sm mb-2">Clientes</div>
+                    <div id="dash-clientes" class="text-4xl font-bold">0</div>
+                </div>
+                <div class="bg-purple-500 rounded-xl p-6 text-white">
+                    <div class="text-sm mb-2">Peso Total (ton)</div>
+                    <div id="dash-peso" class="text-4xl font-bold">0</div>
+                </div>
+                <div class="bg-red-500 rounded-xl p-6 text-white">
+                    <div class="text-sm mb-2">Tasa Rechazo</div>
+                    <div id="dash-rechazo" class="text-4xl font-bold">0%</div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4">📊 Resumen por Cliente y Cultivo</h3>
+                <div id="resumenClienteCultivo" class="overflow-x-auto"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">Por Cultivo</h3>
+                    <canvas id="chartCultivos"></canvas>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">Estados</h3>
+                    <canvas id="chartEstados"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Table -->
+        <div id="content-table" class="tab-content">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between mb-4">
+                    <h2 class="text-2xl font-bold">📋 Datos Detallados</h2>
+                    <div class="flex gap-2">
+                        <button onclick="exportToCSV()" class="bg-green-600 text-white px-4 py-2 rounded-lg">CSV</button>
+                        <button onclick="exportToExcel()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Excel</button>
+                        <button onclick="clearAllData()" class="bg-red-600 text-white px-4 py-2 rounded-lg">Limpiar</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border px-2 py-1">CTG</th>
+                                <th class="border px-2 py-1">Fecha</th>
+                                <th class="border px-2 py-1">Cliente</th>
+                                <th class="border px-2 py-1">Cultivo</th>
+                                <th class="border px-2 py-1">Peso(ton)</th>
+                                <th class="border px-2 py-1">Hum%</th>
+                                <th class="border px-2 py-1">Grado</th>
+                                <th class="border px-2 py-1">Factor</th>
+                                <th class="border px-2 py-1">Var%</th>
+                                <th class="border px-2 py-1">Prot%</th>
+                                <th class="border px-2 py-1">P.Com</th>
+                                <th class="border px-2 py-1">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Commercial -->
+        <div id="content-commercial" class="tab-content">
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">💰 Rentabilidad por Cliente</h3>
+                    <div id="rentabilidadCliente"></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">🎯 Recomendaciones</h3>
+                    <div id="recomendaciones"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let processedData = [];
+        const TABLAS_CALIDAD = {
+            trigo: { humedad_base: 14.0, peso_hectolitro: {1:78,2:76,3:75}, tolerancias: {volatil_pct:1.0}, descuentos: {humedad_por_punto:1.0}, bonificaciones: {proteina_por_punto:0.5} },
+            maiz: { humedad_base: 14.5, peso_hectolitro: {1:78,2:75,3:72}, tolerancias: {volatil_pct:1.0}, descuentos: {humedad_por_punto:1.0} },
+            soja: { humedad_base: 14.0, tolerancias: {volatil_pct:0.5}, descuentos: {humedad_por_punto:1.0}, bonificaciones: {proteina_por_punto:1.0} },
+            girasol: { humedad_base: 9.0, tolerancias: {volatil_pct:1.0}, descuentos: {humedad_por_punto:1.0} }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            setupDropZone();
+        });
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('liag-v5');
+                if (saved) {
+                    processedData = JSON.parse(saved);
+                    updateAllViews();
+                }
+            } catch(e) {}
+        }
+
+        function saveData() {
+            localStorage.setItem('liag-v5', JSON.stringify(processedData));
+        }
+
+        function setupDropZone() {
+            const dz = document.getElementById('dropZone');
+            const fi = document.getElementById('fileInput');
+            dz.onclick = () => fi.click();
+            dz.ondragover = e => { e.preventDefault(); dz.classList.add('bg-indigo-50'); };
+            dz.ondragleave = () => dz.classList.remove('bg-indigo-50');
+            dz.ondrop = e => { e.preventDefault(); dz.classList.remove('bg-indigo-50'); handleFiles(Array.from(e.dataTransfer.files)); };
+            fi.onchange = e => handleFiles(Array.from(e.target.files));
+        }
+
+        async function handleFiles(files) {
+            for (let file of files) {
+                const data = await processFile(file);
+                if (data && data.length > 0) {
+                    processedData = processedData.concat(data);
+                }
+            }
+            saveData();
+            updateAllViews();
+        }
+
+        async function processFile(file) {
+            return new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+                        const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1});
+                        const fmt = detectFormato(data);
+                        if (fmt === 'cargill') resolve(procesarCargill(data));
+                        else if (fmt === 'aca') resolve(procesarACA(data));
+                        else if (fmt === 'cofco') resolve(procesarCOFCO(data));
+                        else resolve([]);
+                    } catch(e) { resolve([]); }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function detectFormato(d) {
+            const h = d[0].join('|').toLowerCase();
+            if (h.includes('peso hectolítrico')) return 'cofco';
+            if (h.includes('peso neto a certificar')) return 'cargill';
+            if (h.includes('kg.netos s/m')) return 'aca';
+            return null;
+        }
+
+        function normCTG(ctg) {
+            const s = String(ctg).replace(/\D/g,'');
+            return s.length >= 11 && s[0] === '1' ? s.substring(0,11) : s;
+        }
+
+        function normFecha(f) {
+            try {
+                const d = new Date(f);
+                return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+            } catch { return String(f); }
+        }
+
+        function normCliente(c) {
+            if (!c) return 'CLIENTE_DESCONOCIDO';
+            return String(c).toUpperCase().includes('LIAG') ? 'CLIENTE_DESCONOCIDO' : c;
+        }
+
+        function normCultivo(t) {
+            if (!t) return null;
+            const l = String(t).toLowerCase();
+            if (l.includes('trigo pan')) return 'trigo';
+            if (l.includes('maiz') || l.includes('maíz')) return 'maiz';
+            if (l.includes('soja')) return 'soja';
+            if (l.includes('girasol')) return 'girasol';
+            if (l.includes('fertilizante')) return null;
+            return 'desconocido';
+        }
+
+        function calcFactor(ph, grado, cultivo, directo=null) {
+            if (directo && directo > 0) return parseFloat(directo);
+            if (!ph || !grado) return 100;
+            const t = TABLAS_CALIDAD[cultivo];
+            if (!t || !t.peso_hectolitro) return 100;
+            const base = t.peso_hectolitro[grado];
+            return base ? parseFloat(((ph/base)*100).toFixed(2)) : 100;
+        }
+
+        function procesarCargill(d) {
+            const h = d[0];
+            const regs = [];
+            for (let i = 1; i < d.length; i++) {
+                const r = d[i];
+                if (!r) continue;
+                const get = col => { const idx = h.findIndex(x => String(x).toLowerCase() === col.toLowerCase()); return idx >= 0 ? r[idx] : null; };
+                const cultivo = normCultivo(get('Producto'));
+                if (!cultivo) continue;
+                const ctg = normCTG(get('CTG'));
+                if (ctg.length !== 11) continue;
+                const grado = parseInt(get('Grado')) || 0;
+                const ph = parseFloat(get('Peso Hectolítrico')) || 0;
+                const factor = calcFactor(ph, grado, cultivo, parseFloat(get('Factor Total')));
+                regs.push({
+                    CTG: ctg,
+                    Fecha_Carga: normFecha(get('Fecha Descarga')),
+                    Cliente: normCliente(get('Cliente')),
+                    Cultivo: cultivo,
+                    Peso_Neto_kg: parseFloat(get('Peso Neto a Certificar')) || 0,
+                    Humedad: parseFloat(get('Humedad%')) || 0,
+                    Grado: grado,
+                    Factor: factor,
+                    Variacion_Factor: parseFloat((factor-100).toFixed(2)),
+                    Proteina: parseFloat(get('Proteina')) || 0,
+                    Zaranda_kg: parseFloat(get('Zaranda')) || 0,
+                    Volatil_kg: parseFloat(get('Volatil')) || 0,
+                    Origen_Archivo: 'Cargill'
+                });
+            }
+            return regs.map(calcDesc);
+        }
+
+        function procesarACA(d) {
+            let hi = 0;
+            for (let i = 0; i < 10; i++) { if (d[i] && String(d[i][0]).includes('CTG')) { hi = i; break; } }
+            const h = d[hi];
+            const regs = [];
+            for (let i = hi+1; i < d.length; i++) {
+                const r = d[i];
+                if (!r) continue;
+                const get = col => { const idx = h.findIndex(x => String(x).toLowerCase().includes(col)); return idx >= 0 ? r[idx] : null; };
+                const ctg = normCTG(get('ctg'));
+                if (ctg.length !== 11) continue;
+                regs.push({
+                    CTG: ctg,
+                    Fecha_Carga: normFecha(get('fecha')),
+                    Cliente: normCliente(get('procedencia')),
+                    Cultivo: 'soja',
+                    Peso_Neto_kg: (parseFloat(get('kg.netos'))||0)*1000,
+                    Humedad: parseFloat(String(get('hum')||'0').replace(',','.')),
+                    Grado: 0,
+                    Factor: 100,
+                    Variacion_Factor: 0,
+                    Proteina: 0,
+                    Zaranda_kg: parseFloat(get('zaranda'))||0,
+                    Volatil_kg: parseFloat(get('volátil'))||0,
+                    Origen_Archivo: 'ACA'
+                });
+            }
+            return regs.map(calcDesc);
+        }
+
+        function procesarCOFCO(d) {
+            const h = d[0];
+            const regs = [];
+            for (let i = 1; i < d.length; i++) {
+                const r = d[i];
+                if (!r) continue;
+                const get = col => { const idx = h.findIndex(x => String(x).toLowerCase().includes(col)); return idx >= 0 ? r[idx] : null; };
+                const cultivo = normCultivo(get('material'));
+                if (!cultivo) continue;
+                const ctg = normCTG(get('número de ctg'));
+                if (ctg.length !== 11) continue;
+                const grado = parseInt(get('grado'))||0;
+                const ph = parseFloat(get('peso hectolítrico'))||0;
+                const factor = calcFactor(ph, grado, cultivo);
+                regs.push({
+                    CTG: ctg,
+                    Fecha_Carga: normFecha(get('ultima descarga')),
+                    Cliente: normCliente(get('titular cpe')),
+                    Cultivo: cultivo,
+                    Peso_Neto_kg: (parseFloat(get('cantidad neta'))||0)*1000,
+                    Humedad: parseFloat(get('humedad'))||0,
+                    Grado: grado,
+                    Factor: factor,
+                    Variacion_Factor: parseFloat((factor-100).toFixed(2)),
+                    Proteina: parseFloat(get('proteinas'))||0,
+                    Zaranda_kg: parseFloat(get('zaranda'))||0,
+                    Volatil_kg: parseFloat(get('merma volátil'))||0,
+                    Origen_Archivo: 'COFCO'
+                });
+            }
+            return regs.map(calcDesc);
+        }
+
+        function calcDesc(r) {
+            const t = TABLAS_CALIDAD[r.Cultivo];
+            if (!t) return {...r, descuento_humedad_kg:0, descuento_volatil_kg:0, bonificacion_proteina_kg:0, peso_comercial_kg:r.Peso_Neto_kg, estado_calidad:'OK'};
+            
+            let dh = 0, estado = 'OK', bp = 0;
+            if (r.Humedad > t.humedad_base) {
+                const exc = r.Humedad - t.humedad_base;
+                dh = r.Peso_Neto_kg * (exc * t.descuentos.humedad_por_punto / 100);
+                if (exc > 2) estado = 'ADVERTENCIA';
+            }
+            if (t.bonificaciones && r.Proteina > (t.proteina_base||0)) {
+                const exc = r.Proteina - t.proteina_base;
+                bp = r.Peso_Neto_kg * (exc * (t.bonificaciones.proteina_por_punto||0) / 100);
+            }
+            const dv = r.Zaranda_kg + r.Volatil_kg;
+            const mvp = (dv / r.Peso_Neto_kg) * 100;
+            if (mvp > t.tolerancias.volatil_pct) estado = 'RECHAZADO';
+            const pc = r.Peso_Neto_kg - dh - dv + bp;
+            
+            return {...r, descuento_humedad_kg:Math.round(dh), descuento_volatil_kg:Math.round(dv), bonificacion_proteina_kg:Math.round(bp), peso_comercial_kg:Math.round(pc), estado_calidad:estado, merma_volatil_pct:parseFloat(mvp.toFixed(3))};
+        }
+
+        function updateAllViews() {
+            document.getElementById('totalRegistros').textContent = processedData.length;
+            document.getElementById('headerStats').classList.remove('hidden');
+            updateTable();
+            updateDashboard();
+            updateCommercial();
+        }
+
+        function updateTable() {
+            const tb = document.getElementById('tableBody');
+            tb.innerHTML = '';
+            processedData.forEach(r => {
+                const tr = tb.insertRow();
+                tr.className = r.estado_calidad==='RECHAZADO'?'bg-red-100':r.estado_calidad==='ADVERTENCIA'?'bg-yellow-100':'';
+                tr.innerHTML = `
+                    <td class="border px-1 text-xs">${r.CTG}</td>
+                    <td class="border px-1 text-xs">${r.Fecha_Carga}</td>
+                    <td class="border px-1 text-xs">${r.Cliente}</td>
+                    <td class="border px-1 text-xs capitalize">${r.Cultivo}</td>
+                    <td class="border px-1 text-xs text-right">${(r.Peso_Neto_kg/1000).toFixed(2)}</td>
+                    <td class="border px-1 text-xs text-right">${r.Humedad.toFixed(1)}</td>
+                    <td class="border px-1 text-xs text-center">${r.Grado||'-'}</td>
+                    <td class="border px-1 text-xs text-right">${r.Factor.toFixed(0)}</td>
+                    <td class="border px-1 text-xs text-right ${r.Variacion_Factor>=0?'text-green-600':'text-red-600'}">${r.Variacion_Factor>=0?'+':''}${r.Variacion_Factor.toFixed(1)}</td>
+                    <td class="border px-1 text-xs text-right">${r.Proteina?r.Proteina.toFixed(1):'-'}</td>
+                    <td class="border px-1 text-xs text-right font-bold">${(r.peso_comercial_kg/1000).toFixed(2)}</td>
+                    <td class="border px-1 text-xs text-center"><span class="px-1 rounded text-xs ${r.estado_calidad==='OK'?'bg-green-100 text-green-800':r.estado_calidad==='ADVERTENCIA'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800'}">${r.estado_calidad}</span></td>
+                `;
+            });
+        }
+
+        function updateDashboard() {
+            const total = processedData.length;
+            const clientes = new Set(processedData.map(r=>r.Cliente)).size;
+            const peso = processedData.reduce((s,r)=>s+r.Peso_Neto_kg,0)/1000;
+            const rech = processedData.filter(r=>r.estado_calidad==='RECHAZADO').length;
+            const tasa = total>0 ? (rech/total*100).toFixed(1) : 0;
+            
+            document.getElementById('dash-total').textContent = total;
+            document.getElementById('dash-clientes').textContent = clientes;
+            document.getElementById('dash-peso').textContent = peso.toFixed(1);
+            document.getElementById('dash-rechazo').textContent = tasa+'%';
+            
+            updateResumenCC();
+            updateCharts();
+        }
+
+        function updateResumenCC() {
+            const res = {};
+            processedData.forEach(r => {
+                const k = `${r.Cliente}|||${r.Cultivo}`;
+                if (!res[k]) res[k] = {cliente:r.Cliente, cultivo:r.Cultivo, cartas:0, peso:0, pcom:0, rech:0};
+                res[k].cartas++;
+                res[k].peso += r.Peso_Neto_kg;
+                res[k].pcom += r.peso_comercial_kg;
+                if (r.estado_calidad==='RECHAZADO') res[k].rech++;
+            });
+            const sorted = Object.values(res).sort((a,b)=>b.peso-a.peso);
+            document.getElementById('resumenClienteCultivo').innerHTML = `
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100"><tr>
+                        <th class="border px-2 py-1">Cliente</th><th class="border px-2 py-1">Cultivo</th>
+                        <th class="border px-2 py-1">Cartas</th><th class="border px-2 py-1">Peso(ton)</th>
+                        <th class="border px-2 py-1">P.Com(ton)</th><th class="border px-2 py-1">Rechazos</th>
+                    </tr></thead>
+                    <tbody>${sorted.map(r=>`<tr><td class="border px-2">${r.cliente}</td><td class="border px-2 capitalize">${r.cultivo}</td><td class="border px-2 text-right">${r.cartas}</td><td class="border px-2 text-right">${(r.peso/1000).toFixed(2)}</td><td class="border px-2 text-right">${(r.pcom/1000).toFixed(2)}</td><td class="border px-2 text-right ${r.rech>0?'text-red-600 font-bold':''}">${r.rech}</td></tr>`).join('')}</tbody>
+                </table>
+            `;
+        }
+
+        function updateCharts() {
+            const cultivos = {};
+            processedData.forEach(r => cultivos[r.Cultivo] = (cultivos[r.Cultivo]||0)+1);
+            const ctx1 = document.getElementById('chartCultivos');
+            if (ctx1 && window.Chart) {
+                new Chart(ctx1, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(cultivos),
+                        datasets: [{data: Object.values(cultivos), backgroundColor: ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6']}]
+                    },
+                    options: {responsive:true, plugins:{legend:{position:'bottom'}}}
+                });
+            }
+            
+            const est = {OK:0, ADVERTENCIA:0, RECHAZADO:0};
+            processedData.forEach(r => est[r.estado_calidad]++);
+            const ctx2 = document.getElementById('chartEstados');
+            if (ctx2 && window.Chart) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(est),
+                        datasets: [{data: Object.values(est), backgroundColor: ['#10B981','#F59E0B','#EF4444']}]
+                    },
+                    options: {responsive:true, plugins:{legend:{position:'bottom'}}}
+                });
+            }
+        }
+
+        function updateCommercial() {
+            const cli = {};
+            processedData.forEach(r => {
+                if (!cli[r.Cliente]) cli[r.Cliente] = {peso:0, rech:0, total:0};
+                cli[r.Cliente].peso += r.peso_comercial_kg;
+                if (r.estado_calidad==='RECHAZADO') cli[r.Cliente].rech++;
+                cli[r.Cliente].total++;
+            });
+            const sorted = Object.entries(cli).sort((a,b)=>b[1].peso-a[1].peso).slice(0,10);
+            document.getElementById('rentabilidadCliente').innerHTML = `
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100"><tr><th class="border px-2">Cliente</th><th class="border px-2">Peso(ton)</th><th class="border px-2">T.Rechazo</th></tr></thead>
+                    <tbody>${sorted.map(([c,d])=>`<tr><td class="border px-2">${c}</td><td class="border px-2 text-right">${(d.peso/1000).toFixed(1)}</td><td class="border px-2 text-right">${((d.rech/d.total)*100).toFixed(1)}%</td></tr>`).join('')}</tbody>
+                </table>
+            `;
+            
+            const mejores = sorted.filter(([,d])=>(d.rech/d.total)<0.05).slice(0,5);
+            document.getElementById('recomendaciones').innerHTML = `
+                <div class="bg-green-50 border-l-4 border-green-500 p-3 rounded">
+                    <div class="font-bold text-green-900 mb-1">✓ Clientes Recomendados</div>
+                    <ul class="text-sm text-green-800">${mejores.map(([c])=>`<li>• ${c}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+
+        function showTab(name) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById(`content-${name}`).classList.add('active');
+            document.getElementById(`tab-${name}`).classList.add('active');
+            if (name==='dashboard') updateDashboard();
+            if (name==='commercial') updateCommercial();
+        }
+
+        function exportToCSV() {
+            const h = ['CTG','Fecha','Cliente','Cultivo','Peso_kg','Peso_ton','Humedad','Grado','Factor','Var_Factor','Proteina','Zaranda','Volatil','Desc_Hum','Desc_Vol','Bonif_Prot','Peso_Com_kg','Peso_Com_ton','Estado','Origen'];
+            const rows = processedData.map(r=>[r.CTG,r.Fecha_Carga,r.Cliente,r.Cultivo,r.Peso_Neto_kg,(r.Peso_Neto_kg/1000).toFixed(3),r.Humedad,r.Grado,r.Factor,r.Variacion_Factor,r.Proteina,r.Zaranda_kg,r.Volatil_kg,r.descuento_humedad_kg,r.descuento_volatil_kg,r.bonificacion_proteina_kg,r.peso_comercial_kg,(r.peso_comercial_kg/1000).toFixed(3),r.estado_calidad,r.Origen_Archivo]);
+            const csv = [h.join(','), ...rows.map(r=>r.join(','))].join('\n');
+            const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `LIAG_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function exportToExcel() {
+            const ws_data = [
+                ['CTG','Fecha','Cliente','Cultivo','Peso_kg','Peso_ton','Humedad','Grado','Factor','Var_Factor','Proteina','Zaranda','Volatil','Desc_Hum','Desc_Vol','Bonif_Prot','Peso_Com_kg','Peso_Com_ton','Estado','Origen'],
+                ...processedData.map(r=>[r.CTG,r.Fecha_Carga,r.Cliente,r.Cultivo,r.Peso_Neto_kg,r.Peso_Neto_kg/1000,r.Humedad,r.Grado,r.Factor,r.Variacion_Factor,r.Proteina,r.Zaranda_kg,r.Volatil_kg,r.descuento_humedad_kg,r.descuento_volatil_kg,r.bonificacion_proteina_kg,r.peso_comercial_kg,r.peso_comercial_kg/1000,r.estado_calidad,r.Origen_Archivo])
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Análisis');
+            XLSX.writeFile(wb, `LIAG_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        function clearAllData() {
+            if (confirm('¿Eliminar TODOS los datos?')) {
+                processedData = [];
+                localStorage.removeItem('liag-v5');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
