@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Calidad de Granos v4.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="min-h-screen">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-6 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">🌾 Análisis de Calidad de Granos v4.0</h1>
+                        <p class="text-indigo-100">Soporta: Cargill • ACA • COFCO • Otros (con Claude.ai)</p>
+                    </div>
+                    <div id="headerStats" class="text-right hidden">
+                        <div class="text-sm text-indigo-200">Base de Datos</div>
+                        <div id="totalRegistros" class="text-4xl font-bold">0</div>
+                        <div class="text-sm text-indigo-200">registros</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Banner Ayuda Claude.ai -->
+            <div id="bannerClaude" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl p-6 mb-6 hidden">
+                <div class="flex items-start gap-4">
+                    <div class="text-4xl">🤖</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold mb-2">¿Formato Nuevo? Usa Claude.ai</h3>
+                        <p class="text-purple-100 mb-3">
+                            Procesa cualquier Excel automáticamente con tu suscripción de Claude.ai. Sin costos extra.
+                        </p>
+                        <button onclick="mostrarGuiaClaude()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50">
+                            📖 Ver Cómo Funciona
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">📤 Cargar Archivos Excel</h2>
+                    <button onclick="scrollToResults()" id="btnVerBaseDatos" class="hidden bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                        </svg>
+                        Ver Base de Datos
+                    </button>
+                </div>
+                <div class="border-4 border-dashed border-indigo-300 rounded-xl p-12 text-center hover:border-indigo-500 hover:bg-indigo-50 transition cursor-pointer" id="dropZone">
+                    <svg class="w-16 h-16 mx-auto text-indigo-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-xl font-semibold text-gray-700 mb-2">Arrastra archivos Excel aquí</p>
+                    <p class="text-gray-500 mb-4">o haz click para seleccionar</p>
+                    <p class="text-sm text-indigo-600 font-semibold">✓ Cargill  ✓ ACA  ✓ COFCO  ✓ Otros</p>
+                    <input type="file" id="fileInput" multiple accept=".xlsx,.xls" class="hidden">
+                </div>
+                <div id="fileList" class="mt-6 space-y-2"></div>
+            </div>
+
+            <!-- Alerta Formato Desconocido -->
+            <div id="alertaDesconocido" class="hidden mb-6"></div>
+
+            <!-- Alerts -->
+            <div id="alertsSection" class="hidden mb-6"></div>
+
+            <!-- Stats -->
+            <div id="stats" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 hidden">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="text-sm opacity-90 mb-2">Total Cartas</div>
+                    <div id="statTotal" class="text-4xl font-bold">0</div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="text-sm opacity-90 mb-2">Peso Neto Físico</div>
+                    <div id="statPesoNeto" class="text-4xl font-bold">0</div>
+                    <div class="text-sm opacity-90">toneladas</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="text-sm opacity-90 mb-2">Peso Comercial</div>
+                    <div id="statPesoComercial" class="text-4xl font-bold">0</div>
+                    <div class="text-sm opacity-90">toneladas</div>
+                </div>
+                <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="text-sm opacity-90 mb-2">Descuento Total</div>
+                    <div id="statDescuento" class="text-4xl font-bold">0</div>
+                    <div class="text-sm opacity-90">kg</div>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div id="resultsSection" class="bg-white rounded-xl shadow-lg p-6 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">📊 Análisis Detallado</h2>
+                    <div class="flex gap-3">
+                        <button onclick="clearAllData()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center gap-2 font-semibold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Limpiar Todo
+                        </button>
+                        <button onclick="exportToCSV()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 font-semibold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            CSV
+                        </button>
+                        <button onclick="exportToExcel()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 font-semibold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th class="border px-2 py-2 text-left">CTG</th>
+                                <th class="border px-2 py-2 text-left">Fecha</th>
+                                <th class="border px-2 py-2 text-left">Proveedor</th>
+                                <th class="border px-2 py-2 text-left">Cultivo</th>
+                                <th class="border px-2 py-2 text-left">Contrato</th>
+                                <th class="border px-2 py-2 text-right">Peso (ton)</th>
+                                <th class="border px-2 py-2 text-right">Humedad %</th>
+                                <th class="border px-2 py-2 text-center">Grado</th>
+                                <th class="border px-2 py-2 text-center">Factor</th>
+                                <th class="border px-2 py-2 text-right">Zaranda</th>
+                                <th class="border px-2 py-2 text-right">Volátil</th>
+                                <th class="border px-2 py-2 text-right">Desc.Hum</th>
+                                <th class="border px-2 py-2 text-right">Desc.Vol</th>
+                                <th class="border px-2 py-2 text-right">P.Comercial</th>
+                                <th class="border px-2 py-2 text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Guía Claude -->
+    <div id="modalGuiaClaude" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onclick="if(event.target === this) cerrarModalClaude()">
+        <div class="bg-white rounded-2xl max-w-3xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <!-- Modal content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIABLES GLOBALES ====================
+        let processedData = [];
+        let alertsList = [];
+
+        // ==================== TABLAS DE CALIDAD ARGENTINAS ====================
+        const TABLAS_CALIDAD = {
+            trigo: {
+                humedad_base: 14.0,
+                peso_hectolitro: {1: 78, 2: 76, 3: 75},
+                tolerancias: { volatil_pct: 1.0 },
+                descuentos: { humedad_por_punto: 1.0 }
+            },
+            trigo_candeal: {
+                humedad_base: 14.0,
+                peso_hectolitro: {1: 79, 2: 77, 3: 75},
+                tolerancias: { volatil_pct: 1.0 },
+                descuentos: { humedad_por_punto: 1.0 }
+            },
+            maiz: {
+                humedad_base: 14.5,
+                peso_hectolitro: {1: 78, 2: 75, 3: 72},
+                tolerancias: { volatil_pct: 1.0 },
+                descuentos: { humedad_por_punto: 1.0 }
+            },
+            soja: {
+                humedad_base: 14.0,
+                tolerancias: { volatil_pct: 0.5 },
+                descuentos: { humedad_por_punto: 1.0 }
+            },
+            girasol: {
+                humedad_base: 9.0,
+                tolerancias: { volatil_pct: 1.0 },
+                descuentos: { humedad_por_punto: 1.0 }
+            },
+            sorgo: {
+                humedad_base: 14.0,
+                peso_hectolitro: {1: 72, 2: 70, 3: 68},
+                tolerancias: { volatil_pct: 1.0 },
+                descuentos: { humedad_por_punto: 1.0 }
+            },
+            cebada: {
+                humedad_base: 13.5,
+                peso_hectolitro: {1: 66, 2: 64, 3: 62},
+                tolerancias: { volatil_pct: 1.0 },
+                descuentos: { humedad_por_punto: 1.0 }
+            }
+        };
+
+        // ==================== PROMPT PARA CLAUDE.AI ====================
+        const PROMPT_MAESTRO = `Analiza este archivo Excel de cartas de porte de granos.
+
+GENERA CSV con estas columnas EXACTAS:
+CTG,Fecha_Carga,Proveedor,Cultivo,Numero_Contrato,Cosecha,Origen,Destino,Peso_Neto_kg,Humedad,Grado,Factor,Peso_Hectolitro,Zaranda_kg,Volatil_kg
+
+NORMALIZACIÓN DE CULTIVOS:
+TRIGO PAN → trigo
+TRIGO CANDEAL → trigo_candeal
+MAIZ DURO / MAÍZ DURO → maiz
+SOJA POROTO → soja
+GIRASOL → girasol
+SORGO → sorgo
+CEBADA → cebada
+
+REGLAS CRÍTICAS:
+
+1. PESO (SIEMPRE EN KILOGRAMOS):
+   - Si está en toneladas: multiplicar × 1000
+   - Columna debe llamarse: Peso_Neto_kg
+
+2. GRADO (CRÍTICO):
+   - Buscar columna "Grado" o similar
+   - Valores: 1, 2, 3
+   - Si no existe: 0
+
+3. FACTOR (CRÍTICO):
+   OPCIÓN A: Si existe columna "Factor"
+     → Usar directamente
+   
+   OPCIÓN B: Si NO existe pero hay "Peso Hectolítrico" + "Grado"
+     → Calcular según tabla:
+       Trigo Grado 1: Factor = PH / 78
+       Trigo Grado 2: Factor = PH / 76
+       Trigo Grado 3: Factor = PH / 75
+       Maíz Grado 1: Factor = PH / 78
+       Maíz Grado 2: Factor = PH / 75
+       Maíz Grado 3: Factor = PH / 72
+   
+   OPCIÓN C: Si no hay datos
+     → Factor = 0
+
+4. NÚMERO DE CONTRATO:
+   - Es una columna SEPARADA del cultivo
+   - NO confundir con el nombre del producto
+
+5. FECHAS:
+   - Formato: YYYY-MM-DD
+   - Ejemplo: 2025-06-03
+
+6. HUMEDAD:
+   - Usar punto decimal (no coma)
+   - Ejemplo: 14.5 (no 14,5)
+
+7. LIMPIEZA:
+   - CTG sin saltos de línea ni espacios extra
+   - Eliminar filas vacías
+   - Filtrar productos que NO sean granos (fertilizantes, etc)
+
+FORMATO DE SALIDA:
+- CSV puro (sin markdown, sin \`\`\`)
+- UTF-8 con BOM
+- Headers en primera fila
+- Separador: coma
+- Todos los registros del archivo
+
+EMPEZAR AHORA.`;
+
+        // ==================== CARGAR DATOS AL INICIO ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPreviousData();
+            setupDropZone();
+        });
+
+        function loadPreviousData() {
+            try {
+                const saved = localStorage.getItem('grain-analysis-data-v4');
+                if (saved) {
+                    processedData = JSON.parse(saved);
+                    if (processedData.length > 0) {
+                        updateDisplay();
+                        showPreviousDataNotification();
+                    }
+                }
+            } catch (error) {
+                console.log('No hay datos previos');
+            }
+        }
+
+        function showPreviousDataNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-6';
+            notification.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-green-900 mb-1">✓ Datos Previos Cargados</h3>
+                        <p class="text-sm text-green-800">
+                            ${processedData.length} registros de sesiones anteriores
+                        </p>
+                        <div class="flex gap-3 mt-3">
+                            <button onclick="scrollToResults()" class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                                Ver Base de Datos
+                            </button>
+                            <button onclick="clearAllData()" class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                                Limpiar Todo
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-green-600 hover:text-green-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            const container = document.querySelector('.max-w-7xl');
+            const banner = document.getElementById('bannerClaude');
+            container.insertBefore(notification, banner ? banner.nextSibling : container.firstChild);
+        }
+
+        // ==================== SETUP DROP ZONE ====================
+        function setupDropZone() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-indigo-500', 'bg-indigo-50');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+                const files = Array.from(e.dataTransfer.files);
+                handleFiles(files);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handleFiles(files);
+            });
+        }
+
+        // ==================== PROCESAR ARCHIVOS ====================
+        async function handleFiles(files) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            let newData = [];
+            let formatosDesconocidos = [];
+
+            for (let file of files) {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'flex items-center justify-between bg-gray-100 rounded-lg p-4';
+                fileDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span class="font-medium">${file.name}</span>
+                    </div>
+                    <span class="text-sm text-gray-500">Procesando...</span>
+                `;
+                fileList.appendChild(fileDiv);
+
+                try {
+                    const data = await processFile(file);
+                    if (data && data.length > 0) {
+                        newData = newData.concat(data);
+                        fileDiv.querySelector('span:last-child').textContent = `✓ ${data.length} cartas`;
+                        fileDiv.querySelector('span:last-child').className = 'text-sm text-green-600 font-semibold';
+                    } else if (data === 'desconocido') {
+                        formatosDesconocidos.push(file);
+                        fileDiv.querySelector('span:last-child').textContent = `⚠️ Formato desconocido`;
+                        fileDiv.querySelector('span:last-child').className = 'text-sm text-orange-600 font-semibold';
+                    }
+                } catch (error) {
+                    fileDiv.querySelector('span:last-child').textContent = `✗ Error: ${error.message}`;
+                    fileDiv.querySelector('span:last-child').className = 'text-sm text-red-600';
+                }
+            }
+
+            if (newData.length > 0) {
+                processedData = processedData.concat(newData);
+                saveToLocalStorage();
+                showSuccessNotification(newData.length);
+                updateDisplay();
+                showAlerts();
+            }
+
+            if (formatosDesconocidos.length > 0) {
+                mostrarAlertaDesconocido(formatosDesconocidos[0]);
+            }
+        }
+
+        async function processFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                        
+                        // Detectar formato
+                        const formato = detectarFormato(jsonData, file.name);
+                        
+                        let registros;
+                        if (formato === 'cargill') {
+                            registros = procesarCargill(jsonData);
+                        } else if (formato === 'aca') {
+                            registros = procesarACA(jsonData);
+                        } else if (formato === 'cofco') {
+                            registros = procesarCOFCO(jsonData);
+                        } else {
+                            resolve('desconocido');
+                            return;
+                        }
+                        
+                        resolve(registros);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = () => reject(new Error('Error al leer archivo'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // ==================== DETECTAR FORMATO ====================
+        function detectarFormato(data, filename) {
+            if (data.length < 2) return 'desconocido';
+            
+            const headers = data[0];
+            const headersStr = headers.join('|').toLowerCase();
+            
+            // COFCO
+            if (headersStr.includes('número de ctg') && headersStr.includes('cantidad neta') && headersStr.includes('peso hectolítrico')) {
+                return 'cofco';
+            }
+            
+            // Cargill
+            if (headersStr.includes('peso neto a certificar') && headersStr.includes('factor total')) {
+                return 'cargill';
+            }
+            
+            // ACA
+            if (headersStr.includes('romaneo') || headersStr.includes('kg.netos s/m')) {
+                return 'aca';
+            }
+            
+            return 'desconocido';
+        }
+
+        // ==================== NORMALIZAR CULTIVO ====================
+        function normalizarCultivo(texto) {
+            if (!texto) return null;
+            
+            const lower = String(texto).toLowerCase();
+            
+            if (lower.includes('trigo pan')) return 'trigo';
+            if (lower.includes('trigo candeal')) return 'trigo_candeal';
+            if (lower.includes('trigo')) return 'trigo';
+            if (lower.includes('maiz duro') || lower.includes('maíz duro')) return 'maiz';
+            if (lower.includes('maiz') || lower.includes('maíz')) return 'maiz';
+            if (lower.includes('soja poroto') || lower.includes('soja')) return 'soja';
+            if (lower.includes('girasol')) return 'girasol';
+            if (lower.includes('sorgo')) return 'sorgo';
+            if (lower.includes('cebada')) return 'cebada';
+            
+            if (lower.includes('monoamonico') || lower.includes('fertilizante') || lower.includes('urea')) return null;
+            
+            return 'desconocido';
+        }
+
+        // ==================== CALCULAR FACTOR ====================
+        function calcularFactor(pesoHectolitro, grado, cultivo) {
+            if (!pesoHectolitro || !grado || grado === 0) return 0;
+            
+            const tabla = TABLAS_CALIDAD[cultivo];
+            if (!tabla || !tabla.peso_hectolitro) return 0;
+            
+            const base = tabla.peso_hectolitro[grado];
+            if (!base) return 0;
+            
+            return parseFloat((pesoHectolitro / base).toFixed(4));
+        }
+
+        // ==================== PROCESADORES POR FORMATO ====================
+        
+        // CARGILL
+        function procesarCargill(data) {
+            const headers = data[0];
+            const registros = [];
+            
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const getVal = (colName) => {
+                    const idx = headers.findIndex(h => String(h).toLowerCase() === colName.toLowerCase());
+                    return idx >= 0 ? row[idx] : null;
+                };
+                
+                const cultivo = normalizarCultivo(getVal('Producto'));
+                if (!cultivo) continue;
+                
+                const grado = parseInt(getVal('Grado')) || 0;
+                const factor = parseFloat(getVal('Factor Total')) || 0;
+                
+                registros.push({
+                    CTG: String(getVal('CTG') || ''),
+                    Fecha_Carga: String(getVal('Fecha Descarga') || '').substring(0, 10),
+                    Proveedor: String(getVal('Cliente') || ''),
+                    Cultivo: cultivo,
+                    Numero_Contrato: String(getVal('Nro Contrato') || ''),
+                    Cosecha: String(getVal('Cosecha') || ''),
+                    Origen: String(getVal('Orígen') || ''),
+                    Destino: String(getVal('Destino') || ''),
+                    Peso_Neto_kg: parseFloat(getVal('Peso Neto a Certificar')) || 0,
+                    Humedad: parseFloat(getVal('Humedad%')) || 0,
+                    Grado: grado,
+                    Factor: factor,
+                    Peso_Hectolitro: 0,
+                    Zaranda_kg: parseFloat(getVal('Zaranda')) || 0,
+                    Volatil_kg: parseFloat(getVal('Volatil')) || 0,
+                    Origen_Archivo: 'Cargill'
+                });
+            }
+            
+            return registros;
+        }
+
+        // ACA
+        function procesarACA(data) {
+            let headerIdx = 0;
+            for (let i = 0; i < Math.min(10, data.length); i++) {
+                if (data[i] && String(data[i][0]).includes('CTG')) {
+                    headerIdx = i;
+                    break;
+                }
+            }
+            
+            const headers = data[headerIdx];
+            const registros = [];
+            
+            for (let i = headerIdx + 1; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const getVal = (colName) => {
+                    const idx = headers.findIndex(h => String(h).toLowerCase().includes(colName.toLowerCase()));
+                    return idx >= 0 ? row[idx] : null;
+                };
+                
+                const ctg = String(getVal('ctg') || '').replace(/[\n\r]/g, '').trim();
+                if (!ctg || ctg === 'CTG') continue;
+                
+                const pesoTon = parseFloat(getVal('kg.netos')) || 0;
+                const humedad = String(getVal('hum') || '').replace(',', '.');
+                
+                registros.push({
+                    CTG: ctg,
+                    Fecha_Carga: String(getVal('fecha') || '').substring(0, 10),
+                    Proveedor: String(getVal('procedencia') || ''),
+                    Cultivo: 'soja',
+                    Numero_Contrato: '',
+                    Cosecha: '',
+                    Origen: '',
+                    Destino: String(getVal('destino') || ''),
+                    Peso_Neto_kg: pesoTon * 1000,
+                    Humedad: parseFloat(humedad) || 0,
+                    Grado: 0,
+                    Factor: 0,
+                    Peso_Hectolitro: 0,
+                    Zaranda_kg: parseFloat(getVal('zaranda')) || 0,
+                    Volatil_kg: (parseFloat(getVal('volátil')) || 0) + (parseFloat(getVal('mermas')) || 0),
+                    Origen_Archivo: 'ACA'
+                });
+            }
+            
+            return registros;
+        }
+
+        // COFCO
+        function procesarCOFCO(data) {
+            const headers = data[0];
+            const registros = [];
+            
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const getVal = (colName) => {
+                    const idx = headers.findIndex(h => String(h).toLowerCase().includes(colName.toLowerCase()));
+                    return idx >= 0 ? row[idx] : null;
+                };
+                
+                const cultivo = normalizarCultivo(getVal('material'));
+                if (!cultivo) continue;
+                
+                const pesoTon = parseFloat(getVal('cantidad neta')) || 0;
+                const pesoKg = pesoTon * 1000;
+                const grado = parseInt(getVal('grado')) || 0;
+                const pesoHectolitro = parseFloat(getVal('peso hectolítrico')) || 0;
+                
+                // Calcular factor desde Peso Hectolítrico
+                const factor = calcularFactor(pesoHectolitro, grado, cultivo);
+                
+                registros.push({
+                    CTG: String(getVal('número de ctg') || ''),
+                    Fecha_Carga: String(getVal('ultima descarga') || '').substring(0, 10),
+                    Proveedor: String(getVal('titular cpe') || ''),
+                    Cultivo: cultivo,
+                    Numero_Contrato: '',
+                    Cosecha: String(getVal('cosecha') || ''),
+                    Origen: '',
+                    Destino: String(getVal('planta') || ''),
+                    Peso_Neto_kg: pesoKg,
+                    Humedad: parseFloat(getVal('humedad')) || 0,
+                    Grado: grado,
+                    Factor: factor,
+                    Peso_Hectolitro: pesoHectolitro,
+                    Zaranda_kg: parseFloat(getVal('zaranda')) || 0,
+                    Volatil_kg: parseFloat(getVal('merma volátil')) || 0,
+                    Origen_Archivo: 'COFCO'
+                });
+            }
+            
+            return registros;
+        }
+
+        // ==================== CALCULAR DESCUENTOS ====================
+        function calcularDescuentos(registro) {
+            const tabla = TABLAS_CALIDAD[registro.Cultivo];
+            if (!tabla) {
+                return {
+                    ...registro,
+                    descuento_humedad_kg: 0,
+                    descuento_volatil_kg: 0,
+                    descuento_total_kg: 0,
+                    peso_comercial_kg: registro.Peso_Neto_kg,
+                    estado_calidad: 'OK',
+                    Merma_Volatil_pct: 0
+                };
+            }
+            
+            const pesoNeto = registro.Peso_Neto_kg;
+            let descuentoHumedad = 0;
+            let estado = 'OK';
+            
+            // Descuento por humedad
+            if (registro.Humedad > tabla.humedad_base) {
+                const exceso = registro.Humedad - tabla.humedad_base;
+                descuentoHumedad = pesoNeto * (exceso * tabla.descuentos.humedad_por_punto / 100);
+                if (exceso > 2) estado = 'ADVERTENCIA';
+            }
+            
+            // Descuento por volátil
+            const descuentoVolatil = registro.Zaranda_kg + registro.Volatil_kg;
+            const mermaVolatilPct = (descuentoVolatil / pesoNeto) * 100;
+            
+            if (mermaVolatilPct > tabla.tolerancias.volatil_pct) {
+                estado = 'RECHAZADO';
+            }
+            
+            const descuentoTotal = descuentoHumedad + descuentoVolatil;
+            const pesoComercial = pesoNeto - descuentoTotal;
+            
+            return {
+                ...registro,
+                descuento_humedad_kg: Math.round(descuentoHumedad),
+                descuento_volatil_kg: Math.round(descuentoVolatil),
+                descuento_total_kg: Math.round(descuentoTotal),
+                peso_comercial_kg: Math.round(pesoComercial),
+                estado_calidad: estado,
+                Merma_Volatil_pct: parseFloat(mermaVolatilPct.toFixed(3))
+            };
+        }
+
+        // ==================== ACTUALIZAR DISPLAY ====================
+        function updateDisplay() {
+            // Calcular descuentos
+            const dataConDescuentos = processedData.map(reg => calcularDescuentos(reg));
+            processedData = dataConDescuentos;
+            
+            // Header stats
+            document.getElementById('totalRegistros').textContent = processedData.length;
+            document.getElementById('headerStats').classList.remove('hidden');
+            document.getElementById('btnVerBaseDatos').classList.remove('hidden');
+            
+            // Cards stats
+            const totalCartas = processedData.length;
+            const pesoNeto = processedData.reduce((sum, r) => sum + r.Peso_Neto_kg, 0);
+            const pesoComercial = processedData.reduce((sum, r) => sum + r.peso_comercial_kg, 0);
+            const descuentoTotal = processedData.reduce((sum, r) => sum + r.descuento_total_kg, 0);
+            
+            document.getElementById('statTotal').textContent = totalCartas.toLocaleString();
+            document.getElementById('statPesoNeto').textContent = (pesoNeto / 1000).toFixed(1);
+            document.getElementById('statPesoComercial').textContent = (pesoComercial / 1000).toFixed(1);
+            document.getElementById('statDescuento').textContent = Math.round(descuentoTotal).toLocaleString();
+            
+            document.getElementById('stats').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            // Tabla
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            processedData.forEach(row => {
+                const estadoClass = 
+                    row.estado_calidad === 'RECHAZADO' ? 'bg-red-100' :
+                    row.estado_calidad === 'ADVERTENCIA' ? 'bg-yellow-100' : '';
+                
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-indigo-50 ${estadoClass}`;
+                tr.innerHTML = `
+                    <td class="border px-2 py-2 font-mono text-xs">${row.CTG}</td>
+                    <td class="border px-2 py-2 text-xs">${row.Fecha_Carga}</td>
+                    <td class="border px-2 py-2 text-xs">${row.Proveedor}</td>
+                    <td class="border px-2 py-2 capitalize">${row.Cultivo}</td>
+                    <td class="border px-2 py-2 text-xs">${row.Numero_Contrato || '-'}</td>
+                    <td class="border px-2 py-2 text-right font-semibold">${(row.Peso_Neto_kg / 1000).toFixed(3)}</td>
+                    <td class="border px-2 py-2 text-right ${row.Humedad > 15 ? 'text-red-600 font-bold' : ''}">${row.Humedad.toFixed(1)}</td>
+                    <td class="border px-2 py-2 text-center">${row.Grado || '-'}</td>
+                    <td class="border px-2 py-2 text-center text-xs">${row.Factor ? row.Factor.toFixed(4) : '-'}</td>
+                    <td class="border px-2 py-2 text-right text-xs">${row.Zaranda_kg.toFixed(0)}</td>
+                    <td class="border px-2 py-2 text-right text-xs">${row.Volatil_kg.toFixed(0)}</td>
+                    <td class="border px-2 py-2 text-right text-red-600 text-xs">${row.descuento_humedad_kg}</td>
+                    <td class="border px-2 py-2 text-right text-red-600 text-xs">${row.descuento_volatil_kg}</td>
+                    <td class="border px-2 py-2 text-right font-bold text-green-700">${(row.peso_comercial_kg / 1000).toFixed(3)}</td>
+                    <td class="border px-2 py-2">
+                        <span class="text-xs px-2 py-1 rounded ${
+                            row.estado_calidad === 'OK' ? 'bg-green-100 text-green-800' :
+                            row.estado_calidad === 'ADVERTENCIA' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                        }">${row.estado_calidad}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==================== ALERTAS ====================
+        function showAlerts() {
+            const rechazados = processedData.filter(r => r.estado_calidad === 'RECHAZADO');
+            const advertencias = processedData.filter(r => r.estado_calidad === 'ADVERTENCIA');
+            
+            if (rechazados.length === 0 && advertencias.length === 0) return;
+            
+            const alertsSection = document.getElementById('alertsSection');
+            alertsSection.innerHTML = '';
+            alertsSection.classList.remove('hidden');
+            
+            if (rechazados.length > 0) {
+                const div = document.createElement('div');
+                div.className = 'bg-red-50 border-l-4 border-red-500 p-4 rounded-lg';
+                div.innerHTML = `
+                    <h3 class="font-bold text-red-900 mb-2">🔴 Alertas Críticas: ${rechazados.length} cartas RECHAZADAS</h3>
+                    <p class="text-sm text-red-800">Volátil excede tolerancia</p>
+                `;
+                alertsSection.appendChild(div);
+            }
+            
+            if (advertencias.length > 0) {
+                const div = document.createElement('div');
+                div.className = 'bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg mt-3';
+                div.innerHTML = `
+                    <h3 class="font-bold text-yellow-900 mb-2">⚠️ Advertencias: ${advertencias.length} cartas</h3>
+                    <p class="text-sm text-yellow-800">Humedad alta o grado bajo</p>
+                `;
+                alertsSection.appendChild(div);
+            }
+        }
+
+        // ==================== ALERTA FORMATO DESCONOCIDO ====================
+        function mostrarAlertaDesconocido(file) {
+            const div = document.getElementById('alertaDesconocido');
+            div.className = 'bg-orange-50 border-l-4 border-orange-500 p-6 rounded-lg';
+            div.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <span class="text-3xl">⚠️</span>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-orange-900 mb-2 text-lg">Formato Desconocido</h4>
+                        <p class="text-orange-800 mb-1"><strong>${file.name}</strong></p>
+                        <p class="text-sm text-orange-700 mb-4">
+                            Este archivo no coincide con formatos conocidos (Cargill, ACA, COFCO). 
+                            Usa Claude.ai para procesarlo.
+                        </p>
+                        
+                        <div class="flex gap-3 flex-wrap">
+                            <button onclick="procesarConClaude('${file.name}')" class="bg-orange-600 text-white px-5 py-3 rounded-lg hover:bg-orange-700 font-semibold flex items-center gap-2 shadow-lg">
+                                <span class="text-xl">🤖</span>
+                                <span>Procesar con Claude.ai</span>
+                            </button>
+                            <button onclick="mostrarGuiaClaude()" class="bg-white border-2 border-orange-300 text-orange-800 px-5 py-3 rounded-lg hover:bg-orange-50 font-semibold">
+                                📖 Guía Paso a Paso
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 bg-white bg-opacity-50 p-3 rounded border border-orange-200">
+                            <p class="text-xs text-orange-800"><strong>✨ Qué pasará:</strong></p>
+                            <ol class="text-xs text-orange-700 mt-1 space-y-1 ml-4">
+                                <li>1. El prompt se copiará automáticamente</li>
+                                <li>2. Claude.ai se abrirá en nueva pestaña</li>
+                                <li>3. Arrastra el Excel y pega el prompt</li>
+                                <li>4. Descarga el CSV generado</li>
+                                <li>5. Impórtalo aquí con drag & drop</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            `;
+            div.classList.remove('hidden');
+            
+            // Mostrar banner de ayuda
+            document.getElementById('bannerClaude').classList.remove('hidden');
+        }
+
+        function procesarConClaude(filename) {
+            // Copiar prompt
+            navigator.clipboard.writeText(PROMPT_MAESTRO).then(() => {
+                // Abrir Claude.ai
+                window.open('https://claude.ai', '_blank');
+                
+                // Mostrar notificación
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+                toast.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <div>
+                            <div class="font-bold">✓ Prompt Copiado</div>
+                            <div class="text-sm">Claude.ai abierto en nueva pestaña</div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            });
+        }
+
+        function mostrarGuiaClaude() {
+            const modal = document.getElementById('modalGuiaClaude');
+            modal.querySelector('.bg-white').innerHTML = `
+                <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">📖 Guía: Procesar con Claude.ai</h2>
+                    <button onclick="cerrarModalClaude()" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg">1</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-2">Click en "Procesar con Claude.ai"</h3>
+                            <p class="text-gray-600 text-sm mb-2">
+                                El botón naranja copiará el prompt automáticamente y abrirá Claude.ai
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-2">Sube el archivo en Claude.ai</h3>
+                            <p class="text-gray-600 text-sm">Arrastra el archivo Excel a la ventana de chat</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg">3</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-2">Pega el prompt</h3>
+                            <p class="text-gray-600 text-sm mb-2">
+                                Presiona <kbd class="px-2 py-1 bg-gray-200 rounded">Ctrl+V</kbd> y luego <kbd class="px-2 py-1 bg-gray-200 rounded">Enter</kbd>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg">4</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-2">Espera 10-15 segundos</h3>
+                            <p class="text-gray-600 text-sm">Claude analizará el archivo y generará un CSV limpio</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg">5</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-2">Descarga el CSV</h3>
+                            <p class="text-gray-600 text-sm">Claude mostrará el CSV. Click en "Descargar"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg">6</div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg mb-2">Arrastra el CSV aquí</h3>
+                            <p class="text-gray-600 text-sm mb-2">
+                                Vuelve a este sistema y arrastra el CSV descargado
+                            </p>
+                            <div class="bg-green-50 border border-green-200 p-3 rounded-lg">
+                                <p class="text-sm text-green-800">
+                                    ✓ Los descuentos se calcularán automáticamente<br>
+                                    ✓ Las alertas se generarán<br>
+                                    ✓ Todo se guardará en tu base de datos
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4">
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-4">
+                        <p class="text-sm text-yellow-800">
+                            <strong>💡 Consejo:</strong> Guarda el prompt en un documento. 
+                            Lo usarás cada vez que recibas un formato nuevo.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="copiarPrompt()" class="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 font-semibold">
+                            📋 Copiar Prompt Ahora
+                        </button>
+                        <button onclick="cerrarModalClaude()" class="px-6 py-3 border rounded-lg hover:bg-gray-100">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function cerrarModalClaude() {
+            document.getElementById('modalGuiaClaude').classList.add('hidden');
+        }
+
+        function copiarPrompt() {
+            navigator.clipboard.writeText(PROMPT_MAESTRO).then(() => {
+                alert('✓ Prompt copiado al portapapeles');
+            });
+        }
+
+        // ==================== PERSISTENCIA ====================
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('grain-analysis-data-v4', JSON.stringify(processedData));
+            } catch (error) {
+                console.error('Error al guardar:', error);
+            }
+        }
+
+        function showSuccessNotification(count) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <div class="font-bold">¡Datos Procesados!</div>
+                        <div class="text-sm">${count} nuevas cartas agregadas</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function scrollToResults() {
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearAllData() {
+            if (confirm('¿Eliminar TODOS los datos guardados? Esta acción no se puede deshacer.')) {
+                processedData = [];
+                localStorage.removeItem('grain-analysis-data-v4');
+                location.reload();
+            }
+        }
+
+        // ==================== EXPORTAR ====================
+        function exportToCSV() {
+            const headers = ['CTG', 'Fecha', 'Proveedor', 'Cultivo', 'Numero_Contrato', 'Cosecha', 'Origen', 'Destino', 
+                            'Peso_Neto_kg', 'Peso_Neto_ton', 'Humedad_%', 'Grado', 'Factor', 'Peso_Hectolitro',
+                            'Zaranda_kg', 'Volatil_kg', 'Merma_Volatil_%',
+                            'Descuento_Humedad_kg', 'Descuento_Volatil_kg', 'Descuento_Total_kg', 'Descuento_%',
+                            'Peso_Comercial_kg', 'Peso_Comercial_ton', 'Estado', 'Origen_Archivo'];
+            
+            const rows = processedData.map(row => [
+                row.CTG,
+                row.Fecha_Carga,
+                row.Proveedor,
+                row.Cultivo,
+                row.Numero_Contrato,
+                row.Cosecha,
+                row.Origen,
+                row.Destino,
+                row.Peso_Neto_kg,
+                (row.Peso_Neto_kg / 1000).toFixed(3),
+                row.Humedad,
+                row.Grado,
+                row.Factor,
+                row.Peso_Hectolitro,
+                row.Zaranda_kg,
+                row.Volatil_kg,
+                row.Merma_Volatil_pct,
+                row.descuento_humedad_kg,
+                row.descuento_volatil_kg,
+                row.descuento_total_kg,
+                ((row.descuento_total_kg / row.Peso_Neto_kg) * 100).toFixed(3),
+                row.peso_comercial_kg,
+                (row.peso_comercial_kg / 1000).toFixed(3),
+                row.estado_calidad,
+                row.Origen_Archivo
+            ]);
+            
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `analisis_granos_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function exportToExcel() {
+            const ws_data = [
+                ['CTG', 'Fecha', 'Proveedor', 'Cultivo', 'Numero_Contrato', 'Cosecha', 'Origen', 'Destino',
+                 'Peso_Neto_kg', 'Peso_Neto_ton', 'Humedad_%', 'Grado', 'Factor', 'Peso_Hectolitro',
+                 'Zaranda_kg', 'Volatil_kg', 'Merma_Volatil_%',
+                 'Descuento_Humedad_kg', 'Descuento_Volatil_kg', 'Descuento_Total_kg', 'Descuento_%',
+                 'Peso_Comercial_kg', 'Peso_Comercial_ton', 'Estado', 'Origen_Archivo'],
+                ...processedData.map(row => [
+                    row.CTG,
+                    row.Fecha_Carga,
+                    row.Proveedor,
+                    row.Cultivo,
+                    row.Numero_Contrato,
+                    row.Cosecha,
+                    row.Origen,
+                    row.Destino,
+                    row.Peso_Neto_kg,
+                    row.Peso_Neto_kg / 1000,
+                    row.Humedad,
+                    row.Grado,
+                    row.Factor,
+                    row.Peso_Hectolitro,
+                    row.Zaranda_kg,
+                    row.Volatil_kg,
+                    row.Merma_Volatil_pct,
+                    row.descuento_humedad_kg,
+                    row.descuento_volatil_kg,
+                    row.descuento_total_kg,
+                    (row.descuento_total_kg / row.Peso_Neto_kg) * 100,
+                    row.peso_comercial_kg,
+                    row.peso_comercial_kg / 1000,
+                    row.estado_calidad,
+                    row.Origen_Archivo
+                ])
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Análisis Calidad');
+            XLSX.writeFile(wb, `analisis_calidad_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+    </script>
+</body>
+</html>
