@@ -3,243 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIAG - Sistema de Gestión de Granos</title>
+    <title>LIAG v7.1 - Sistema de Gestión de Granos</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --verde-900: #1B5E20;
-            --verde-800: #2E7D32;
-            --verde-700: #388E3C;
-            --verde-600: #43A047;
-            --verde-500: #4CAF50;
-            --verde-400: #66BB6A;
-            --verde-300: #81C784;
-            --verde-200: #A5D6A7;
-            --verde-100: #C8E6C9;
-            --verde-50: #E8F5E9;
-            --amarillo-700: #F57F17;
-            --amarillo-500: #FFC107;
-            --amarillo-100: #FFF8E1;
-            --rojo-700: #C62828;
-            --rojo-500: #F44336;
-            --rojo-100: #FFEBEE;
-            --gris-900: #212121;
-            --gris-800: #424242;
-            --gris-700: #616161;
-            --gris-600: #757575;
-            --gris-500: #9E9E9E;
-            --gris-400: #BDBDBD;
-            --gris-300: #E0E0E0;
-            --gris-200: #EEEEEE;
-            --gris-100: #F5F5F5;
-            --blanco: #FFFFFF;
+            --verde-900: #1B5E20; --verde-800: #2E7D32; --verde-700: #388E3C;
+            --verde-600: #43A047; --verde-500: #4CAF50; --verde-400: #66BB6A;
+            --verde-300: #81C784; --verde-200: #A5D6A7; --verde-100: #C8E6C9; --verde-50: #E8F5E9;
+            --amarillo-700: #F57F17; --amarillo-500: #FFC107; --amarillo-100: #FFF8E1;
+            --rojo-700: #C62828; --rojo-500: #F44336; --rojo-100: #FFEBEE;
+            --gris-900: #212121; --gris-800: #424242; --gris-700: #616161; --gris-600: #757575;
+            --gris-500: #9E9E9E; --gris-400: #BDBDBD; --gris-300: #E0E0E0;
+            --gris-200: #EEEEEE; --gris-100: #F5F5F5; --blanco: #FFFFFF;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: var(--gris-100);
-            color: var(--gris-800);
-            min-height: 100vh;
-            line-height: 1.5;
-        }
-        
-        /* HEADER */
-        .header {
-            background: linear-gradient(135deg, var(--verde-900), var(--verde-800));
-            padding: 0.75rem 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--gris-100); color: var(--gris-800); min-height: 100vh; }
+        .header { background: linear-gradient(135deg, var(--verde-900), var(--verde-800)); padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .header-content { max-width: 1600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .logo { display: flex; align-items: center; gap: 0.75rem; }
-        .logo-icon {
-            width: 42px; height: 42px;
-            background: var(--blanco);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .logo-icon { width: 42px; height: 42px; background: var(--blanco); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .logo-icon svg { width: 26px; height: 26px; }
         .logo h1 { font-size: 1.4rem; font-weight: 800; color: var(--blanco); }
-        .logo-sub { font-size: 0.65rem; color: var(--verde-200); letter-spacing: 0.5px; }
+        .logo-sub { font-size: 0.65rem; color: var(--verde-200); }
         .header-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-        .db-status {
-            display: flex; align-items: center; gap: 0.4rem;
-            padding: 0.4rem 0.75rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--verde-200);
-        }
+        .db-status { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.75rem; color: var(--verde-200); }
         .db-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--verde-400); }
-        
-        /* BUTTONS */
-        .btn {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.55rem 1rem; border-radius: 6px;
-            font-family: inherit; font-size: 0.82rem; font-weight: 600;
-            cursor: pointer; border: none; transition: all 0.15s;
-        }
+        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border-radius: 6px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
         .btn-primary { background: var(--blanco); color: var(--verde-800); }
-        .btn-primary:hover { background: var(--verde-50); transform: translateY(-1px); }
+        .btn-primary:hover { background: var(--verde-50); }
         .btn-secondary { background: rgba(255,255,255,0.15); color: var(--blanco); border: 1px solid rgba(255,255,255,0.25); }
-        .btn-secondary:hover { background: rgba(255,255,255,0.25); }
         .btn-success { background: var(--verde-600); color: var(--blanco); }
         .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
-        
-        /* NAVIGATION */
-        .nav-container {
-            background: var(--blanco);
-            border-bottom: 1px solid var(--gris-200);
-            padding: 0 1.5rem;
-            position: sticky; top: 54px; z-index: 90;
-        }
+        .nav-container { background: var(--blanco); border-bottom: 1px solid var(--gris-200); padding: 0 1.5rem; position: sticky; top: 54px; z-index: 90; }
         .nav { max-width: 1600px; margin: 0 auto; display: flex; gap: 0.25rem; overflow-x: auto; }
-        .nav::-webkit-scrollbar { height: 0; }
-        .nav-item {
-            padding: 0.85rem 1.25rem; background: transparent; border: none;
-            color: var(--gris-600); font-family: inherit; font-size: 0.85rem; font-weight: 600;
-            cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s;
-            white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;
-        }
+        .nav-item { padding: 0.85rem 1.25rem; background: transparent; border: none; color: var(--gris-600); font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
         .nav-item:hover { color: var(--verde-700); background: var(--verde-50); }
         .nav-item.active { color: var(--verde-800); border-bottom-color: var(--verde-600); }
-        .nav-badge {
-            background: var(--verde-600); color: var(--blanco);
-            font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 10px;
-        }
-        
-        /* MAIN */
+        .nav-badge { background: var(--verde-600); color: var(--blanco); font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 10px; margin-left: 0.3rem; }
         .main { max-width: 1600px; margin: 0 auto; padding: 1.25rem 1.5rem; }
-        .page { display: none; animation: fadeIn 0.25s ease; }
+        .page { display: none; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        /* UPLOAD ZONE */
-        .upload-zone {
-            background: var(--blanco); border: 2px dashed var(--gris-300);
-            border-radius: 14px; padding: 2.5rem; text-align: center;
-            margin-bottom: 1.25rem; transition: all 0.2s; cursor: pointer;
-        }
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--verde-500); background: var(--verde-50);
-        }
-        .upload-icon {
-            width: 70px; height: 70px; margin: 0 auto 1rem;
-            background: var(--verde-100); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .upload-zone { background: var(--blanco); border: 2px dashed var(--gris-300); border-radius: 14px; padding: 2.5rem; text-align: center; margin-bottom: 1.25rem; cursor: pointer; }
+        .upload-zone:hover { border-color: var(--verde-500); background: var(--verde-50); }
+        .upload-icon { width: 70px; height: 70px; margin: 0 auto 1rem; background: var(--verde-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .upload-icon svg { width: 32px; height: 32px; stroke: var(--verde-600); }
-        .upload-zone h3 { font-size: 1.1rem; color: var(--gris-800); margin-bottom: 0.5rem; }
-        .upload-zone p { color: var(--gris-500); font-size: 0.9rem; margin-bottom: 1rem; }
         input[type="file"] { display: none; }
-        
-        /* ALERT BANNER */
-        .alert-banner {
-            background: linear-gradient(135deg, var(--rojo-100), #FFF3E0);
-            border: 1px solid #FF9800; border-left: 4px solid var(--rojo-500);
-            border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: none;
-        }
-        .alert-banner.show { display: block; }
-        .alert-banner-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .alert-banner-title { font-weight: 700; color: var(--rojo-700); display: flex; align-items: center; gap: 0.5rem; }
-        .alert-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .alert-item {
-            background: var(--blanco); border: 1px solid var(--gris-300); border-radius: 6px;
-            padding: 0.35rem 0.65rem; font-size: 0.78rem; cursor: pointer;
-        }
-        .alert-item.critical { border-color: var(--rojo-500); background: var(--rojo-100); color: var(--rojo-700); }
-        
-        /* GRID */
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
         .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
-        
-        /* CARD */
-        .card {
-            background: var(--blanco); border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden;
-        }
-        .card-header {
-            padding: 1rem 1.25rem; border-bottom: 1px solid var(--gris-200);
-            display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-        }
-        .card-title { font-size: 0.95rem; font-weight: 700; color: var(--gris-800); display: flex; align-items: center; gap: 0.5rem; }
+        .card { background: var(--blanco); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+        .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--gris-200); display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 0.95rem; font-weight: 700; color: var(--gris-800); }
         .card-body { padding: 1.25rem; }
         .card-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--gris-200); background: var(--gris-100); }
-        
-        /* STAT CARD */
-        .stat-card {
-            background: var(--blanco); border-radius: 10px; padding: 1rem 1.15rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-left: 4px solid var(--verde-500);
-        }
-        .stat-card.warning { border-left-color: var(--amarillo-500); }
+        .stat-card { background: var(--blanco); border-radius: 10px; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-left: 4px solid var(--verde-500); }
         .stat-card.danger { border-left-color: var(--rojo-500); }
-        .stat-label { font-size: 0.7rem; color: var(--gris-500); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
+        .stat-label { font-size: 0.7rem; color: var(--gris-500); text-transform: uppercase; font-weight: 600; }
         .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--gris-900); font-family: 'JetBrains Mono', monospace; }
         .stat-sub { font-size: 0.72rem; color: var(--gris-500); }
-        
-        /* QUALITY PANEL */
-        .quality-panel {
-            background: linear-gradient(135deg, var(--verde-50), var(--blanco));
-            border: 1px solid var(--verde-200); border-radius: 12px; padding: 1.25rem;
-        }
+        .quality-panel { background: linear-gradient(135deg, var(--verde-50), var(--blanco)); border: 1px solid var(--verde-200); border-radius: 12px; padding: 1.25rem; }
         .quality-title { font-size: 0.85rem; font-weight: 700; color: var(--verde-800); margin-bottom: 1rem; }
         .quality-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
         .quality-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed var(--gris-200); }
-        .quality-item:last-child { border-bottom: none; }
         .quality-label { font-size: 0.8rem; color: var(--gris-600); }
         .quality-value { font-size: 0.9rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
         .quality-value.good { color: var(--verde-700); }
         .quality-value.warning { color: var(--amarillo-700); }
         .quality-value.danger { color: var(--rojo-700); }
-        
-        /* RANKING */
         .ranking-list { display: flex; flex-direction: column; gap: 0.65rem; }
         .ranking-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; background: var(--gris-100); border-radius: 8px; }
         .ranking-pos { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; background: var(--gris-200); }
         .ranking-item:nth-child(1) .ranking-pos { background: #FFD700; color: #7B6400; }
-        .ranking-item:nth-child(2) .ranking-pos { background: #C0C0C0; color: #5A5A5A; }
-        .ranking-item:nth-child(3) .ranking-pos { background: #CD7F32; color: #5C3A18; }
+        .ranking-item:nth-child(2) .ranking-pos { background: #C0C0C0; }
+        .ranking-item:nth-child(3) .ranking-pos { background: #CD7F32; }
         .ranking-name { flex: 1; font-weight: 600; font-size: 0.85rem; }
         .ranking-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.85rem; }
         .ranking-bar { width: 80px; height: 8px; background: var(--gris-200); border-radius: 4px; overflow: hidden; }
-        .ranking-bar-fill { height: 100%; background: var(--verde-500); border-radius: 4px; }
-        
-        /* ACTIONS */
+        .ranking-bar-fill { height: 100%; background: var(--verde-500); }
         .actions-panel { background: var(--blanco); border: 1px solid var(--gris-200); border-radius: 12px; }
         .actions-header { padding: 0.85rem 1rem; background: var(--gris-100); border-bottom: 1px solid var(--gris-200); font-weight: 700; font-size: 0.85rem; }
         .action-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.85rem 1rem; border-bottom: 1px solid var(--gris-100); }
-        .action-item:last-child { border-bottom: none; }
-        .action-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+        .action-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .action-icon.success { background: var(--verde-100); }
         .action-icon.danger { background: var(--rojo-100); }
         .action-title { font-size: 0.82rem; font-weight: 600; }
         .action-desc { font-size: 0.75rem; color: var(--gris-500); }
-        
-        /* TABLE */
-        .table-container { overflow-x: auto; max-height: 500px; overflow-y: auto; }
-        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
-        .table-container::-webkit-scrollbar-thumb { background: var(--gris-300); border-radius: 4px; }
+        .table-container { overflow-x: auto; max-height: 500px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         thead { position: sticky; top: 0; z-index: 10; }
-        th {
-            background: var(--verde-800); color: var(--blanco);
-            padding: 0.7rem 0.85rem; text-align: left; font-weight: 600;
-            font-size: 0.7rem; text-transform: uppercase; cursor: pointer;
-        }
+        th { background: var(--verde-800); color: var(--blanco); padding: 0.7rem 0.85rem; text-align: left; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; cursor: pointer; }
         th:hover { background: var(--verde-700); }
         th.sorted-asc::after { content: ' ↑'; }
         th.sorted-desc::after { content: ' ↓'; }
@@ -251,24 +105,16 @@
         .cell-good { color: var(--verde-700); }
         .cell-warning { color: var(--amarillo-700); }
         .cell-danger { color: var(--rojo-700); }
-        .badge { display: inline-block; padding: 0.18rem 0.45rem; border-radius: 6px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+        .badge { display: inline-block; padding: 0.18rem 0.45rem; border-radius: 6px; font-size: 0.65rem; font-weight: 600; }
         .badge-prov { background: var(--verde-100); color: var(--verde-800); }
         .badge-cult { background: var(--amarillo-100); color: var(--amarillo-700); }
         .badge-g1 { background: var(--verde-100); color: var(--verde-700); }
         .badge-g2 { background: var(--amarillo-100); color: var(--amarillo-700); }
         .badge-g3 { background: var(--rojo-100); color: var(--rojo-700); }
-        
-        /* FILTERS */
         .filters-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem; }
         .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
         .filter-group label { font-size: 0.68rem; color: var(--gris-500); text-transform: uppercase; font-weight: 600; }
-        .filter-group select, .filter-group input {
-            padding: 0.5rem 0.7rem; border: 1px solid var(--gris-300); border-radius: 6px;
-            font-family: inherit; font-size: 0.82rem; min-width: 130px;
-        }
-        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--verde-500); }
-        
-        /* PAGINATION */
+        .filter-group select, .filter-group input { padding: 0.5rem 0.7rem; border: 1px solid var(--gris-300); border-radius: 6px; font-family: inherit; font-size: 0.82rem; min-width: 130px; }
         .pagination { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; }
         .pagination-info { font-size: 0.8rem; color: var(--gris-500); }
         .pagination-controls { display: flex; gap: 0.3rem; }
@@ -276,27 +122,11 @@
         .pg-btn:hover:not(:disabled) { border-color: var(--verde-500); background: var(--verde-50); }
         .pg-btn.active { background: var(--verde-600); color: var(--blanco); border-color: var(--verde-600); }
         .pg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        /* CHART */
         .chart-container { position: relative; height: 220px; }
         .chart-container.tall { height: 300px; }
-        
-        /* CHAT */
-        .chat-toggle {
-            position: fixed; bottom: 1.25rem; right: 1.25rem;
-            width: 54px; height: 54px; background: var(--verde-700);
-            border-radius: 50%; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
-        }
-        .chat-toggle:hover { background: var(--verde-800); transform: scale(1.05); }
+        .chat-toggle { position: fixed; bottom: 1.25rem; right: 1.25rem; width: 54px; height: 54px; background: var(--verde-700); border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
         .chat-toggle svg { width: 24px; height: 24px; fill: var(--blanco); }
-        .chat-panel {
-            position: fixed; bottom: 5rem; right: 1.25rem;
-            width: 360px; max-height: 480px; background: var(--blanco);
-            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            display: none; flex-direction: column; z-index: 1000; overflow: hidden;
-        }
+        .chat-panel { position: fixed; bottom: 5rem; right: 1.25rem; width: 360px; max-height: 480px; background: var(--blanco); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 1000; }
         .chat-panel.open { display: flex; }
         .chat-header { background: var(--verde-800); padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; }
         .chat-header h4 { color: var(--blanco); font-size: 0.9rem; }
@@ -307,2718 +137,973 @@
         .msg.user { background: var(--verde-700); color: var(--blanco); align-self: flex-end; }
         .chat-quick { padding: 0.5rem 1rem; border-top: 1px solid var(--gris-200); display: flex; flex-wrap: wrap; gap: 0.35rem; }
         .quick-btn { padding: 0.3rem 0.6rem; background: var(--gris-100); border: 1px solid var(--gris-300); border-radius: 12px; font-size: 0.7rem; cursor: pointer; }
-        .quick-btn:hover { background: var(--verde-100); border-color: var(--verde-400); }
         .chat-input { padding: 0.65rem; border-top: 1px solid var(--gris-200); display: flex; gap: 0.5rem; }
         .chat-input input { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid var(--gris-300); border-radius: 6px; font-size: 0.82rem; }
         .chat-input button { background: var(--verde-700); border: none; border-radius: 6px; padding: 0.5rem 0.75rem; cursor: pointer; }
         .chat-input button svg { width: 18px; height: 18px; fill: var(--blanco); }
-        
-        /* LOADING & TOAST */
-        .loading-overlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.9);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-        }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; opacity: 0; pointer-events: none; }
         .loading-overlay.active { opacity: 1; pointer-events: auto; }
         .spinner { width: 48px; height: 48px; border: 4px solid var(--gris-200); border-top-color: var(--verde-600); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { margin-top: 1rem; color: var(--gris-600); font-weight: 500; }
         .toast-container { position: fixed; top: 4.5rem; right: 1rem; z-index: 3000; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background: var(--blanco); border-radius: 10px; padding: 0.85rem 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 0.65rem; min-width: 280px; border-left: 4px solid var(--verde-500); }
+        .toast { background: var(--blanco); border-radius: 10px; padding: 0.85rem 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; border-left: 4px solid var(--verde-500); }
         .toast.error { border-left-color: var(--rojo-500); }
         .toast.warning { border-left-color: var(--amarillo-500); }
-        
-        /* RESPONSIVE */
-        @media (max-width: 1200px) {
-            .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
-            .main { padding: 1rem; }
-            .chat-panel { width: calc(100vw - 2rem); }
-            .quality-grid { grid-template-columns: 1fr; }
-        }
+        .modelador-wrapper { display: grid; grid-template-columns: 1fr 100px 1fr; gap: 0; min-height: 450px; background: var(--gris-100); border-radius: 12px; border: 1px solid var(--gris-300); }
+        .modelador-panel { background: var(--blanco); display: flex; flex-direction: column; }
+        .modelador-panel-header { padding: 0.85rem 1rem; background: var(--gris-100); border-bottom: 1px solid var(--gris-200); font-weight: 700; font-size: 0.85rem; display: flex; justify-content: space-between; }
+        .modelador-count { background: var(--verde-600); color: white; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.75rem; }
+        .modelador-cubos { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .modelador-conexiones { background: linear-gradient(90deg, var(--gris-200), var(--gris-100), var(--gris-200)); position: relative; }
+        #svgConexiones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .conexion-linea { fill: none; stroke: var(--verde-500); stroke-width: 2; stroke-dasharray: 5, 3; }
+        .conexion-punto { fill: var(--verde-600); }
+        .cubo { background: var(--blanco); border: 2px solid var(--gris-300); border-radius: 8px; padding: 0.6rem 0.75rem; cursor: grab; transition: all 0.15s; position: relative; }
+        .cubo:hover { border-color: var(--verde-400); box-shadow: 0 2px 8px rgba(46,125,50,0.15); }
+        .cubo.conectado { border-color: var(--verde-500); background: var(--verde-50); }
+        .cubo.requerido:not(.conectado) { border-color: var(--amarillo-500); background: var(--amarillo-100); }
+        .cubo-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+        .cubo-indice { background: var(--gris-200); color: var(--gris-600); font-size: 0.65rem; padding: 0.1rem 0.35rem; border-radius: 4px; font-weight: 600; }
+        .cubo.conectado .cubo-indice { background: var(--verde-600); color: white; }
+        .cubo-nombre { font-weight: 600; font-size: 0.82rem; color: var(--gris-800); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cubo-muestra { font-size: 0.72rem; color: var(--gris-500); font-family: 'JetBrains Mono', monospace; }
+        .cubo-descripcion { font-size: 0.7rem; color: var(--gris-500); }
+        .cubo-drop-zone { margin-top: 0.5rem; padding: 0.4rem; border: 1px dashed var(--gris-400); border-radius: 4px; text-align: center; font-size: 0.7rem; color: var(--gris-500); }
+        .cubo-conexion { margin-top: 0.4rem; padding: 0.35rem 0.5rem; background: var(--verde-100); border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--verde-800); }
+        .conexion-quitar { background: none; border: none; color: var(--rojo-500); cursor: pointer; font-size: 0.85rem; }
+        .cubo-estado { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--verde-500); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; }
+        .cubo.arrastrando { opacity: 0.5; border-style: dashed; }
+        .cubo-destino.drop-activo { border-color: var(--verde-400); }
+        .cubo-destino.drop-hover { border-color: var(--verde-600); background: var(--verde-100); transform: scale(1.02); }
+        .modelador-footer { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--gris-100); border-top: 1px solid var(--gris-200); margin-top: 1rem; border-radius: 8px; }
+        .modelador-leyenda { display: flex; gap: 1.5rem; }
+        .leyenda-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: var(--gris-600); }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot.conectado { background: var(--verde-500); }
+        .dot.requerido { background: var(--amarillo-500); }
+        .dot.opcional { background: var(--gris-400); }
+        @media (max-width: 1200px) { .grid-3, .grid-5 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr; } .modelador-wrapper { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <header class="header">
     <div class="header-content">
         <div class="logo">
-            <div class="logo-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-            </div>
-            <div>
-                <h1>LIAG</h1>
-                <div class="logo-sub">Sistema de Gestión de Granos</div>
-            </div>
+            <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+            <div><h1>LIAG</h1><div class="logo-sub">Sistema de Gestión de Granos v7.1</div></div>
         </div>
         <div class="header-actions">
-            <div class="db-status">
-                <span class="db-dot"></span>
-                <span id="dbStatus">IndexedDB</span>
-                <span id="dbCount">0 cartas</span>
-            </div>
-            <button class="btn btn-secondary" onclick="limpiarBaseDatos()">🗑️ Limpiar BD</button>
+            <div class="db-status"><span class="db-dot"></span><span id="dbStatus">IndexedDB</span><span id="dbCount">0 cartas</span></div>
+            <button class="btn btn-secondary" onclick="limpiarBaseDatos()">🗑️ Limpiar</button>
             <button class="btn btn-secondary" onclick="exportarExcel()">📥 Exportar</button>
-            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Cargar Archivos</button>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Cargar</button>
             <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv" onchange="handleFiles(this.files)">
         </div>
     </div>
 </header>
-
-<!-- NAVIGATION -->
 <nav class="nav-container">
     <div class="nav">
         <button class="nav-item active" data-page="ejecutivo">📊 Panel Ejecutivo</button>
         <button class="nav-item" data-page="clientes">🏢 Por Cliente</button>
         <button class="nav-item" data-page="analisis">📈 Análisis</button>
-        <button class="nav-item" data-page="cartas">📋 Cartas <span class="nav-badge" id="cartasCount">0</span></button>
+        <button class="nav-item" data-page="cartas">📋 Cartas<span class="nav-badge" id="cartasCount">0</span></button>
         <button class="nav-item" data-page="integracion">🔧 Integrar Cliente</button>
     </div>
 </nav>
-
-<!-- MAIN -->
 <main class="main">
-
-    <!-- PAGE: EJECUTIVO -->
     <section id="page-ejecutivo" class="page active">
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-            <div class="upload-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-            </div>
-            <h3>Arrastra archivos aquí o haz clic para cargar</h3>
-            <p>Soporta: Cargill, ACA, COFCO, LDC, FYO (.xlsx, .xls)</p>
-            <button class="btn btn-success" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">Seleccionar Archivos</button>
+            <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <h3>Arrastrá archivos aquí o hacé clic</h3>
+            <p>Soporta: Cargill, ACA, COFCO, LDC, FYO</p>
         </div>
-
-        <div class="alert-banner" id="alertBanner">
-            <div class="alert-banner-header">
-                <span class="alert-banner-title">🚨 Alertas que requieren atención</span>
-                <button class="btn btn-sm" onclick="navegarA('cartas')">Ver todas →</button>
-            </div>
-            <div class="alert-items" id="alertItems"></div>
+        <div class="grid-5" style="margin-bottom:1.25rem;">
+            <div class="stat-card"><div class="stat-label">Total Cartas</div><div class="stat-value" id="statCartas">0</div></div>
+            <div class="stat-card"><div class="stat-label">Peso Total</div><div class="stat-value" id="statPeso">0</div><div class="stat-sub">kg</div></div>
+            <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value" id="statProvs">0</div></div>
+            <div class="stat-card"><div class="stat-label">Merma Total</div><div class="stat-value" id="statMerma">0</div><div class="stat-sub">kg</div></div>
+            <div class="stat-card danger" id="statAlertasCard" style="display:none;"><div class="stat-label">Alertas</div><div class="stat-value" id="statAlertas">0</div></div>
         </div>
-
-        <div class="grid-5" style="margin-bottom:1.25rem;" id="statsRow">
-            <div class="stat-card"><div class="stat-label">Total Cartas</div><div class="stat-value" id="statCartas">0</div><div class="stat-sub">en base de datos</div></div>
-            <div class="stat-card"><div class="stat-label">Peso Total</div><div class="stat-value" id="statPeso">0</div><div class="stat-sub">kilogramos</div></div>
-            <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value" id="statProvs">0</div><div class="stat-sub">activos</div></div>
-            <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div><div class="stat-sub">únicos</div></div>
-            <div class="stat-card danger" id="statAlertasCard" style="display:none;"><div class="stat-label">Alertas</div><div class="stat-value" id="statAlertas">0</div><div class="stat-sub">requieren revisión</div></div>
-        </div>
-
         <div class="grid-3" id="mainContent" style="display:none;">
             <div>
                 <div class="quality-panel" style="margin-bottom:1.25rem;">
                     <div class="quality-title">⚖️ Calidad Consolidada</div>
                     <div class="quality-grid">
-                        <div class="quality-item"><span class="quality-label">Factor Promedio</span><span class="quality-value" id="qFactor">-</span></div>
-                        <div class="quality-item"><span class="quality-label">Humedad Promedio</span><span class="quality-value" id="qHumedad">-</span></div>
-                        <div class="quality-item" id="qProtRow" style="display:none;"><span class="quality-label">Proteína Prom.</span><span class="quality-value" id="qProteina">-</span></div>
-                        <div class="quality-item" id="qPHRow" style="display:none;"><span class="quality-label">Peso Hectolítrico</span><span class="quality-value" id="qPH">-</span></div>
-                        <div class="quality-item"><span class="quality-label">Merma Promedio</span><span class="quality-value" id="qMerma">-</span></div>
-                        <div class="quality-item"><span class="quality-label">Grado Predominante</span><span class="quality-value" id="qGrado">-</span></div>
+                        <div class="quality-item"><span class="quality-label">Factor Prom.</span><span class="quality-value" id="qFactor">-</span></div>
+                        <div class="quality-item"><span class="quality-label">Humedad Prom.</span><span class="quality-value" id="qHumedad">-</span></div>
+                        <div class="quality-item"><span class="quality-label">Merma % Prom.</span><span class="quality-value" id="qMerma">-</span></div>
+                        <div class="quality-item"><span class="quality-label">Grado Predom.</span><span class="quality-value" id="qGrado">-</span></div>
                     </div>
                 </div>
-                <div class="actions-panel">
-                    <div class="actions-header">📋 Acciones Recomendadas</div>
-                    <div id="actionsList"></div>
-                </div>
+                <div class="actions-panel"><div class="actions-header">📋 Acciones</div><div id="actionsList"></div></div>
             </div>
-            <div>
-                <div class="card" style="height:100%;">
-                    <div class="card-header">
-                        <span class="card-title">🏆 Ranking Clientes</span>
-                        <select id="rankingMetric" class="btn btn-sm" style="background:var(--gris-100);border:1px solid var(--gris-300);" onchange="updateRanking()">
-                            <option value="factor">Por Factor</option>
-                            <option value="peso">Por Volumen</option>
-                            <option value="cartas">Por Cartas</option>
-                        </select>
-                    </div>
-                    <div class="card-body"><div class="ranking-list" id="rankingList"></div></div>
-                </div>
-            </div>
-            <div>
-                <div class="card" style="height:100%;">
-                    <div class="card-header"><span class="card-title">📈 Evolución (30 días)</span></div>
-                    <div class="card-body"><div class="chart-container"><canvas id="chartEvolucion"></canvas></div></div>
-                </div>
-            </div>
+            <div class="card"><div class="card-header"><span class="card-title">🏆 Ranking Clientes</span><select id="rankingMetric" onchange="updateRanking()" style="padding:0.3rem;border-radius:4px;"><option value="factor">Factor</option><option value="peso">Volumen</option></select></div><div class="card-body"><div class="ranking-list" id="rankingList"></div></div></div>
+            <div class="card"><div class="card-header"><span class="card-title">📈 Evolución</span></div><div class="card-body"><div class="chart-container"><canvas id="chartEvolucion"></canvas></div></div></div>
         </div>
     </section>
-
-    <!-- PAGE: CLIENTES (Cargill, ACA, COFCO, LDC, FYO - quienes reciben nuestra mercadería) -->
     <section id="page-clientes" class="page">
         <div class="card">
-            <div class="card-header">
-                <span class="card-title">🏢 Análisis por Cliente</span>
-                <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <input type="text" id="searchCliente" placeholder="Buscar cliente..." style="padding:0.5rem;border:1px solid var(--gris-300);border-radius:6px;width:180px;" oninput="renderClientes()">
-                </div>
-            </div>
-            <div class="table-container">
-                <table><thead><tr>
-                    <th>Cliente</th>
-                    <th>Cartas</th>
-                    <th>Peso Total (kg)</th>
-                    <th>Factor Prom.</th>
-                    <th>Humedad Prom.</th>
-                    <th>Proteína Prom.</th>
-                    <th>PH Prom.</th>
-                    <th>Merma Total (kg)</th>
-                    <th>Merma %</th>
-                    <th>Alertas</th>
-                    <th>Última Descarga</th>
-                </tr></thead><tbody id="tbodyClientes"></tbody></table>
-            </div>
-        </div>
-        
-        <!-- Cards visuales por cliente -->
-        <div style="margin-top:1.25rem;">
-            <div class="grid-auto" id="clienteCards"></div>
+            <div class="card-header"><span class="card-title">🏢 Por Cliente</span><input type="text" id="searchCliente" placeholder="Buscar..." style="padding:0.4rem;border:1px solid var(--gris-300);border-radius:4px;" oninput="renderClientes()"></div>
+            <div class="table-container"><table><thead><tr><th>Cliente</th><th>Cartas</th><th>Peso (kg)</th><th>Factor</th><th>Humedad</th><th>Merma kg</th><th>Merma %</th><th>Alertas</th></tr></thead><tbody id="tbodyClientes"></tbody></table></div>
         </div>
     </section>
-
-    <!-- PAGE: ANÁLISIS -->
     <section id="page-analisis" class="page">
         <div class="card">
             <div class="card-header"><span class="card-title">💧 Humedad vs Factor</span></div>
             <div class="card-body">
                 <div class="filters-bar">
-                    <div class="filter-group"><label>Proveedor</label><select id="afProv" onchange="updateAnalisis()"><option value="">Todos</option></select></div>
+                    <div class="filter-group"><label>Cliente</label><select id="afProv" onchange="updateAnalisis()"><option value="">Todos</option></select></div>
                     <div class="filter-group"><label>Cultivo</label><select id="afCult" onchange="updateAnalisis()"><option value="">Todos</option></select></div>
-                    <div class="filter-group"><label>Cliente</label><select id="afCli" onchange="updateAnalisis()"><option value="">Todos</option></select></div>
-                    <button class="btn btn-sm btn-secondary" onclick="resetAnalisis()">Limpiar</button>
                 </div>
-                <div id="analisisStats" style="font-size:0.82rem;color:var(--gris-600);margin-bottom:0.75rem;"></div>
                 <div class="chart-container tall"><canvas id="chartAnalisis"></canvas></div>
             </div>
         </div>
-        <div class="grid-2" style="margin-top:1.25rem;">
-            <div class="card"><div class="card-header"><span class="card-title">📊 Factor por Proveedor</span></div><div class="card-body"><div class="chart-container"><canvas id="chartFactorProv"></canvas></div></div></div>
-            <div class="card"><div class="card-header"><span class="card-title">📦 Mermas por Proveedor</span></div><div class="card-body"><div class="chart-container"><canvas id="chartMermasProv"></canvas></div></div></div>
-        </div>
     </section>
-
-    <!-- PAGE: CARTAS -->
     <section id="page-cartas" class="page">
         <div class="card">
-            <div class="card-header"><span class="card-title">📋 Detalle de Cartas</span><span id="cartasInfo" style="font-size:0.8rem;color:var(--gris-500);"></span></div>
-            <div class="card-body" style="padding:1rem;">
+            <div class="card-header"><span class="card-title">📋 Cartas</span><span id="cartasInfo"></span></div>
+            <div class="card-body" style="padding:0.75rem;">
                 <div class="filters-bar">
-                    <div class="filter-group"><label>Campaña</label><select id="cfCampaña" onchange="aplicarFiltrosCartas()"><option value="">Todas</option></select></div>
-                    <div class="filter-group"><label>Proveedor</label><select id="cfProv" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
-                    <div class="filter-group"><label>Cliente</label><select id="cfCliente" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
+                    <div class="filter-group"><label>Cliente</label><select id="cfProv" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
                     <div class="filter-group"><label>Cultivo</label><select id="cfCultivo" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
-                    <div class="filter-group"><label>Grado</label><select id="cfGrado" onchange="aplicarFiltrosCartas()"><option value="">Todos</option><option value="1">G1</option><option value="2">G2</option><option value="3">G3</option></select></div>
-                    <div class="filter-group"><label>Alertas</label><select id="cfAlertas" onchange="aplicarFiltrosCartas()"><option value="">Todas</option><option value="si">Con alertas</option><option value="no">Sin alertas</option></select></div>
-                    <div class="filter-group"><label>CTG</label><input type="text" id="cfCTG" placeholder="Buscar..." style="width:120px;" oninput="aplicarFiltrosCartas()"></div>
+                    <div class="filter-group"><label>CTG</label><input type="text" id="cfCTG" placeholder="Buscar..." style="width:100px;" oninput="aplicarFiltrosCartas()"></div>
                     <button class="btn btn-sm btn-secondary" onclick="limpiarFiltrosCartas()">Limpiar</button>
                 </div>
             </div>
-            <div class="table-container" id="cartasTableContainer"><table><thead><tr id="cartasHead"></tr></thead><tbody id="cartasBody"></tbody></table></div>
-            <div class="card-footer"><div class="pagination"><div class="pagination-info" id="paginationInfo">0 de 0</div><div class="pagination-controls" id="paginationControls"></div></div></div>
+            <div class="table-container"><table><thead><tr id="cartasHead"></tr></thead><tbody id="cartasBody"></tbody></table></div>
+            <div class="card-footer"><div class="pagination"><div class="pagination-info" id="paginationInfo"></div><div class="pagination-controls" id="paginationControls"></div></div></div>
         </div>
     </section>
-
-    <!-- PAGE: INTEGRACIÓN DE NUEVOS CLIENTES -->
     <section id="page-integracion" class="page">
         <div class="card">
-            <div class="card-header">
-                <span class="card-title">🔧 Integrar Nuevo Cliente</span>
-            </div>
+            <div class="card-header"><span class="card-title">🔧 Integrar Nuevo Cliente</span></div>
             <div class="card-body">
                 <div style="background:var(--verde-50);border:1px solid var(--verde-200);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;">
-                    <h3 style="color:var(--verde-800);margin-bottom:0.75rem;font-size:1rem;">📤 ¿Tenés archivos de un cliente no soportado?</h3>
-                    <p style="color:var(--gris-600);font-size:0.9rem;margin-bottom:1rem;">
-                        Subí un archivo de muestra y te ayudo a mapearlo al sistema. Actualmente soportamos:
-                        <strong>Cargill, ACA, COFCO, LDC, FYO</strong>
-                    </p>
-                    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-                        <button class="btn btn-success" onclick="document.getElementById('fileIntegracion').click()">
-                            📎 Subir Archivo de Muestra
-                        </button>
-                        <input type="file" id="fileIntegracion" accept=".xlsx,.xls,.csv" style="display:none;" onchange="analizarArchivoNuevo(this.files[0])">
-                    </div>
+                    <h3 style="color:var(--verde-800);margin-bottom:0.75rem;">📤 Subí un archivo de muestra</h3>
+                    <p style="color:var(--gris-600);font-size:0.9rem;margin-bottom:1rem;">El sistema analizará las columnas para mapearlas.</p>
+                    <button class="btn btn-success" onclick="document.getElementById('fileIntegracion').click()">📎 Seleccionar</button>
+                    <input type="file" id="fileIntegracion" accept=".xlsx,.xls,.csv" style="display:none;" onchange="analizarParaModelador(this.files[0])">
+                    <span id="archivoSeleccionado" style="margin-left:1rem;color:var(--gris-600);"></span>
                 </div>
-
-                <div id="analisisContainer" style="display:none;">
-                    <div class="card" style="margin-bottom:1rem;">
-                        <div class="card-header" style="background:var(--gris-100);">
-                            <span class="card-title">📊 Análisis del Archivo</span>
-                        </div>
-                        <div class="card-body">
-                            <div id="analisisInfo"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Mapeo interactivo de columnas -->
-                    <div class="card" style="margin-bottom:1rem;">
-                        <div class="card-header" style="background:#E3F2FD;">
-                            <span class="card-title">🔗 Mapeo de Columnas</span>
-                        </div>
-                        <div class="card-body">
-                            <p style="font-size:0.85rem;color:var(--gris-600);margin-bottom:1rem;">
-                                Seleccioná qué columna del archivo corresponde a cada campo. Si no existe, dejá "No disponible".
-                            </p>
-                            <div id="mapeoColumnas" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;"></div>
-                            <div style="margin-top:1.5rem;display:flex;gap:0.75rem;">
-                                <button class="btn btn-success" onclick="guardarMapeoCliente()">💾 Guardar Configuración</button>
-                                <button class="btn btn-secondary" onclick="exportarConfigCliente()">📥 Exportar Config</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header" style="background:var(--gris-100);">
-                            <span class="card-title">📋 Vista Previa de Datos</span>
-                        </div>
-                        <div class="table-container" style="max-height:350px;">
-                            <table id="tablaPreview"></table>
-                        </div>
-                    </div>
+                <div id="configInicial" style="display:none;margin-bottom:1.5rem;background:#E3F2FD;padding:1rem;border-radius:10px;">
+                    <div class="filter-group" style="margin-bottom:0.5rem;"><label>Nombre del Cliente *</label><input type="text" id="nombreNuevoCliente" placeholder="Ej: Bunge"></div>
+                    <div class="filter-group"><label>Peso en</label><select id="unidadPeso"><option value="KG">KG</option><option value="TN">TN (x1000)</option></select></div>
                 </div>
-
-                <div style="margin-top:2rem;border-top:1px solid var(--gris-200);padding-top:1.5rem;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-                        <h3 style="font-size:1rem;color:var(--gris-800);">📚 Clientes Configurados y Campos Disponibles</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="toggleEditarClientes()">✏️ Editar</button>
-                    </div>
-                    <div class="table-container">
-                        <table id="tablaClientesConfig">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>Nombre Col. CTG</th>
-                                    <th>Peso (unidad)</th>
-                                    <th>Humedad</th>
-                                    <th>Factor</th>
-                                    <th>Proteína</th>
-                                    <th>PH</th>
-                                    <th>Gr.Verde</th>
-                                    <th>Grado</th>
-                                    <th>Campaña</th>
-                                    <th>Merma</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyClientesConfig">
-                                <tr>
-                                    <td><span class="badge badge-prov">Cargill</span></td>
-                                    <td><code>ctg</code></td>
-                                    <td>KG</td>
-                                    <td>✅ <small>humedad%</small></td>
-                                    <td>✅ <small>factor total</small></td>
-                                    <td>✅ <small>proteina</small></td>
-                                    <td>✅ <small>peso hectolitrico</small></td>
-                                    <td>✅ <small>grano verde</small></td>
-                                    <td>✅ <small>grado</small></td>
-                                    <td>✅ <small>cosecha</small></td>
-                                    <td>✅ <small>zaranda+volatil</small></td>
-                                </tr>
-                                <tr>
-                                    <td><span class="badge badge-prov">COFCO</span></td>
-                                    <td><code>número de ctg</code></td>
-                                    <td>TN→KG</td>
-                                    <td>✅ <small>humedad</small></td>
-                                    <td>✅ <small>factor</small></td>
-                                    <td>✅ <small>proteinas</small></td>
-                                    <td>✅ <small>peso hectolítrico</small></td>
-                                    <td>⚠️</td>
-                                    <td>✅ <small>grado</small></td>
-                                    <td>✅ <small>cosecha</small></td>
-                                    <td>✅ <small>zaranda+merma volátil</small></td>
+                <div id="modeladorSection" style="display:none;">
+                    <h3 style="margin-bottom:1rem;">🔗 Arrastrá columnas a los campos</h3>
+                    <div id="modeladorContainer"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<button class="chat-toggle" onclick="toggleChat()"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+<div class="chat-panel" id="chatPanel">
+    <div class="chat-header"><h4>🌾 Asistente</h4><button class="chat-close" onclick="toggleChat()">✕</button></div>
+    <div class="chat-messages" id="chatMsgs"><div class="msg bot">Escribe "resumen", "alertas" o un CTG.</div></div>
+    <div class="chat-quick"><button class="quick-btn" onclick="quickChat('resumen')">📊 Resumen</button><button class="quick-btn" onclick="quickChat('alertas')">⚠️ Alertas</button></div>
+    <div class="chat-input"><input type="text" id="chatInput" placeholder="Mensaje..." onkeypress="if(event.key==='Enter')sendChat()"><button onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3 2 10l15 2-15 2z"/></svg></button></div>
+</div>
+<div class="loading-overlay" id="loading"><div class="spinner"></div><div class="loading-text" id="loadingText">Cargando...</div></div>
+<div class="toast-container" id="toasts"></div>
 <script>
-// ╔════════════════════════════════════════════════════════════════════════════╗
-// ║  LIAG v7.0 - PARTE 2: IndexedDB + Estado + Normalización                   ║
-// ╚════════════════════════════════════════════════════════════════════════════╝
+// ═══════════════════════════════════════════════════════════════════
+// LIAG v7.1 - SISTEMA COMPLETO
+// ═══════════════════════════════════════════════════════════════════
 
-// ══════════════════════════════════════════════════════════════════════════════
-// CONFIGURACIÓN IndexedDB
-// ══════════════════════════════════════════════════════════════════════════════
-
-const DB_NAME = 'LIAG_Database';
-const DB_VERSION = 1;
+const DB_NAME = 'LIAG_DB', DB_VERSION = 1;
 let db = null;
 
-/**
- * Inicializa IndexedDB
- */
+const STATE = { cartas: [], filtradas: [], correcciones: {}, pagina: 1, porPagina: 50, sortCol: 'Fecha', sortDir: 'desc', charts: {} };
+const COLORES = ['#2E7D32','#8BC34A','#F9A825','#4CAF50','#1B5E20','#CDDC39','#FFC107','#689F38'];
+const UMBRALES = { humedadAlta: 14, humedadCritica: 15.5, factorBajo: 98, factorCritico: 95, mermaPctAlta: 5, mermaPctCritica: 15 };
+
+const COLUMNAS = [
+    {key:'Alertas',label:'⚠️',w:45},{key:'CTG',label:'CTG',w:110},{key:'Fecha',label:'Fecha',w:85},
+    {key:'Campaña',label:'Camp.',w:70},{key:'Proveedor',label:'Cliente',w:85},{key:'Cliente',label:'Origen',w:130},
+    {key:'Cultivo',label:'Cultivo',w:75},{key:'Peso_kg',label:'Peso kg',w:90},{key:'Humedad',label:'Hum%',w:60},
+    {key:'Grado',label:'Grado',w:50},{key:'Factor',label:'Factor',w:65},{key:'Merma_kg',label:'Merma kg',w:80},{key:'MermaPct',label:'Merma%',w:65}
+];
+
+// ═══ IndexedDB ═══
 function initDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        
-        request.onerror = () => {
-            console.error('❌ Error abriendo IndexedDB:', request.error);
-            reject(request.error);
-        };
-        
-        request.onsuccess = () => {
-            db = request.result;
-            console.log('✅ IndexedDB conectada correctamente');
-            resolve(db);
-        };
-        
-        request.onupgradeneeded = (event) => {
-            const database = event.target.result;
-            console.log('📦 Creando estructura de base de datos...');
-            
-            // Store principal: cartas (clave primaria: CTG)
-            if (!database.objectStoreNames.contains('cartas')) {
-                const store = database.createObjectStore('cartas', { keyPath: 'CTG' });
-                store.createIndex('Proveedor', 'Proveedor', { unique: false });
-                store.createIndex('Cliente', 'Cliente', { unique: false });
-                store.createIndex('Cultivo', 'Cultivo', { unique: false });
-                store.createIndex('Fecha', 'Fecha', { unique: false });
-                console.log('  ✓ Store "cartas" creado con índices');
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => { db = req.result; resolve(db); };
+        req.onupgradeneeded = (e) => {
+            const d = e.target.result;
+            if (!d.objectStoreNames.contains('cartas')) {
+                const s = d.createObjectStore('cartas', {keyPath:'CTG'});
+                s.createIndex('Proveedor','Proveedor');
+                s.createIndex('Fecha','Fecha');
             }
-            
-            // Store de configuración
-            if (!database.objectStoreNames.contains('config')) {
-                database.createObjectStore('config', { keyPath: 'key' });
-                console.log('  ✓ Store "config" creado');
-            }
+            if (!d.objectStoreNames.contains('config')) d.createObjectStore('config', {keyPath:'key'});
         };
     });
 }
 
-/**
- * Guarda múltiples cartas (usa put para insertar o actualizar)
- */
-function dbGuardarCartas(cartas) {
+function dbGuardar(cartas) {
     return new Promise((resolve, reject) => {
-        if (!db) { reject(new Error('DB no inicializada')); return; }
-        
-        const tx = db.transaction('cartas', 'readwrite');
-        const store = tx.objectStore('cartas');
-        let count = 0;
-        
-        cartas.forEach(carta => {
-            const req = store.put(carta);
-            req.onsuccess = () => count++;
-        });
-        
-        tx.oncomplete = () => {
-            console.log(`💾 ${count} cartas guardadas en IndexedDB`);
-            resolve(count);
-        };
+        const tx = db.transaction('cartas','readwrite'), st = tx.objectStore('cartas');
+        cartas.forEach(c => st.put(c));
+        tx.oncomplete = () => resolve(cartas.length);
         tx.onerror = () => reject(tx.error);
     });
 }
 
-/**
- * Obtiene todas las cartas
- */
-function dbObtenerCartas() {
+function dbObtener() {
     return new Promise((resolve, reject) => {
-        if (!db) { reject(new Error('DB no inicializada')); return; }
-        
-        const tx = db.transaction('cartas', 'readonly');
-        const store = tx.objectStore('cartas');
-        const request = store.getAll();
-        
-        request.onsuccess = () => {
-            console.log(`📖 ${request.result.length} cartas leídas de IndexedDB`);
-            resolve(request.result || []);
-        };
-        request.onerror = () => reject(request.error);
+        const tx = db.transaction('cartas','readonly'), req = tx.objectStore('cartas').getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
     });
 }
 
-/**
- * Cuenta cartas en la BD
- */
-function dbContarCartas() {
+function dbLimpiar() {
     return new Promise((resolve, reject) => {
-        if (!db) { resolve(0); return; }
-        
-        const tx = db.transaction('cartas', 'readonly');
-        const store = tx.objectStore('cartas');
-        const request = store.count();
-        
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        const tx = db.transaction('cartas','readwrite'), req = tx.objectStore('cartas').clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
     });
 }
 
-/**
- * Limpia todas las cartas
- */
-function dbLimpiarCartas() {
-    return new Promise((resolve, reject) => {
-        if (!db) { reject(new Error('DB no inicializada')); return; }
-        
-        const tx = db.transaction('cartas', 'readwrite');
-        const store = tx.objectStore('cartas');
-        const request = store.clear();
-        
-        request.onsuccess = () => {
-            console.log('🗑️ Base de datos limpiada');
-            resolve();
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
-
-/**
- * Guarda configuración
- */
-function dbGuardarConfig(key, value) {
-    return new Promise((resolve, reject) => {
-        if (!db) { reject(new Error('DB no inicializada')); return; }
-        
-        const tx = db.transaction('config', 'readwrite');
-        const store = tx.objectStore('config');
-        store.put({ key, value });
-        
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-/**
- * Obtiene configuración
- */
-function dbObtenerConfig(key) {
-    return new Promise((resolve, reject) => {
+function dbConfig(key, value) {
+    return new Promise((resolve) => {
         if (!db) { resolve(null); return; }
-        
-        const tx = db.transaction('config', 'readonly');
-        const store = tx.objectStore('config');
-        const request = store.get(key);
-        
-        request.onsuccess = () => resolve(request.result?.value || null);
-        request.onerror = () => reject(request.error);
+        const tx = db.transaction('config', value !== undefined ? 'readwrite' : 'readonly');
+        const st = tx.objectStore('config');
+        if (value !== undefined) { st.put({key, value}); tx.oncomplete = () => resolve(true); }
+        else { const r = st.get(key); r.onsuccess = () => resolve(r.result?.value); }
     });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ESTADO GLOBAL
-// ══════════════════════════════════════════════════════════════════════════════
-
-const STATE = {
-    cartas: [],           // Todas las cartas cargadas
-    filtradas: [],        // Cartas después de filtros
-    correcciones: {},     // Mapa de correcciones de cliente
-    pagina: 1,
-    porPagina: 50,
-    sortCol: 'Fecha',
-    sortDir: 'desc',
-    charts: {}            // Referencias a gráficos Chart.js
-};
-
-// Paleta de colores estilo agro/GDM
-const COLORES = [
-    '#2E7D32', // Verde oscuro
-    '#8BC34A', // Verde lima
-    '#F9A825', // Amarillo/dorado
-    '#4CAF50', // Verde medio
-    '#1B5E20', // Verde muy oscuro
-    '#CDDC39', // Lima claro
-    '#FFC107', // Ámbar
-    '#689F38', // Verde oliva
-    '#33691E', // Verde bosque
-    '#AED581'  // Verde claro
-];
-
-// Umbrales para alertas de calidad
-// Merma: normal hasta 5%, warning hasta 15%, crítico >15%
-const UMBRALES = {
-    humedadAlta: 14,
-    humedadCritica: 15.5,
-    factorBajo: 98,
-    factorCritico: 95,
-    mermaPctAlta: 5,       // Warning si merma > 5%
-    mermaPctCritica: 15    // Crítico si merma > 15%
-};
-
-// TERMINOLOGÍA:
-// - "Cliente" = Cargill, ACA, COFCO, LDC, FYO (quienes COMPRAN/reciben nuestra mercadería)
-// - "Campo/Origen" = De dónde sale la mercadería (campos de LIAG)
-// - LIAG Argentina = Nosotros, el proveedor de la mercadería
-
-const COLUMNAS_BASE = [
-    { key: 'Alertas', label: '⚠️', width: 50 },
-    { key: 'CTG', label: 'CTG', width: 110 },
-    { key: 'Fecha', label: 'Fecha', width: 90 },
-    { key: 'Campaña', label: 'Campaña', width: 80 },
-    { key: 'Proveedor', label: 'Cliente', width: 90 },        // Cargill, ACA, etc.
-    { key: 'Cliente', label: 'Campo/Origen', width: 150 },    // De dónde sale
-    { key: 'Cultivo', label: 'Cultivo', width: 80 },
-    { key: 'Peso_kg', label: 'Peso (kg)', width: 100 },
-    { key: 'Humedad', label: 'Hum %', width: 65 },
-    { key: 'Grado', label: 'Grado', width: 55 },
-    { key: 'Factor', label: 'Factor', width: 65 },
-    { key: 'Merma_kg', label: 'Merma (kg)', width: 85 },
-    { key: 'MermaPct', label: 'Merma %', width: 70 }
-];
-
-// Columnas opcionales (se muestran si hay datos)
-const COLUMNAS_CALIDAD = [
-    { key: 'Proteina', label: 'Prot %', width: 65 },
-    { key: 'PesoHL', label: 'PH', width: 55 },
-    { key: 'GranoVerde', label: 'Gr.Verde', width: 70 },
-    { key: 'Zaranda', label: 'Zaranda', width: 70 },
-    { key: 'Destino', label: 'Destino', width: 120 }
-];
-
-// ══════════════════════════════════════════════════════════════════════════════
-// FUNCIONES DE NORMALIZACIÓN
-// ══════════════════════════════════════════════════════════════════════════════
-
-/**
- * Normaliza CTG a 11 dígitos
- */
-function normCTG(ctg) {
-    if (!ctg) return '';
-    let s = String(ctg).replace(/[\xa0\n\r\s\-\.]/g, '').replace(/\D/g, '');
-    if (s.length >= 11 && s[0] === '1') return s.substring(0, 11);
-    if (s.length === 11) return s;
-    return '';
+// ═══ Utilidades ═══
+function formatNum(n, d=0) { return n == null || isNaN(n) ? '-' : Number(n).toLocaleString('es-AR', {minimumFractionDigits:d, maximumFractionDigits:d}); }
+function showLoading(t) { document.getElementById('loadingText').textContent = t || 'Cargando...'; document.getElementById('loading').classList.add('active'); }
+function hideLoading() { document.getElementById('loading').classList.remove('active'); }
+function toast(msg, type='success') {
+    const c = document.getElementById('toasts'), d = document.createElement('div');
+    d.className = 'toast ' + type; d.innerHTML = msg;
+    c.appendChild(d);
+    setTimeout(() => { d.style.opacity = '0'; setTimeout(() => d.remove(), 300); }, 4000);
 }
 
-/**
- * Normaliza fecha a DD/MM/YYYY
- */
+// ═══ Normalización ═══
+function normCTG(v) { if (!v) return ''; let s = String(v).replace(/\D/g,''); return s.length >= 11 ? s.substring(0,11) : ''; }
 function normFecha(f) {
     if (!f) return '';
     try {
         let d;
-        if (f instanceof Date) {
-            d = f;
-        } else if (typeof f === 'number') {
-            // Fecha Excel (días desde 1/1/1900)
-            d = new Date(new Date(1900, 0, 1).getTime() + (f - 2) * 86400000);
-        } else {
+        if (typeof f === 'number') d = new Date(new Date(1900,0,1).getTime() + (f-2)*86400000);
+        else if (f instanceof Date) d = f;
+        else {
             const s = String(f).trim();
-            if (s.includes('/')) {
-                const p = s.split('/');
-                if (p.length === 3) {
-                    if (p[2].length === 4) {
-                        d = new Date(+p[2], +p[1] - 1, +p[0]);
-                    } else if (p[0].length === 4) {
-                        d = new Date(+p[0], +p[1] - 1, +p[2]);
-                    }
-                }
-            } else if (s.includes('-')) {
-                d = new Date(s);
-            } else {
-                d = new Date(s);
-            }
+            if (s.includes('/')) { const p = s.split('/'); d = p[2]?.length === 4 ? new Date(+p[2],+p[1]-1,+p[0]) : new Date(+p[0],+p[1]-1,+p[2]); }
+            else d = new Date(s);
         }
-        
-        if (!d || isNaN(d.getTime())) return '';
-        const year = d.getFullYear();
-        if (year < 2020 || year > 2030) return '';
-        
-        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${year}`;
-    } catch {
-        return '';
-    }
+        if (!d || isNaN(d.getTime()) || d.getFullYear() < 2020 || d.getFullYear() > 2030) return '';
+        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    } catch { return ''; }
 }
-
-/**
- * Parsea fecha DD/MM/YYYY a objeto Date
- */
-function parseFecha(str) {
-    if (!str) return null;
-    const p = str.split('/');
-    if (p.length !== 3) return null;
-    return new Date(+p[2], +p[1] - 1, +p[0]);
-}
-
-/**
- * Normaliza nombre de cultivo
- */
-function normCultivo(texto) {
-    if (!texto) return null;
-    const l = String(texto).toLowerCase().trim();
-    
-    // Filtrar fertilizantes
-    if (/fertilizante|urea|fosfato|monoamonico|sulfato/.test(l)) return null;
-    
-    // Normalizar granos
-    if (l.includes('trigo pan') || l === 'trigo') return 'Trigo';
-    if (l.includes('trigo candeal')) return 'Trigo Candeal';
-    if (l.includes('trigo fideo')) return 'Trigo Fideo';
+function normCultivo(t) {
+    if (!t) return null;
+    const l = String(t).toLowerCase();
+    if (/fertilizante|urea|fosfato/.test(l)) return null;
     if (l.includes('trigo')) return 'Trigo';
     if (/maiz|maíz/.test(l)) return 'Maíz';
     if (/soja|soya/.test(l)) return 'Soja';
     if (l.includes('girasol')) return 'Girasol';
     if (l.includes('sorgo')) return 'Sorgo';
     if (l.includes('cebada')) return 'Cebada';
-    if (l.includes('avena')) return 'Avena';
-    if (l.includes('colza')) return 'Colza';
-    
-    return texto;
+    return t;
+}
+function normCampaña(v) {
+    if (!v) return '';
+    const s = String(v).trim();
+    if (/^\d{4}\/\d{2}$/.test(s)) return s;
+    const m = s.match(/(\d{4})[-\/]?(\d{2,4})?/);
+    if (m) { const a2 = m[2] ? (m[2].length === 4 ? m[2].slice(-2) : m[2]) : String(+m[1]+1).slice(-2); return `${m[1]}/${a2}`; }
+    return s;
+}
+function esLIAG(t) { return t && String(t).toUpperCase().includes('LIAG'); }
+
+function calcAlertas(r) {
+    const a = [];
+    if (r.Humedad > UMBRALES.humedadCritica) a.push({tipo:'critical',msg:`Hum ${r.Humedad}%`});
+    else if (r.Humedad > UMBRALES.humedadAlta) a.push({tipo:'warning',msg:`Hum ${r.Humedad}%`});
+    if (r.Factor < UMBRALES.factorCritico) a.push({tipo:'critical',msg:`Factor ${r.Factor}%`});
+    else if (r.Factor < UMBRALES.factorBajo) a.push({tipo:'warning',msg:`Factor ${r.Factor}%`});
+    if (r.MermaPct > UMBRALES.mermaPctCritica) a.push({tipo:'critical',msg:`Merma ${r.MermaPct}%`});
+    else if (r.MermaPct > UMBRALES.mermaPctAlta) a.push({tipo:'warning',msg:`Merma ${r.MermaPct}%`});
+    if (r.Grado === 3) a.push({tipo:'warning',msg:'Grado 3'});
+    return a;
 }
 
-/**
- * Detecta si el texto indica LIAG (nosotros)
- */
-function esLIAG(texto) {
-    if (!texto) return false;
-    const u = String(texto).toUpperCase().trim();
-    return u.includes('LIAG ARGENTINA') || u === 'LIAG' || u.includes('LIAG ') || u.startsWith('LIAG');
-}
-
-/**
- * Aplica corrección de cliente si existe
- */
-function aplicarCorreccion(cliente) {
-    if (!cliente) return cliente;
-    const key = cliente.toLowerCase().trim();
-    return STATE.correcciones[key] || cliente;
-}
-
-/**
- * Guarda una corrección de cliente
- */
-async function guardarCorreccion(desde, hasta) {
-    const key = desde.toLowerCase().trim();
-    STATE.correcciones[key] = hasta;
-    
-    // Guardar en IndexedDB
-    await dbGuardarConfig('correcciones', STATE.correcciones);
-    
-    // Aplicar a cartas existentes
-    let count = 0;
-    STATE.cartas.forEach(c => {
-        if (c.ClienteOrig && c.ClienteOrig.toLowerCase().trim() === key) {
-            c.Cliente = hasta;
-            count++;
-        }
-    });
-    
-    // Guardar cartas actualizadas
-    if (count > 0) {
-        await dbGuardarCartas(STATE.cartas);
-    }
-    
-    return count;
-}
-
-/**
- * Calcula alertas para un registro
- */
-function calcAlertas(reg) {
-    const alertas = [];
-    
-    // Humedad
-    if (reg.Humedad > UMBRALES.humedadCritica) {
-        alertas.push({ tipo: 'critical', msg: `Hum ${reg.Humedad}%` });
-    } else if (reg.Humedad > UMBRALES.humedadAlta) {
-        alertas.push({ tipo: 'warning', msg: `Hum ${reg.Humedad}%` });
-    }
-    
-    // Factor
-    if (reg.Factor < UMBRALES.factorCritico) {
-        alertas.push({ tipo: 'critical', msg: `Factor ${reg.Factor}%` });
-    } else if (reg.Factor < UMBRALES.factorBajo) {
-        alertas.push({ tipo: 'warning', msg: `Factor ${reg.Factor}%` });
-    }
-    
-    // Merma
-    if (reg.MermaPct > UMBRALES.mermaPctCritica) {
-        alertas.push({ tipo: 'critical', msg: `Merma ${reg.MermaPct}%` });
-    } else if (reg.MermaPct > UMBRALES.mermaPctAlta) {
-        alertas.push({ tipo: 'warning', msg: `Merma ${reg.MermaPct}%` });
-    }
-    
-    // Grado
-    if (reg.Grado === 3) {
-        alertas.push({ tipo: 'warning', msg: 'Grado 3' });
-    }
-    
-    return alertas;
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// UTILIDADES
-// ══════════════════════════════════════════════════════════════════════════════
-
-function formatNum(n, decimals = 0) {
-    if (n === null || n === undefined || isNaN(n)) return '-';
-    return Number(n).toLocaleString('es-AR', {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-    });
-}
-
-function showLoading(text = 'Cargando...') {
-    document.getElementById('loadingText').textContent = text;
-    document.getElementById('loading').classList.add('active');
-}
-
-function setLoadingText(text) {
-    document.getElementById('loadingText').textContent = text;
-}
-
-function hideLoading() {
-    document.getElementById('loading').classList.remove('active');
-}
-
-function toast(message, type = 'success') {
-    const container = document.getElementById('toasts');
-    const div = document.createElement('div');
-    div.className = `toast ${type}`;
-    div.innerHTML = `<span>${message}</span>`;
-    container.appendChild(div);
-    
-    setTimeout(() => {
-        div.style.opacity = '0';
-        div.style.transform = 'translateX(100%)';
-        setTimeout(() => div.remove(), 300);
-    }, 4000);
-}
-
-console.log('✅ Parte 2 cargada: IndexedDB + Estado + Normalización');
-
-// ╔════════════════════════════════════════════════════════════════════════════╗
-// ║  LIAG v7.0 - PARTE 3: Procesadores de Proveedores                          ║
-// ╚════════════════════════════════════════════════════════════════════════════╝
-
-// ══════════════════════════════════════════════════════════════════════════════
-// HELPERS PARA PROCESAMIENTO
-// ══════════════════════════════════════════════════════════════════════════════
-
-/**
- * Busca índice de columna por nombre parcial
- */
-function findCol(headers, ...nombres) {
-    for (const nombre of nombres) {
-        const idx = headers.findIndex(h => 
-            String(h || '').toLowerCase().includes(nombre.toLowerCase())
-        );
-        if (idx >= 0) return idx;
-    }
-    return -1;
-}
-
-/**
- * Obtiene valor de una fila por nombre de columna
- */
-function getVal(row, headers, ...nombres) {
-    const idx = findCol(headers, ...nombres);
-    return idx >= 0 ? row[idx] : null;
-}
-
-/**
- * Detecta proveedor por nombre de archivo
- */
-function detectarProveedor(filename) {
-    const l = filename.toLowerCase();
+// ═══ Procesadores ═══
+function findCol(h, ...n) { for (const x of n) { const i = h.findIndex(c => String(c||'').toLowerCase().includes(x.toLowerCase())); if (i >= 0) return i; } return -1; }
+function getVal(r, h, ...n) { const i = findCol(h, ...n); return i >= 0 ? r[i] : null; }
+function detectarProveedor(f) {
+    const l = f.toLowerCase();
     if (l.includes('cargill')) return 'Cargill';
-    if (l.includes('aca') || l.includes('acopios')) return 'ACA';
+    if (l.includes('aca')) return 'ACA';
     if (l.includes('cofco')) return 'COFCO';
     if (l.includes('ldc') || l.includes('dreyfus')) return 'LDC';
     if (l.includes('fyo')) return 'FYO';
-    if (l.includes('bunge')) return 'Bunge';
-    if (l.includes('molinos')) return 'Molinos';
     return 'Otro';
 }
 
-/**
- * Normaliza formato de campaña a "AAAA/AA" (ej: "2024/25")
- */
-function normCampaña(valor) {
-    if (!valor) return '';
-    const s = String(valor).trim();
-    
-    // Ya está en formato correcto: "2024/25" o "24/25"
-    if (/^\d{4}\/\d{2}$/.test(s)) return s;
-    if (/^\d{2}\/\d{2}$/.test(s)) return '20' + s;
-    
-    // Formato "2024-2025" o "2024-25"
-    const match1 = s.match(/(\d{4})[-\/](\d{2,4})/);
-    if (match1) {
-        const año1 = match1[1];
-        const año2 = match1[2].length === 4 ? match1[2].slice(-2) : match1[2];
-        return `${año1}/${año2}`;
-    }
-    
-    // Solo año: "2024" -> asumimos campaña actual
-    const match2 = s.match(/^(\d{4})$/);
-    if (match2) {
-        const año = parseInt(match2[1]);
-        return `${año}/${String(año + 1).slice(-2)}`;
-    }
-    
-    // Texto como "Campaña 2024/25"
-    const match3 = s.match(/(\d{4})\/(\d{2})/);
-    if (match3) return `${match3[1]}/${match3[2]}`;
-    
-    return s;
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PROCESADOR: CARGILL
-// Pesos en KG, tiene factor total
-// ══════════════════════════════════════════════════════════════════════════════
-
 function procesarCargill(data) {
-    const registros = [];
-    const headers = data[0] || [];
-    
+    const regs = [], h = data[0] || [];
     for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        // Cultivo
-        const cultivo = normCultivo(getVal(row, headers, 'producto'));
-        if (!cultivo) continue;
-        
-        // CTG
-        const ctg = normCTG(getVal(row, headers, 'ctg'));
-        if (ctg.length !== 11) continue;
-        
-        // Cliente
-        let cliente = getVal(row, headers, 'cliente');
-        const clienteOrig = cliente;
+        const r = data[i]; if (!r?.length) continue;
+        const cultivo = normCultivo(getVal(r,h,'producto')); if (!cultivo) continue;
+        const ctg = normCTG(getVal(r,h,'ctg')); if (ctg.length !== 11) continue;
+        let cliente = getVal(r,h,'cliente'); const clienteOrig = cliente;
         if (esLIAG(cliente)) cliente = 'Cargill';
-        cliente = aplicarCorreccion(cliente);
-        
-        // Peso (ya en KG)
-        const peso = parseFloat(getVal(row, headers, 'peso neto a certificar', 'peso neto')) || 0;
-        
-        // Calidad
-        const grado = parseInt(getVal(row, headers, 'grado')) || 0;
-        const factor = parseFloat(getVal(row, headers, 'factor total', 'factor')) || 100;
-        const humedad = parseFloat(getVal(row, headers, 'humedad%', 'humedad')) || 0;
-        const proteina = parseFloat(getVal(row, headers, 'proteina')) || 0;
-        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph')) || 0;
-        
-        // Mermas - EN CARGILL YA VIENEN EN KG (no en toneladas ni %)
-        const zaranda = parseFloat(getVal(row, headers, 'zaranda')) || 0;
-        const volatil = parseFloat(getVal(row, headers, 'volatil', 'volátil')) || 0;
+        const peso = parseFloat(getVal(r,h,'peso neto a certificar','peso neto')) || 0;
+        const grado = parseInt(getVal(r,h,'grado')) || 0;
+        const factor = parseFloat(getVal(r,h,'factor total','factor')) || 100;
+        const humedad = parseFloat(getVal(r,h,'humedad%','humedad')) || 0;
+        const proteina = parseFloat(getVal(r,h,'proteina')) || 0;
+        const ph = parseFloat(getVal(r,h,'peso hectolitrico','ph')) || 0;
+        const granoVerde = parseFloat(getVal(r,h,'grano verde')) || 0;
+        const zaranda = parseFloat(getVal(r,h,'zaranda')) || 0;
+        const volatil = parseFloat(getVal(r,h,'volatil')) || 0;
         const mermaKg = zaranda + volatil;
-        // Calcular % sobre peso bruto (peso + merma = bruto aproximado)
-        const pesoBruto = peso + mermaKg;
-        const mermaPct = pesoBruto > 0 ? parseFloat(((mermaKg / pesoBruto) * 100).toFixed(2)) : 0;
-        
-        // Grano Verde
-        const granoVerde = parseFloat(getVal(row, headers, 'grano verde', 'granos verdes', 'verde')) || 0;
-        
-        // Campaña (normalizar formato)
-        let campaña = String(getVal(row, headers, 'cosecha', 'campaña') || '');
-        campaña = normCampaña(campaña);
-        
-        const registro = {
-            CTG: ctg,
-            Fecha: normFecha(getVal(row, headers, 'fecha descarga', 'fecha')),
-            Cliente: cliente,
-            ClienteOrig: clienteOrig,
-            Proveedor: 'Cargill',
-            Cultivo: cultivo,
-            Campaña: campaña,
-            Peso_kg: peso,
-            Humedad: humedad,
-            Grado: grado,
-            Factor: factor,
-            VarFactor: parseFloat((factor - 100).toFixed(2)),
-            Zaranda: zaranda,
-            Volatil: volatil,
-            Merma_kg: mermaKg,
-            MermaPct: mermaPct,
-            GranoVerde: granoVerde,
-            Proteina: proteina,
-            PesoHL: ph,
-            Origen: String(getVal(row, headers, 'origen', 'orígen') || ''),
-            Destino: String(getVal(row, headers, 'destino') || ''),
-            Cosecha: campaña
+        const mermaPct = (peso + mermaKg) > 0 ? parseFloat(((mermaKg / (peso + mermaKg)) * 100).toFixed(2)) : 0;
+        const reg = {
+            CTG: ctg, Fecha: normFecha(getVal(r,h,'fecha descarga','fecha')), Cliente: cliente, ClienteOrig: clienteOrig,
+            Proveedor: 'Cargill', Cultivo: cultivo, Campaña: normCampaña(getVal(r,h,'cosecha','campaña')),
+            Peso_kg: peso, Humedad: humedad, Grado: grado, Factor: factor,
+            Zaranda: zaranda, Volatil: volatil, Merma_kg: mermaKg, MermaPct: mermaPct,
+            GranoVerde: granoVerde, Proteina: proteina, PesoHL: ph,
+            Origen: String(getVal(r,h,'origen') || ''), Destino: String(getVal(r,h,'destino') || '')
         };
-        
-        registro.Alertas = calcAlertas(registro);
-        registros.push(registro);
+        reg.Alertas = calcAlertas(reg);
+        regs.push(reg);
     }
-    
-    return registros;
+    return regs;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PROCESADOR: ACA
-// Pesos en TONELADAS (x1000), humedad puede tener coma
-// ══════════════════════════════════════════════════════════════════════════════
 
 function procesarACA(data) {
-    const registros = [];
-    const headers = data[0] || [];
-    
+    const regs = [], h = data[0] || [];
     for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        // CTG
-        const ctgRaw = String(getVal(row, headers, 'ctg') || '').replace(/[\xa0]/g, '');
-        const ctg = normCTG(ctgRaw);
-        if (ctg.length !== 11) continue;
-        
-        // Cliente desde procedencia
-        let cliente = String(getVal(row, headers, 'procedencia') || '').replace(/[\xa0]/g, '').trim();
-        const clienteOrig = cliente;
+        const r = data[i]; if (!r?.length) continue;
+        const ctg = normCTG(getVal(r,h,'ctg')); if (ctg.length !== 11) continue;
+        let cliente = String(getVal(r,h,'procedencia') || '').trim();
         if (!cliente || esLIAG(cliente)) cliente = 'ACA';
-        cliente = aplicarCorreccion(cliente);
-        
-        // Peso en TONELADAS -> convertir a KG
-        const pesoTn = parseFloat(getVal(row, headers, 'kg.netos', 'netos', 'kg netos')) || 0;
+        const pesoTn = parseFloat(getVal(r,h,'kg.netos','netos')) || 0;
         const pesoKg = pesoTn * 1000;
-        
-        // Humedad (puede tener coma decimal)
-        const humRaw = String(getVal(row, headers, 'hum', 'humedad') || '0');
-        const humedad = parseFloat(humRaw.replace(',', '.')) || 0;
-        
-        // Mermas (en toneladas)
-        const zaranda = (parseFloat(getVal(row, headers, 'zaran', 'kg.zaran', 'zaranda')) || 0) * 1000;
-        const volRaw = parseFloat(getVal(row, headers, 'volátil', 'kg.volátil', 'volatil')) || 0;
-        const merVarias = parseFloat(getVal(row, headers, 'mer.varias', 'kg.mer.varias')) || 0;
-        const volatil = (volRaw + merVarias) * 1000;
+        const humedad = parseFloat(String(getVal(r,h,'hum','humedad') || '0').replace(',','.')) || 0;
+        const zaranda = (parseFloat(getVal(r,h,'zaran','zaranda')) || 0) * 1000;
+        const volatil = (parseFloat(getVal(r,h,'volátil','volatil')) || 0) * 1000;
         const mermaKg = zaranda + volatil;
-        const mermaPct = pesoKg > 0 ? parseFloat(((mermaKg / pesoKg) * 100).toFixed(2)) : 0;
-        
-        const registro = {
-            CTG: ctg,
-            Fecha: normFecha(getVal(row, headers, 'fecha')),
-            Cliente: cliente,
-            ClienteOrig: clienteOrig,
-            Proveedor: 'ACA',
-            Cultivo: 'Soja',
-            Peso_kg: pesoKg,
-            Humedad: humedad,
-            Grado: 0,
-            Factor: 100,
-            VarFactor: 0,
-            Zaranda: zaranda,
-            Volatil: volatil,
-            Merma_kg: mermaKg,
-            MermaPct: mermaPct,
-            Proteina: 0,
-            PesoHL: 0,
-            Origen: cliente,
-            Destino: String(getVal(row, headers, 'destino') || ''),
-            Cosecha: ''
+        const mermaPct = (pesoKg + mermaKg) > 0 ? parseFloat(((mermaKg / (pesoKg + mermaKg)) * 100).toFixed(2)) : 0;
+        const reg = {
+            CTG: ctg, Fecha: normFecha(getVal(r,h,'fecha')), Cliente: cliente, ClienteOrig: cliente,
+            Proveedor: 'ACA', Cultivo: 'Soja', Campaña: '',
+            Peso_kg: pesoKg, Humedad: humedad, Grado: 0, Factor: 100,
+            Zaranda: zaranda, Volatil: volatil, Merma_kg: mermaKg, MermaPct: mermaPct,
+            GranoVerde: 0, Proteina: 0, PesoHL: 0, Origen: cliente, Destino: ''
         };
-        
-        registro.Alertas = calcAlertas(registro);
-        registros.push(registro);
+        reg.Alertas = calcAlertas(reg);
+        regs.push(reg);
     }
-    
-    return registros;
+    return regs;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PROCESADOR: COFCO
-// El más completo en calidad, pesos en TONELADAS
-// ══════════════════════════════════════════════════════════════════════════════
 
 function procesarCOFCO(data) {
-    const registros = [];
-    const headers = data[0] || [];
-    
+    const regs = [], h = data[0] || [];
     for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        // Cultivo
-        const cultivo = normCultivo(getVal(row, headers, 'material', 'producto'));
-        if (!cultivo) continue;
-        
-        // CTG
-        const ctg = normCTG(getVal(row, headers, 'número de ctg', 'numero de ctg', 'ctg'));
-        if (ctg.length !== 11) continue;
-        
-        // Cliente inteligente
-        const titular = getVal(row, headers, 'titular cpe', 'titular');
-        const cliente1 = getVal(row, headers, 'cliente.1', 'cliente 1');
-        const clienteBase = getVal(row, headers, 'cliente');
-        
-        let cliente;
-        if (esLIAG(titular)) {
-            cliente = cliente1 || clienteBase || 'COFCO';
-        } else {
-            cliente = titular || clienteBase || 'COFCO';
-        }
-        const clienteOrig = cliente;
-        cliente = aplicarCorreccion(cliente);
-        
-        // Peso en TONELADAS
-        const pesoTn = parseFloat(getVal(row, headers, 'cantidad neta', 'cant neta')) || 0;
+        const r = data[i]; if (!r?.length) continue;
+        const cultivo = normCultivo(getVal(r,h,'material','producto')); if (!cultivo) continue;
+        const ctg = normCTG(getVal(r,h,'número de ctg','numero de ctg','ctg')); if (ctg.length !== 11) continue;
+        const titular = getVal(r,h,'titular cpe');
+        const cliente1 = getVal(r,h,'cliente.1');
+        let cliente = esLIAG(titular) ? (cliente1 || 'COFCO') : (titular || 'COFCO');
+        const pesoTn = parseFloat(getVal(r,h,'cantidad neta')) || 0;
         const pesoKg = pesoTn * 1000;
-        
-        // Calidad
-        const grado = parseInt(getVal(row, headers, 'grado')) || 0;
-        const pesoHL = parseFloat(getVal(row, headers, 'peso hectolítrico', 'peso hectolitrico', 'ph')) || 0;
-        const humedad = parseFloat(getVal(row, headers, 'humedad')) || 0;
-        const proteina = parseFloat(getVal(row, headers, 'proteinas', 'proteina')) || 0;
-        
-        // Factor (calcular desde PH si no viene)
-        let factor = parseFloat(getVal(row, headers, 'factor')) || 0;
-        if (!factor && pesoHL > 0 && grado > 0) {
-            const bases = {
-                'Trigo': { 1: 78, 2: 76, 3: 75 },
-                'Trigo Candeal': { 1: 80, 2: 78, 3: 76 },
-                'Maíz': { 1: 78, 2: 75, 3: 72 },
-                'Sorgo': { 1: 72, 2: 70, 3: 68 },
-                'Cebada': { 1: 66, 2: 64, 3: 62 }
-            };
-            const tabla = bases[cultivo];
-            if (tabla && tabla[grado]) {
-                factor = parseFloat(((pesoHL / tabla[grado]) * 100).toFixed(2));
-            }
-        }
+        const grado = parseInt(getVal(r,h,'grado')) || 0;
+        const humedad = parseFloat(getVal(r,h,'humedad')) || 0;
+        const proteina = parseFloat(getVal(r,h,'proteinas','proteina')) || 0;
+        const ph = parseFloat(getVal(r,h,'peso hectolítrico','ph')) || 0;
+        let factor = parseFloat(getVal(r,h,'factor')) || 0;
+        if (!factor && ph > 0) factor = 100;
         if (!factor) factor = 100;
-        
-        // Mermas (en toneladas)
-        const zaranda = (parseFloat(getVal(row, headers, 'zaranda')) || 0) * 1000;
-        const volatil = (parseFloat(getVal(row, headers, 'merma volátil', 'merma volatil', 'volatil')) || 0) * 1000;
+        const zaranda = (parseFloat(getVal(r,h,'zaranda')) || 0) * 1000;
+        const volatil = (parseFloat(getVal(r,h,'merma volátil','volatil')) || 0) * 1000;
         const mermaKg = zaranda + volatil;
-        const mermaPct = pesoKg > 0 ? parseFloat(((mermaKg / pesoKg) * 100).toFixed(2)) : 0;
-        
-        const registro = {
-            CTG: ctg,
-            Fecha: normFecha(getVal(row, headers, 'ultima descarga', 'fecha descarga', 'fecha')),
-            Cliente: cliente,
-            ClienteOrig: clienteOrig,
-            Proveedor: 'COFCO',
-            Cultivo: cultivo,
-            Peso_kg: pesoKg,
-            Humedad: humedad,
-            Grado: grado,
-            Factor: factor,
-            VarFactor: parseFloat((factor - 100).toFixed(2)),
-            Zaranda: zaranda,
-            Volatil: volatil,
-            Merma_kg: mermaKg,
-            MermaPct: mermaPct,
-            Proteina: proteina,
-            PesoHL: pesoHL,
-            Origen: String(getVal(row, headers, 'provincia procedencia', 'procedencia') || ''),
-            Destino: String(getVal(row, headers, 'planta', 'destino') || ''),
-            Cosecha: String(getVal(row, headers, 'cosecha') || '')
+        const mermaPct = (pesoKg + mermaKg) > 0 ? parseFloat(((mermaKg / (pesoKg + mermaKg)) * 100).toFixed(2)) : 0;
+        const reg = {
+            CTG: ctg, Fecha: normFecha(getVal(r,h,'ultima descarga','fecha')), Cliente: cliente, ClienteOrig: cliente,
+            Proveedor: 'COFCO', Cultivo: cultivo, Campaña: normCampaña(getVal(r,h,'cosecha')),
+            Peso_kg: pesoKg, Humedad: humedad, Grado: grado, Factor: factor,
+            Zaranda: zaranda, Volatil: volatil, Merma_kg: mermaKg, MermaPct: mermaPct,
+            GranoVerde: 0, Proteina: proteina, PesoHL: ph, Origen: '', Destino: String(getVal(r,h,'planta') || '')
         };
-        
-        registro.Alertas = calcAlertas(registro);
-        registros.push(registro);
+        reg.Alertas = calcAlertas(reg);
+        regs.push(reg);
     }
-    
-    return registros;
+    return regs;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PROCESADOR: LDC (Louis Dreyfus)
-// Pesos en TONELADAS, cliente desde procedencia
-// ══════════════════════════════════════════════════════════════════════════════
 
 function procesarLDC(data) {
-    const registros = [];
-    const headers = data[0] || [];
-    
+    const regs = [], h = data[0] || [];
     for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        // Cultivo
-        const cultivo = normCultivo(getVal(row, headers, 'producto', 'material'));
-        if (!cultivo) continue;
-        
-        // CTG
-        const ctg = normCTG(getVal(row, headers, 'ctg'));
-        if (ctg.length !== 11) continue;
-        
-        // Cliente (quitar prefijo "-")
-        let cliente = String(getVal(row, headers, 'procedencia') || '').trim();
-        if (cliente.startsWith('-')) cliente = cliente.substring(1).trim();
-        const clienteOrig = cliente;
+        const r = data[i]; if (!r?.length) continue;
+        const cultivo = normCultivo(getVal(r,h,'producto','material')); if (!cultivo) continue;
+        const ctg = normCTG(getVal(r,h,'ctg')); if (ctg.length !== 11) continue;
+        let cliente = String(getVal(r,h,'procedencia') || '').replace(/^-/,'').trim();
         if (!cliente || esLIAG(cliente)) cliente = 'LDC';
-        cliente = aplicarCorreccion(cliente);
-        
-        // Peso en TONELADAS
-        const pesoTn = parseFloat(getVal(row, headers, 'cant. neta', 'cant neta', 'cantidad neta')) || 0;
+        const pesoTn = parseFloat(getVal(r,h,'cant. neta','cant neta')) || 0;
         const pesoKg = pesoTn * 1000;
-        
-        // Calidad
-        const grado = parseInt(getVal(row, headers, 'grado')) || 0;
-        const factor = parseFloat(getVal(row, headers, 'factor')) || 100;
-        const humedad = parseFloat(getVal(row, headers, 'humedad')) || 0;
-        const proteina = parseFloat(getVal(row, headers, 'proteina')) || 0;
-        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph')) || 0;
-        
-        // Mermas (en toneladas)
-        const zaranda = (parseFloat(getVal(row, headers, 'zaranda')) || 0) * 1000;
-        const volatil = (parseFloat(getVal(row, headers, 'volatil', 'volátil')) || 0) * 1000;
+        const grado = parseInt(getVal(r,h,'grado')) || 0;
+        const factor = parseFloat(getVal(r,h,'factor')) || 100;
+        const humedad = parseFloat(getVal(r,h,'humedad')) || 0;
+        const proteina = parseFloat(getVal(r,h,'proteina')) || 0;
+        const ph = parseFloat(getVal(r,h,'peso hectolitrico','ph')) || 0;
+        const zaranda = (parseFloat(getVal(r,h,'zaranda')) || 0) * 1000;
+        const volatil = (parseFloat(getVal(r,h,'volatil')) || 0) * 1000;
         const mermaKg = zaranda + volatil;
-        const mermaPct = pesoKg > 0 ? parseFloat(((mermaKg / pesoKg) * 100).toFixed(2)) : 0;
-        
-        const registro = {
-            CTG: ctg,
-            Fecha: normFecha(getVal(row, headers, 'fecha movimiento', 'fecha')),
-            Cliente: cliente,
-            ClienteOrig: clienteOrig,
-            Proveedor: 'LDC',
-            Cultivo: cultivo,
-            Peso_kg: pesoKg,
-            Humedad: humedad,
-            Grado: grado,
-            Factor: factor,
-            VarFactor: parseFloat((factor - 100).toFixed(2)),
-            Zaranda: zaranda,
-            Volatil: volatil,
-            Merma_kg: mermaKg,
-            MermaPct: mermaPct,
-            Proteina: proteina,
-            PesoHL: ph,
-            Origen: cliente,
-            Destino: String(getVal(row, headers, 'puerto', 'destino') || ''),
-            Cosecha: String(getVal(row, headers, 'cosecha') || '')
+        const mermaPct = (pesoKg + mermaKg) > 0 ? parseFloat(((mermaKg / (pesoKg + mermaKg)) * 100).toFixed(2)) : 0;
+        const reg = {
+            CTG: ctg, Fecha: normFecha(getVal(r,h,'fecha movimiento','fecha')), Cliente: cliente, ClienteOrig: cliente,
+            Proveedor: 'LDC', Cultivo: cultivo, Campaña: normCampaña(getVal(r,h,'cosecha')),
+            Peso_kg: pesoKg, Humedad: humedad, Grado: grado, Factor: factor,
+            Zaranda: zaranda, Volatil: volatil, Merma_kg: mermaKg, MermaPct: mermaPct,
+            GranoVerde: 0, Proteina: proteina, PesoHL: ph, Origen: cliente, Destino: String(getVal(r,h,'puerto') || '')
         };
-        
-        registro.Alertas = calcAlertas(registro);
-        registros.push(registro);
+        reg.Alertas = calcAlertas(reg);
+        regs.push(reg);
     }
-    
-    return registros;
+    return regs;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PROCESADOR: FYO
-// Estructura por índice de columna, pesos en KG
-// ══════════════════════════════════════════════════════════════════════════════
 
 function procesarFYO(data) {
-    const registros = [];
-    
+    const regs = [];
     for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        // CTG en columna 1
-        const ctg = normCTG(row[1]);
-        if (ctg.length !== 11) continue;
-        
-        // Peso en columna 4 (ya en KG)
-        const pesoKg = parseFloat(row[4]) || 0;
-        if (pesoKg <= 0) continue;
-        
-        // Grado y Factor
-        const grado = parseInt(row[10]) || 0;
-        const factor = parseFloat(row[11]) || 100;
-        
-        // Vendedor (col 5) y Comprador (col 6)
-        const vendedor = String(row[5] || '').trim();
-        const comprador = String(row[6] || '').trim();
-        
-        // Si vendedor es LIAG, el cliente es el comprador
+        const r = data[i]; if (!r?.length) continue;
+        const ctg = normCTG(r[1]); if (ctg.length !== 11) continue;
+        const pesoKg = parseFloat(r[4]) || 0; if (pesoKg <= 0) continue;
+        const grado = parseInt(r[10]) || 0;
+        const factor = parseFloat(r[11]) || 100;
+        const vendedor = String(r[5] || '').trim();
+        const comprador = String(r[6] || '').trim();
         let cliente = esLIAG(vendedor) ? comprador : vendedor;
-        const clienteOrig = cliente;
         if (!cliente) cliente = 'FYO';
-        cliente = aplicarCorreccion(cliente);
-        
-        // Humedad en columna 16
-        const humRaw = String(row[16] || '0');
-        const humedad = parseFloat(humRaw.replace(',', '.')) || 0;
-        
-        const registro = {
-            CTG: ctg,
-            Fecha: normFecha(row[3]),
-            Cliente: cliente,
-            ClienteOrig: clienteOrig,
-            Proveedor: 'FYO',
-            Cultivo: 'Soja',
-            Peso_kg: pesoKg,
-            Humedad: humedad,
-            Grado: grado,
-            Factor: factor,
-            VarFactor: parseFloat((factor - 100).toFixed(2)),
-            Zaranda: 0,
-            Volatil: 0,
-            Merma_kg: 0,
-            MermaPct: 0,
-            Proteina: 0,
-            PesoHL: 0,
-            Origen: String(row[7] || ''),
-            Destino: comprador,
-            Cosecha: ''
+        const humedad = parseFloat(String(r[16] || '0').replace(',','.')) || 0;
+        const reg = {
+            CTG: ctg, Fecha: normFecha(r[3]), Cliente: cliente, ClienteOrig: cliente,
+            Proveedor: 'FYO', Cultivo: 'Soja', Campaña: '',
+            Peso_kg: pesoKg, Humedad: humedad, Grado: grado, Factor: factor,
+            Zaranda: 0, Volatil: 0, Merma_kg: 0, MermaPct: 0,
+            GranoVerde: 0, Proteina: 0, PesoHL: 0, Origen: '', Destino: comprador
         };
-        
-        registro.Alertas = calcAlertas(registro);
-        registros.push(registro);
+        reg.Alertas = calcAlertas(reg);
+        regs.push(reg);
     }
-    
-    return registros;
+    return regs;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// MANEJO DE ARCHIVOS
-// ══════════════════════════════════════════════════════════════════════════════
-
-/**
- * Lee un archivo Excel y retorna datos como array
- */
+// ═══ Archivos ═══
 function leerArchivo(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        
         reader.onload = (e) => {
             try {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { 
-                    type: 'array', 
-                    cellDates: true,
-                    dateNF: 'yyyy-mm-dd'
-                });
-                
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-                    header: 1, 
-                    raw: false,
-                    dateNF: 'yyyy-mm-dd'
-                });
-                
-                resolve(jsonData);
-            } catch (err) {
-                console.error('Error leyendo archivo:', file.name, err);
-                reject(err);
-            }
+                const wb = XLSX.read(data, {type:'array', cellDates:true});
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                resolve(XLSX.utils.sheet_to_json(ws, {header:1, raw:false}));
+            } catch (err) { reject(err); }
         };
-        
-        reader.onerror = () => reject(new Error('Error leyendo archivo'));
+        reader.onerror = () => reject(new Error('Error leyendo'));
         reader.readAsArrayBuffer(file);
     });
 }
 
-/**
- * Procesa múltiples archivos
- */
 async function handleFiles(files) {
-    if (!files || files.length === 0) return;
-    
-    showLoading('Procesando archivos...');
-    
+    if (!files?.length) return;
+    showLoading('Procesando...');
     try {
-        // CTGs existentes para evitar duplicados
-        const ctgsExistentes = new Set(STATE.cartas.map(c => c.CTG));
-        let totalNuevos = 0;
-        
+        const existentes = new Set(STATE.cartas.map(c => c.CTG));
+        let total = 0;
         for (const file of files) {
-            setLoadingText(`Leyendo ${file.name}...`);
             const data = await leerArchivo(file);
-            
-            const proveedor = detectarProveedor(file.name);
-            setLoadingText(`Procesando ${proveedor}...`);
-            
-            let registros = [];
-            switch (proveedor) {
-                case 'Cargill': registros = procesarCargill(data); break;
-                case 'ACA': registros = procesarACA(data); break;
-                case 'COFCO': registros = procesarCOFCO(data); break;
-                case 'LDC': registros = procesarLDC(data); break;
-                case 'FYO': registros = procesarFYO(data); break;
-                default:
-                    console.warn('Proveedor no reconocido:', proveedor);
-                    toast(`Proveedor "${proveedor}" no soportado`, 'warning');
-                    continue;
+            const prov = detectarProveedor(file.name);
+            let regs = [];
+            switch(prov) {
+                case 'Cargill': regs = procesarCargill(data); break;
+                case 'ACA': regs = procesarACA(data); break;
+                case 'COFCO': regs = procesarCOFCO(data); break;
+                case 'LDC': regs = procesarLDC(data); break;
+                case 'FYO': regs = procesarFYO(data); break;
+                default: toast(`Proveedor "${prov}" no soportado`, 'warning'); continue;
             }
-            
-            // Filtrar duplicados
-            const nuevos = registros.filter(r => !ctgsExistentes.has(r.CTG));
-            nuevos.forEach(r => ctgsExistentes.add(r.CTG));
-            
-            if (nuevos.length > 0) {
-                setLoadingText(`Guardando ${nuevos.length} cartas de ${proveedor}...`);
-                await dbGuardarCartas(nuevos);
+            const nuevos = regs.filter(r => !existentes.has(r.CTG));
+            nuevos.forEach(r => existentes.add(r.CTG));
+            if (nuevos.length) {
+                await dbGuardar(nuevos);
                 STATE.cartas.push(...nuevos);
-                totalNuevos += nuevos.length;
-                
-                console.log(`✓ ${proveedor}: ${nuevos.length} nuevas (${registros.length - nuevos.length} duplicadas)`);
-            } else {
-                console.log(`✓ ${proveedor}: 0 nuevas (${registros.length} duplicadas)`);
+                total += nuevos.length;
             }
         }
-        
         hideLoading();
-        
-        if (totalNuevos > 0) {
-            toast(`${totalNuevos} cartas nuevas agregadas`, 'success');
-            await refreshUI();
-        } else {
-            toast('No se encontraron cartas nuevas', 'warning');
-        }
-        
-    } catch (err) {
-        hideLoading();
-        console.error('Error procesando archivos:', err);
-        toast('Error al procesar archivos', 'error');
-    }
+        if (total) { toast(`${total} cartas agregadas`); await refreshUI(); }
+        else toast('Sin cartas nuevas', 'warning');
+    } catch (err) { hideLoading(); console.error(err); toast('Error procesando', 'error'); }
 }
 
-console.log('✅ Parte 3 cargada: Procesadores de Proveedores');
-
-// ╔════════════════════════════════════════════════════════════════════════════╗
-// ║  LIAG v7.0 - PARTE 4: UI, Renderizado y Gráficos                           ║
-// ╚════════════════════════════════════════════════════════════════════════════╝
-
-// ══════════════════════════════════════════════════════════════════════════════
-// ACTUALIZACIÓN DE UI PRINCIPAL
-// ══════════════════════════════════════════════════════════════════════════════
-
-/**
- * Refresca toda la UI después de cargar datos
- */
+// ═══ UI ═══
 async function refreshUI() {
-    const count = STATE.cartas.length;
-    
-    // Actualizar indicadores de BD
-    document.getElementById('dbCount').textContent = `${formatNum(count)} cartas`;
-    document.getElementById('cartasCount').textContent = count;
-    
-    // Mostrar/ocultar elementos
-    const hasData = count > 0;
-    document.getElementById('uploadZone').style.display = hasData ? 'none' : 'block';
-    document.getElementById('mainContent').style.display = hasData ? 'grid' : 'none';
-    
-    if (!hasData) return;
-    
-    // Actualizar todas las secciones
+    const n = STATE.cartas.length;
+    document.getElementById('dbCount').textContent = `${formatNum(n)} cartas`;
+    document.getElementById('cartasCount').textContent = n;
+    document.getElementById('uploadZone').style.display = n ? 'none' : 'block';
+    document.getElementById('mainContent').style.display = n ? 'grid' : 'none';
+    if (!n) return;
     updateStats();
     updateQuality();
     updateRanking();
     updateAlertas();
     updateEvolucion();
     updateFilters();
-    
-    // Cargar página actual si corresponde
-    const activePage = document.querySelector('.nav-item.active')?.dataset.page;
-    if (activePage === 'proveedores') renderProveedores();
-    if (activePage === 'clientes') renderClientes();
-    if (activePage === 'analisis') updateAnalisis();
-    if (activePage === 'cartas') aplicarFiltrosCartas();
 }
 
-/**
- * Actualiza estadísticas principales
- */
 function updateStats() {
-    const cartas = STATE.cartas;
-    
-    const peso = cartas.reduce((s, c) => s + (c.Peso_kg || 0), 0);
-    const provs = [...new Set(cartas.map(c => c.Proveedor))].length;
-    const clientes = [...new Set(cartas.map(c => c.Cliente))].filter(c => c).length;
-    const alertas = cartas.filter(c => c.Alertas?.length > 0).length;
-    
-    document.getElementById('statCartas').textContent = formatNum(cartas.length);
+    const c = STATE.cartas;
+    const peso = c.reduce((s,x) => s + (x.Peso_kg||0), 0);
+    const merma = c.reduce((s,x) => s + (x.Merma_kg||0), 0);
+    const provs = [...new Set(c.map(x => x.Proveedor))].length;
+    const alertas = c.filter(x => x.Alertas?.length).length;
+    document.getElementById('statCartas').textContent = formatNum(c.length);
     document.getElementById('statPeso').textContent = formatNum(peso);
+    document.getElementById('statMerma').textContent = formatNum(merma);
     document.getElementById('statProvs').textContent = provs;
-    document.getElementById('statClientes').textContent = clientes;
-    
-    // Mostrar card de alertas solo si hay
-    const alertasCard = document.getElementById('statAlertasCard');
-    if (alertas > 0) {
-        alertasCard.style.display = 'block';
-        document.getElementById('statAlertas').textContent = alertas;
-    } else {
-        alertasCard.style.display = 'none';
-    }
+    const ac = document.getElementById('statAlertasCard');
+    if (alertas) { ac.style.display = 'block'; document.getElementById('statAlertas').textContent = alertas; }
+    else ac.style.display = 'none';
 }
 
-/**
- * Actualiza panel de calidad consolidada
- */
 function updateQuality() {
-    const cartas = STATE.cartas;
-    if (!cartas.length) return;
-    
-    // Factor
-    const factorProm = cartas.reduce((s, c) => s + (c.Factor || 100), 0) / cartas.length;
-    const elFactor = document.getElementById('qFactor');
-    elFactor.textContent = factorProm.toFixed(2) + '%';
-    elFactor.className = 'quality-value ' + (factorProm >= 100 ? 'good' : factorProm >= 98 ? '' : 'danger');
-    
-    // Humedad
-    const humRegs = cartas.filter(c => c.Humedad > 0);
-    const humProm = humRegs.length ? humRegs.reduce((s, c) => s + c.Humedad, 0) / humRegs.length : 0;
-    const elHum = document.getElementById('qHumedad');
-    elHum.textContent = humProm.toFixed(1) + '%';
-    elHum.className = 'quality-value ' + (humProm <= 14 ? 'good' : humProm <= 15.5 ? 'warning' : 'danger');
-    
-    // Proteína (mostrar solo si hay datos)
-    const protRegs = cartas.filter(c => c.Proteina > 0);
-    const protRow = document.getElementById('qProtRow');
-    if (protRegs.length > 0) {
-        const protProm = protRegs.reduce((s, c) => s + c.Proteina, 0) / protRegs.length;
-        protRow.style.display = 'flex';
-        document.getElementById('qProteina').textContent = protProm.toFixed(1) + '%';
-    } else {
-        protRow.style.display = 'none';
-    }
-    
-    // Peso Hectolítrico (mostrar solo si hay datos)
-    const phRegs = cartas.filter(c => c.PesoHL > 0);
-    const phRow = document.getElementById('qPHRow');
-    if (phRegs.length > 0) {
-        const phProm = phRegs.reduce((s, c) => s + c.PesoHL, 0) / phRegs.length;
-        phRow.style.display = 'flex';
-        document.getElementById('qPH').textContent = phProm.toFixed(1) + ' kg/hl';
-    } else {
-        phRow.style.display = 'none';
-    }
-    
-    // Merma
-    const mermaProm = cartas.reduce((s, c) => s + (c.MermaPct || 0), 0) / cartas.length;
-    const elMerma = document.getElementById('qMerma');
-    elMerma.textContent = mermaProm.toFixed(2) + '%';
-    elMerma.className = 'quality-value ' + (mermaProm <= 2 ? 'good' : mermaProm <= 4 ? 'warning' : 'danger');
-    
-    // Grado predominante
-    const grados = { 0: 0, 1: 0, 2: 0, 3: 0 };
-    cartas.forEach(c => grados[c.Grado || 0]++);
-    const gradoMax = Object.entries(grados).filter(([g]) => g !== '0').sort((a, b) => b[1] - a[1])[0];
-    document.getElementById('qGrado').textContent = gradoMax ? `Grado ${gradoMax[0]} (${gradoMax[1]})` : 'Sin datos';
+    const c = STATE.cartas; if (!c.length) return;
+    const fp = c.reduce((s,x) => s + (x.Factor||100), 0) / c.length;
+    const el1 = document.getElementById('qFactor');
+    el1.textContent = fp.toFixed(2) + '%';
+    el1.className = 'quality-value ' + (fp >= 100 ? 'good' : fp >= 98 ? '' : 'danger');
+    const hr = c.filter(x => x.Humedad > 0);
+    const hp = hr.length ? hr.reduce((s,x) => s + x.Humedad, 0) / hr.length : 0;
+    const el2 = document.getElementById('qHumedad');
+    el2.textContent = hp.toFixed(1) + '%';
+    el2.className = 'quality-value ' + (hp <= 14 ? 'good' : hp <= 15.5 ? 'warning' : 'danger');
+    const mp = c.reduce((s,x) => s + (x.MermaPct||0), 0) / c.length;
+    const el3 = document.getElementById('qMerma');
+    el3.textContent = mp.toFixed(2) + '%';
+    el3.className = 'quality-value ' + (mp <= 5 ? 'good' : mp <= 15 ? 'warning' : 'danger');
+    const gs = {1:0, 2:0, 3:0};
+    c.forEach(x => { if (x.Grado) gs[x.Grado]++; });
+    const gm = Object.entries(gs).sort((a,b) => b[1]-a[1])[0];
+    document.getElementById('qGrado').textContent = gm && gm[1] ? `G${gm[0]} (${gm[1]})` : '-';
 }
 
-/**
- * Actualiza ranking de clientes (Cargill, ACA, COFCO, etc)
- */
 function updateRanking() {
     const metric = document.getElementById('rankingMetric')?.value || 'factor';
     const stats = {};
-    
-    // Agrupar por Proveedor (que son los CLIENTES)
     STATE.cartas.forEach(c => {
-        if (!stats[c.Proveedor]) {
-            stats[c.Proveedor] = { cartas: 0, peso: 0, factor: 0, mermaKg: 0 };
-        }
-        stats[c.Proveedor].cartas++;
+        if (!stats[c.Proveedor]) stats[c.Proveedor] = {n:0, peso:0, factor:0, merma:0};
+        stats[c.Proveedor].n++;
         stats[c.Proveedor].peso += c.Peso_kg || 0;
         stats[c.Proveedor].factor += c.Factor || 100;
-        stats[c.Proveedor].mermaKg += c.Merma_kg || 0;
+        stats[c.Proveedor].merma += c.Merma_kg || 0;
     });
-    
-    const lista = Object.entries(stats).map(([cli, s]) => ({
-        nombre: cli,
-        cartas: s.cartas,
-        peso: s.peso,
-        factor: s.factor / s.cartas,
-        mermaKg: s.mermaKg
-    }));
-    
-    // Ordenar según métrica
-    if (metric === 'factor') lista.sort((a, b) => b.factor - a.factor);
-    else if (metric === 'peso') lista.sort((a, b) => b.peso - a.peso);
-    else lista.sort((a, b) => b.cartas - a.cartas);
-    
-    // Calcular máximo para barras
-    const maxVal = metric === 'factor' ? 105 : 
-                   Math.max(...lista.map(l => metric === 'peso' ? l.peso : l.cartas));
-    
-    const container = document.getElementById('rankingList');
-    container.innerHTML = lista.slice(0, 6).map((p, i) => {
-        const val = metric === 'factor' ? p.factor.toFixed(2) + '%' :
-                    metric === 'peso' ? formatNum(p.peso) + ' kg' : 
-                    p.cartas + ' cartas';
-        const pct = metric === 'factor' ? (p.factor / 105) * 100 :
-                    (metric === 'peso' ? p.peso : p.cartas) / maxVal * 100;
-        
-        return `
-            <div class="ranking-item">
-                <div class="ranking-pos">${i + 1}</div>
-                <div class="ranking-name">${p.nombre}</div>
-                <div class="ranking-value">${val}</div>
-                <div class="ranking-bar"><div class="ranking-bar-fill" style="width:${Math.min(pct, 100)}%"></div></div>
-            </div>
-        `;
+    const list = Object.entries(stats).map(([p,s]) => ({nombre:p, n:s.n, peso:s.peso, factor:s.factor/s.n, merma:s.merma}));
+    if (metric === 'factor') list.sort((a,b) => b.factor - a.factor);
+    else list.sort((a,b) => b.peso - a.peso);
+    const max = metric === 'factor' ? 105 : Math.max(...list.map(l => l.peso));
+    document.getElementById('rankingList').innerHTML = list.slice(0,5).map((p,i) => {
+        const val = metric === 'factor' ? p.factor.toFixed(2)+'%' : formatNum(p.peso)+' kg';
+        const pct = metric === 'factor' ? (p.factor/105)*100 : (p.peso/max)*100;
+        return `<div class="ranking-item"><div class="ranking-pos">${i+1}</div><div class="ranking-name">${p.nombre}</div><div class="ranking-value">${val}</div><div class="ranking-bar"><div class="ranking-bar-fill" style="width:${Math.min(pct,100)}%"></div></div></div>`;
     }).join('');
 }
 
-/**
- * Actualiza banner y lista de alertas
- */
 function updateAlertas() {
-    const criticas = STATE.cartas.filter(c => c.Alertas?.some(a => a.tipo === 'critical'));
-    const banner = document.getElementById('alertBanner');
-    const actionsList = document.getElementById('actionsList');
-    
-    if (criticas.length === 0) {
-        banner.classList.remove('show');
-        actionsList.innerHTML = `
-            <div class="action-item">
-                <div class="action-icon success">✅</div>
-                <div class="action-content">
-                    <div class="action-title">Sin alertas críticas</div>
-                    <div class="action-desc">Todas las cartas dentro de parámetros normales</div>
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    banner.classList.add('show');
-    
-    // Items de alerta en el banner
-    const alertItems = criticas.slice(0, 8).map(c => {
-        const msg = c.Alertas.find(a => a.tipo === 'critical')?.msg || 'Alerta';
-        return `<div class="alert-item critical" onclick="buscarCarta('${c.CTG}')">${c.CTG.slice(-6)} - ${msg}</div>`;
-    });
-    
-    if (criticas.length > 8) {
-        alertItems.push(`<div class="alert-item">+${criticas.length - 8} más...</div>`);
-    }
-    document.getElementById('alertItems').innerHTML = alertItems.join('');
-    
-    // Acciones recomendadas agrupadas por proveedor
+    const crit = STATE.cartas.filter(c => c.Alertas?.some(a => a.tipo === 'critical'));
+    const al = document.getElementById('actionsList');
+    if (!crit.length) { al.innerHTML = '<div class="action-item"><div class="action-icon success">✅</div><div><div class="action-title">Sin alertas críticas</div></div></div>'; return; }
     const porProv = {};
-    criticas.forEach(c => {
-        porProv[c.Proveedor] = (porProv[c.Proveedor] || 0) + 1;
-    });
-    
-    actionsList.innerHTML = Object.entries(porProv)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 4)
-        .map(([prov, count]) => `
-            <div class="action-item">
-                <div class="action-icon danger">⚠️</div>
-                <div class="action-content">
-                    <div class="action-title">Revisar ${count} carta(s) de ${prov}</div>
-                    <div class="action-desc">Factor bajo o humedad crítica</div>
-                </div>
-            </div>
-        `).join('');
+    crit.forEach(c => { porProv[c.Proveedor] = (porProv[c.Proveedor]||0) + 1; });
+    al.innerHTML = Object.entries(porProv).sort((a,b) => b[1]-a[1]).slice(0,4).map(([p,n]) =>
+        `<div class="action-item"><div class="action-icon danger">⚠️</div><div><div class="action-title">Revisar ${n} carta(s) de ${p}</div><div class="action-desc">Factor bajo o humedad crítica</div></div></div>`
+    ).join('');
 }
 
-/**
- * Actualiza gráfico de evolución
- */
 function updateEvolucion() {
-    const ctx = document.getElementById('chartEvolucion');
-    if (!ctx) return;
-    
-    if (STATE.charts.evolucion) STATE.charts.evolucion.destroy();
-    
-    // Agrupar por fecha
+    const ctx = document.getElementById('chartEvolucion'); if (!ctx) return;
+    if (STATE.charts.evo) STATE.charts.evo.destroy();
     const porFecha = {};
-    STATE.cartas.forEach(c => {
-        if (c.Fecha) {
-            porFecha[c.Fecha] = (porFecha[c.Fecha] || 0) + (c.Peso_kg || 0);
-        }
-    });
-    
-    // Ordenar fechas y tomar últimas 30
-    const fechas = Object.keys(porFecha).sort((a, b) => {
-        const [dA, mA, yA] = a.split('/');
-        const [dB, mB, yB] = b.split('/');
-        return new Date(yA, mA - 1, dA) - new Date(yB, mB - 1, dB);
+    STATE.cartas.forEach(c => { if (c.Fecha) porFecha[c.Fecha] = (porFecha[c.Fecha]||0) + (c.Peso_kg||0); });
+    const fechas = Object.keys(porFecha).sort((a,b) => {
+        const [da,ma,ya] = a.split('/'), [db,mb,yb] = b.split('/');
+        return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
     }).slice(-30);
-    
-    STATE.charts.evolucion = new Chart(ctx, {
+    STATE.charts.evo = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: fechas.map(f => f.slice(0, 5)),
-            datasets: [{
-                label: 'Peso (kg)',
-                data: fechas.map(f => porFecha[f]),
-                borderColor: '#2E7D32',
-                backgroundColor: 'rgba(46,125,50,0.1)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 3,
-                pointBackgroundColor: '#2E7D32'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } },
-                y: { grid: { color: '#E0E0E0' }, ticks: { callback: v => formatNum(v / 1000) + 't' } }
-            }
-        }
+        data: { labels: fechas.map(f => f.slice(0,5)), datasets: [{label:'Peso', data: fechas.map(f => porFecha[f]), borderColor:'#2E7D32', backgroundColor:'rgba(46,125,50,0.1)', fill:true, tension:0.3}] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{ticks:{callback:v => formatNum(v/1000)+'t'}}} }
     });
 }
 
-/**
- * Actualiza selectores de filtros
- */
 function updateFilters() {
-    const proveedores = [...new Set(STATE.cartas.map(c => c.Proveedor))].sort();
-    const clientes = [...new Set(STATE.cartas.map(c => c.Cliente))].filter(c => c).sort();
-    const cultivos = [...new Set(STATE.cartas.map(c => c.Cultivo))].filter(c => c).sort();
-    
-    // Filtros página cartas
-    updateSelect('cfProv', proveedores);
-    updateSelect('cfCliente', clientes);
-    updateSelect('cfCultivo', cultivos);
-    
-    // Filtros página análisis
-    updateSelect('afProv', proveedores);
-    updateSelect('afCult', cultivos);
-    updateSelect('afCli', clientes);
+    const provs = [...new Set(STATE.cartas.map(c => c.Proveedor))].sort();
+    const cults = [...new Set(STATE.cartas.map(c => c.Cultivo))].filter(c => c).sort();
+    ['cfProv','afProv'].forEach(id => { const s = document.getElementById(id); if (s) s.innerHTML = '<option value="">Todos</option>' + provs.map(p => `<option>${p}</option>`).join(''); });
+    ['cfCultivo','afCult'].forEach(id => { const s = document.getElementById(id); if (s) s.innerHTML = '<option value="">Todos</option>' + cults.map(c => `<option>${c}</option>`).join(''); });
 }
 
-function updateSelect(id, options) {
-    const select = document.getElementById(id);
-    if (!select) return;
-    const val = select.value;
-    select.innerHTML = '<option value="">Todos</option>' + 
-        options.map(o => `<option value="${o}">${o}</option>`).join('');
-    select.value = val;
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PÁGINA: PROVEEDORES
-// ══════════════════════════════════════════════════════════════════════════════
-
-function renderProveedores() {
-    const stats = {};
-    
-    STATE.cartas.forEach(c => {
-        if (!stats[c.Proveedor]) {
-            stats[c.Proveedor] = {
-                cartas: 0, peso: 0, factor: 0, hum: 0,
-                prot: 0, protN: 0, ph: 0, phN: 0,
-                merma: 0, alertas: 0
-            };
-        }
-        const s = stats[c.Proveedor];
-        s.cartas++;
-        s.peso += c.Peso_kg || 0;
-        s.factor += c.Factor || 100;
-        s.hum += c.Humedad || 0;
-        s.merma += c.MermaPct || 0;
-        if (c.Proteina > 0) { s.prot += c.Proteina; s.protN++; }
-        if (c.PesoHL > 0) { s.ph += c.PesoHL; s.phN++; }
-        if (c.Alertas?.length) s.alertas++;
-    });
-    
-    const tbody = document.getElementById('tbodyProveedores');
-    tbody.innerHTML = Object.entries(stats).map(([prov, s]) => {
-        const factorProm = s.factor / s.cartas;
-        const factorClass = factorProm >= 100 ? 'cell-good' : factorProm >= 98 ? '' : 'cell-danger';
-        
-        return `
-            <tr>
-                <td><span class="badge badge-prov">${prov}</span></td>
-                <td class="cell-mono">${formatNum(s.cartas)}</td>
-                <td class="cell-mono">${formatNum(s.peso)}</td>
-                <td class="cell-mono ${factorClass}">${factorProm.toFixed(2)}%</td>
-                <td class="cell-mono">${(s.hum / s.cartas).toFixed(1)}%</td>
-                <td class="cell-mono">${s.protN > 0 ? (s.prot / s.protN).toFixed(1) + '%' : '-'}</td>
-                <td class="cell-mono">${s.phN > 0 ? (s.ph / s.phN).toFixed(1) : '-'}</td>
-                <td class="cell-mono">${(s.merma / s.cartas).toFixed(2)}%</td>
-                <td>${s.alertas > 0 ? `<span class="badge badge-g3">${s.alertas}</span>` : '<span class="cell-good">✓</span>'}</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PÁGINA: CLIENTES (Cargill, ACA, COFCO, LDC, FYO - quienes reciben mercadería)
-// ══════════════════════════════════════════════════════════════════════════════
-
+// ═══ Clientes ═══
 function renderClientes() {
     const stats = {};
-    
-    // Agrupar por "Proveedor" que en realidad son los CLIENTES (Cargill, ACA, etc)
     STATE.cartas.forEach(c => {
-        const cli = c.Proveedor || 'Sin cliente';
-        if (!stats[cli]) {
-            stats[cli] = {
-                cartas: 0, peso: 0, factor: 0, hum: 0, humN: 0,
-                prot: 0, protN: 0, ph: 0, phN: 0,
-                mermaKg: 0, alertas: 0, ultima: ''
-            };
-        }
-        const s = stats[cli];
-        s.cartas++;
-        s.peso += c.Peso_kg || 0;
-        s.factor += c.Factor || 100;
-        if (c.Humedad > 0) { s.hum += c.Humedad; s.humN++; }
-        if (c.Proteina > 0) { s.prot += c.Proteina; s.protN++; }
-        if (c.PesoHL > 0) { s.ph += c.PesoHL; s.phN++; }
-        s.mermaKg += c.Merma_kg || 0;
-        if (c.Alertas?.length) s.alertas++;
-        if (!s.ultima || c.Fecha > s.ultima) s.ultima = c.Fecha;
+        const p = c.Proveedor;
+        if (!stats[p]) stats[p] = {n:0, peso:0, factor:0, hum:0, humN:0, merma:0, alertas:0, ult:''};
+        stats[p].n++;
+        stats[p].peso += c.Peso_kg || 0;
+        stats[p].factor += c.Factor || 100;
+        if (c.Humedad > 0) { stats[p].hum += c.Humedad; stats[p].humN++; }
+        stats[p].merma += c.Merma_kg || 0;
+        if (c.Alertas?.length) stats[p].alertas++;
+        if (!stats[p].ult || c.Fecha > stats[p].ult) stats[p].ult = c.Fecha;
     });
-    
-    // Filtrar por búsqueda
     const buscar = (document.getElementById('searchCliente')?.value || '').toLowerCase();
-    const filtrados = Object.entries(stats)
-        .filter(([cli]) => cli.toLowerCase().includes(buscar))
-        .sort((a, b) => b[1].peso - a[1].peso);
-    
-    // Calcular merma % sobre total
-    const calcMermaPct = (s) => {
-        const bruto = s.peso + s.mermaKg;
-        return bruto > 0 ? ((s.mermaKg / bruto) * 100) : 0;
-    };
-    
-    const tbody = document.getElementById('tbodyClientes');
-    tbody.innerHTML = filtrados.map(([cli, s]) => {
-        const factorProm = s.factor / s.cartas;
-        const factorClass = factorProm >= 100 ? 'cell-good' : factorProm >= 98 ? '' : 'cell-danger';
-        const mermaPct = calcMermaPct(s);
-        const mermaClass = mermaPct <= 5 ? 'cell-good' : mermaPct <= 15 ? 'cell-warning' : 'cell-danger';
-        
-        return `
-            <tr>
-                <td><span class="badge badge-prov">${cli}</span></td>
-                <td class="cell-mono">${formatNum(s.cartas)}</td>
-                <td class="cell-mono">${formatNum(s.peso)}</td>
-                <td class="cell-mono ${factorClass}">${factorProm.toFixed(2)}%</td>
-                <td class="cell-mono">${s.humN > 0 ? (s.hum / s.humN).toFixed(1) + '%' : '-'}</td>
-                <td class="cell-mono">${s.protN > 0 ? (s.prot / s.protN).toFixed(1) + '%' : '-'}</td>
-                <td class="cell-mono">${s.phN > 0 ? (s.ph / s.phN).toFixed(1) : '-'}</td>
-                <td class="cell-mono">${formatNum(s.mermaKg)}</td>
-                <td class="cell-mono ${mermaClass}">${mermaPct.toFixed(2)}%</td>
-                <td>${s.alertas > 0 ? `<span class="badge badge-g3">${s.alertas}</span>` : '<span class="cell-good">✓</span>'}</td>
-                <td class="cell-mono">${s.ultima || '-'}</td>
-            </tr>
-        `;
+    const filt = Object.entries(stats).filter(([p]) => p.toLowerCase().includes(buscar)).sort((a,b) => b[1].peso - a[1].peso);
+    document.getElementById('tbodyClientes').innerHTML = filt.map(([p,s]) => {
+        const fp = s.factor / s.n;
+        const hp = s.humN ? s.hum / s.humN : 0;
+        const mp = (s.peso + s.merma) > 0 ? (s.merma / (s.peso + s.merma)) * 100 : 0;
+        return `<tr><td><span class="badge badge-prov">${p}</span></td><td class="cell-mono">${formatNum(s.n)}</td><td class="cell-mono">${formatNum(s.peso)}</td><td class="cell-mono ${fp>=100?'cell-good':fp>=98?'':'cell-danger'}">${fp.toFixed(2)}%</td><td class="cell-mono">${hp.toFixed(1)}%</td><td class="cell-mono">${formatNum(s.merma)}</td><td class="cell-mono ${mp<=5?'cell-good':mp<=15?'cell-warning':'cell-danger'}">${mp.toFixed(2)}%</td><td>${s.alertas?`<span class="badge badge-g3">${s.alertas}</span>`:'✓'}</td></tr>`;
     }).join('');
-    
-    // Cards visuales
-    const cardsContainer = document.getElementById('clienteCards');
-    if (cardsContainer) {
-        cardsContainer.innerHTML = filtrados.slice(0, 6).map(([cli, s]) => {
-            const factorProm = s.factor / s.cartas;
-            return `
-                <div class="card">
-                    <div class="card-header" style="padding:0.85rem 1rem;">
-                        <span class="card-title"><span class="badge badge-prov">${cli}</span></span>
-                        <span style="font-size:0.75rem;color:var(--gris-500);">${s.cartas} cartas</span>
-                    </div>
-                    <div class="card-body" style="padding:1rem;">
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;text-align:center;">
-                            <div>
-                                <div style="font-size:1.1rem;font-weight:700;color:var(--verde-700);font-family:'JetBrains Mono',monospace;">${formatNum(s.peso/1000,1)}t</div>
-                                <div style="font-size:0.65rem;color:var(--gris-500);text-transform:uppercase;">Peso</div>
-                            </div>
-                            <div>
-                                <div style="font-size:1.1rem;font-weight:700;color:${factorProm >= 100 ? 'var(--verde-700)' : factorProm >= 98 ? 'var(--gris-700)' : 'var(--rojo-700)'};font-family:'JetBrains Mono',monospace;">${factorProm.toFixed(1)}%</div>
-                                <div style="font-size:0.65rem;color:var(--gris-500);text-transform:uppercase;">Factor</div>
-                            </div>
-                            <div>
-                                <div style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${formatNum(s.mermaKg)}</div>
-                                <div style="font-size:0.65rem;color:var(--gris-500);text-transform:uppercase;">Merma kg</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// PÁGINA: ANÁLISIS
-// ══════════════════════════════════════════════════════════════════════════════
-
+// ═══ Análisis ═══
 function updateAnalisis() {
-    // Obtener filtros
-    const fProv = document.getElementById('afProv')?.value || '';
-    const fCult = document.getElementById('afCult')?.value || '';
-    const fCli = document.getElementById('afCli')?.value || '';
-    
-    // Filtrar datos
+    const prov = document.getElementById('afProv')?.value;
+    const cult = document.getElementById('afCult')?.value;
     let datos = STATE.cartas.filter(c => c.Humedad > 0 && c.Factor > 0);
-    if (fProv) datos = datos.filter(c => c.Proveedor === fProv);
-    if (fCult) datos = datos.filter(c => c.Cultivo === fCult);
-    if (fCli) datos = datos.filter(c => c.Cliente === fCli);
-    
-    // Estadísticas
-    const humProm = datos.length ? datos.reduce((s, c) => s + c.Humedad, 0) / datos.length : 0;
-    const facProm = datos.length ? datos.reduce((s, c) => s + c.Factor, 0) / datos.length : 0;
-    document.getElementById('analisisStats').textContent = 
-        `${datos.length} puntos | Humedad prom: ${humProm.toFixed(1)}% | Factor prom: ${facProm.toFixed(2)}%`;
-    
-    // Gráfico scatter
+    if (prov) datos = datos.filter(c => c.Proveedor === prov);
+    if (cult) datos = datos.filter(c => c.Cultivo === cult);
     renderChartAnalisis(datos);
-    
-    // Gráficos adicionales
-    renderChartFactorProv();
-    renderChartMermasProv();
 }
 
 function renderChartAnalisis(datos) {
-    const ctx = document.getElementById('chartAnalisis');
-    if (!ctx) return;
-    
+    const ctx = document.getElementById('chartAnalisis'); if (!ctx) return;
     if (STATE.charts.analisis) STATE.charts.analisis.destroy();
-    
-    // Agrupar por proveedor
     const porProv = {};
-    datos.forEach(c => {
-        if (!porProv[c.Proveedor]) porProv[c.Proveedor] = [];
-        porProv[c.Proveedor].push({ x: c.Humedad, y: c.Factor, ctg: c.CTG });
-    });
-    
-    const datasets = Object.entries(porProv).map(([prov, puntos], i) => ({
-        label: prov,
-        data: puntos.slice(0, 150),
-        backgroundColor: COLORES[i % COLORES.length],
-        pointRadius: 5,
-        pointHoverRadius: 8
-    }));
-    
+    datos.forEach(c => { if (!porProv[c.Proveedor]) porProv[c.Proveedor] = []; porProv[c.Proveedor].push({x:c.Humedad, y:c.Factor}); });
+    const datasets = Object.entries(porProv).map(([p,pts], i) => ({label:p, data:pts.slice(0,100), backgroundColor:COLORES[i%COLORES.length], pointRadius:5}));
     STATE.charts.analisis = new Chart(ctx, {
-        type: 'scatter',
-        data: { datasets },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top', labels: { padding: 15, font: { size: 11 } } },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `${ctx.dataset.label}: Hum ${ctx.raw.x}%, Factor ${ctx.raw.y}%`
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: { display: true, text: 'Humedad (%)', font: { weight: 'bold' } },
-                    min: 8, max: 20,
-                    grid: { color: '#E0E0E0' }
-                },
-                y: {
-                    title: { display: true, text: 'Factor (%)', font: { weight: 'bold' } },
-                    min: 90, max: 110,
-                    grid: { color: '#E0E0E0' }
-                }
-            }
-        }
+        type: 'scatter', data: {datasets},
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{title:{display:true,text:'Humedad %'},min:8,max:20}, y:{title:{display:true,text:'Factor %'},min:90,max:110}} }
     });
 }
 
-function renderChartFactorProv() {
-    const ctx = document.getElementById('chartFactorProv');
-    if (!ctx) return;
-    
-    if (STATE.charts.factorProv) STATE.charts.factorProv.destroy();
-    
-    const stats = {};
-    STATE.cartas.forEach(c => {
-        if (!stats[c.Proveedor]) stats[c.Proveedor] = { sum: 0, count: 0 };
-        stats[c.Proveedor].sum += c.Factor || 100;
-        stats[c.Proveedor].count++;
-    });
-    
-    const labels = Object.keys(stats);
-    const valores = labels.map(l => stats[l].sum / stats[l].count);
-    
-    STATE.charts.factorProv = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Factor Promedio',
-                data: valores,
-                backgroundColor: valores.map(v => v >= 100 ? '#4CAF50' : v >= 98 ? '#FFC107' : '#F44336')
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { min: 95, max: 105, grid: { color: '#E0E0E0' } },
-                y: { grid: { display: false } }
-            }
-        }
-    });
-}
+function resetAnalisis() { document.getElementById('afProv').value = ''; document.getElementById('afCult').value = ''; updateAnalisis(); }
 
-function renderChartMermasProv() {
-    const ctx = document.getElementById('chartMermasProv');
-    if (!ctx) return;
-    
-    if (STATE.charts.mermasProv) STATE.charts.mermasProv.destroy();
-    
-    const stats = {};
-    STATE.cartas.forEach(c => {
-        stats[c.Proveedor] = (stats[c.Proveedor] || 0) + (c.Merma_kg || 0);
-    });
-    
-    STATE.charts.mermasProv = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(stats),
-            datasets: [{
-                label: 'Merma (kg)',
-                data: Object.values(stats),
-                backgroundColor: '#F9A825'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: '#E0E0E0' }, ticks: { callback: v => formatNum(v) } }
-            }
-        }
-    });
-}
-
-function resetAnalisis() {
-    document.getElementById('afProv').value = '';
-    document.getElementById('afCult').value = '';
-    document.getElementById('afCli').value = '';
-    updateAnalisis();
-}
-
-console.log('✅ Parte 4 cargada: UI, Renderizado y Gráficos');
-
-// ╔════════════════════════════════════════════════════════════════════════════╗
-// ║  LIAG v7.0 - PARTE 5: Tabla Cartas, Chat, Export, Init                     ║
-// ║  + Grano Verde, Campaña, Integración nuevos proveedores                    ║
-// ╚════════════════════════════════════════════════════════════════════════════╝
-
-// NOTA: COLUMNAS_BASE y COLUMNAS_CALIDAD están definidas en Parte 2
-
-// ══════════════════════════════════════════════════════════════════════════════
-// PÁGINA: CARTAS DE PORTE
-// ══════════════════════════════════════════════════════════════════════════════
-
+// ═══ Cartas ═══
 function aplicarFiltrosCartas() {
     let datos = [...STATE.cartas];
-    
-    const fProv = document.getElementById('cfProv')?.value;
-    const fCliente = document.getElementById('cfCliente')?.value;
-    const fCultivo = document.getElementById('cfCultivo')?.value;
-    const fGrado = document.getElementById('cfGrado')?.value;
-    const fAlertas = document.getElementById('cfAlertas')?.value;
-    const fCTG = document.getElementById('cfCTG')?.value?.trim();
-    const fCampaña = document.getElementById('cfCampaña')?.value;
-    
-    if (fProv) datos = datos.filter(c => c.Proveedor === fProv);
-    if (fCliente) datos = datos.filter(c => c.Cliente === fCliente);
-    if (fCultivo) datos = datos.filter(c => c.Cultivo === fCultivo);
-    if (fGrado) datos = datos.filter(c => c.Grado === parseInt(fGrado));
-    if (fAlertas === 'si') datos = datos.filter(c => c.Alertas?.length > 0);
-    if (fAlertas === 'no') datos = datos.filter(c => !c.Alertas?.length);
-    if (fCTG) datos = datos.filter(c => c.CTG.includes(fCTG));
-    if (fCampaña) datos = datos.filter(c => c.Campaña === fCampaña);
-    
+    const prov = document.getElementById('cfProv')?.value;
+    const cult = document.getElementById('cfCultivo')?.value;
+    const ctg = document.getElementById('cfCTG')?.value?.trim();
+    if (prov) datos = datos.filter(c => c.Proveedor === prov);
+    if (cult) datos = datos.filter(c => c.Cultivo === cult);
+    if (ctg) datos = datos.filter(c => c.CTG.includes(ctg));
     STATE.filtradas = datos;
     STATE.pagina = 1;
-    
-    renderTablaCartas();
-}
-
-function getColumnasVisibles() {
-    const columnas = [...COLUMNAS_BASE];
-    
-    // Columnas de calidad: solo si hay datos
-    const tieneProteina = STATE.cartas.some(c => c.Proteina > 0);
-    const tienePH = STATE.cartas.some(c => c.PesoHL > 0);
-    const tieneGranoVerde = STATE.cartas.some(c => c.GranoVerde > 0);
-    const tieneZaranda = STATE.cartas.some(c => c.Zaranda > 0);
-    const tieneDestino = STATE.cartas.some(c => c.Destino);
-    
-    if (tieneProteina) columnas.push({ key: 'Proteina', label: 'Prot %', width: 65 });
-    if (tienePH) columnas.push({ key: 'PesoHL', label: 'PH', width: 55 });
-    if (tieneGranoVerde) columnas.push({ key: 'GranoVerde', label: 'Gr.Verde', width: 70 });
-    if (tieneZaranda) columnas.push({ key: 'Zaranda', label: 'Zaranda', width: 70 });
-    if (tieneDestino) columnas.push({ key: 'Destino', label: 'Destino', width: 120 });
-    
-    return columnas;
-}
-
-function renderTablaCartas() {
-    const columnas = getColumnasVisibles();
-    const datos = STATE.filtradas;
-    
-    // Ordenar
-    if (STATE.sortCol) {
-        datos.sort((a, b) => {
-            let va = a[STATE.sortCol];
-            let vb = b[STATE.sortCol];
-            if (Array.isArray(va)) va = va.length;
-            if (Array.isArray(vb)) vb = vb.length;
-            if (typeof va === 'number' && typeof vb === 'number') {
-                return STATE.sortDir === 'asc' ? va - vb : vb - va;
-            }
-            va = String(va || ''); vb = String(vb || '');
-            return STATE.sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
-        });
-    }
-    
-    // Cabeceras
-    document.getElementById('cartasHead').innerHTML = columnas.map(col => {
-        const sorted = STATE.sortCol === col.key;
-        const cls = sorted ? `sorted-${STATE.sortDir}` : '';
-        return `<th class="${cls}" onclick="ordenarCartas('${col.key}')" style="min-width:${col.width}px">${col.label}</th>`;
-    }).join('');
-    
-    // Paginación
-    const inicio = (STATE.pagina - 1) * STATE.porPagina;
-    const datosPagina = datos.slice(inicio, inicio + STATE.porPagina);
-    
-    // Cuerpo
-    document.getElementById('cartasBody').innerHTML = datosPagina.length ? datosPagina.map(row => {
-        const tieneAlertaCrit = row.Alertas?.some(a => a.tipo === 'critical');
-        const tieneAlertaWarn = row.Alertas?.some(a => a.tipo === 'warning') && !tieneAlertaCrit;
-        const rowClass = tieneAlertaCrit ? 'row-alert' : (tieneAlertaWarn ? 'row-warning' : '');
-        const celdas = columnas.map(col => `<td>${formatCelda(col.key, row[col.key], row)}</td>`).join('');
-        return `<tr class="${rowClass}">${celdas}</tr>`;
-    }).join('') : `<tr><td colspan="${columnas.length}" style="text-align:center;padding:2rem;color:var(--gris-500);">No hay datos</td></tr>`;
-    
-    renderPaginacion(datos.length);
-    document.getElementById('cartasInfo').textContent = `${datos.length} cartas filtradas`;
-}
-
-function formatCelda(key, val, row) {
-    if (val === undefined || val === null || val === '') return '-';
-    
-    switch (key) {
-        case 'Alertas':
-            if (!val || val.length === 0) return '<span class="cell-good">✓</span>';
-            const crit = val.filter(a => a.tipo === 'critical').length;
-            const warn = val.filter(a => a.tipo === 'warning').length;
-            let html = '';
-            if (crit) html += `<span class="badge badge-g3" title="${val.filter(a=>a.tipo==='critical').map(a=>a.msg).join(', ')}">${crit}</span>`;
-            if (warn) html += `<span class="badge badge-g2" title="${val.filter(a=>a.tipo==='warning').map(a=>a.msg).join(', ')}">${warn}</span>`;
-            return html;
-        case 'CTG':
-            return `<span class="cell-mono" style="color:var(--verde-800);font-weight:600;">${val}</span>`;
-        case 'Campaña':
-            return val ? `<span class="badge" style="background:#E3F2FD;color:#1565C0;">${val}</span>` : '-';
-        case 'Peso_kg':
-        case 'Merma_kg':
-        case 'Zaranda':
-            return `<span class="cell-mono">${formatNum(val, 0)}</span>`;
-        case 'Proveedor':
-            return `<span class="badge badge-prov">${val}</span>`;
-        case 'Cultivo':
-            return `<span class="badge badge-cult">${val}</span>`;
-        case 'Grado':
-            if (!val) return '-';
-            return `<span class="badge badge-g${val}">${val}</span>`;
-        case 'Factor':
-            const f = Number(val);
-            const fCls = f >= 100 ? 'cell-good' : f >= 98 ? '' : 'cell-danger';
-            return `<span class="cell-mono ${fCls}">${f.toFixed(2)}%</span>`;
-        case 'Humedad':
-            const h = Number(val);
-            const hCls = h <= 14 ? 'cell-good' : h <= 15.5 ? 'cell-warning' : 'cell-danger';
-            return `<span class="cell-mono ${hCls}">${h.toFixed(1)}%</span>`;
-        case 'MermaPct':
-            const m = Number(val);
-            const mCls = m <= 5 ? 'cell-good' : m <= 15 ? 'cell-warning' : 'cell-danger';
-            return `<span class="cell-mono ${mCls}">${m.toFixed(2)}%</span>`;
-        case 'GranoVerde':
-            if (!val || val === 0) return '-';
-            const gv = Number(val);
-            const gvCls = gv <= 5 ? '' : gv <= 10 ? 'cell-warning' : 'cell-danger';
-            return `<span class="cell-mono ${gvCls}">${gv.toFixed(1)}%</span>`;
-        case 'Proteina':
-        case 'PesoHL':
-            return val > 0 ? `<span class="cell-mono">${Number(val).toFixed(1)}</span>` : '-';
-        default:
-            return typeof val === 'number' ? formatNum(val, 2) : val;
-    }
-}
-
-function ordenarCartas(columna) {
-    if (STATE.sortCol === columna) {
-        STATE.sortDir = STATE.sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-        STATE.sortCol = columna;
-        STATE.sortDir = 'asc';
-    }
-    renderTablaCartas();
-}
-
-function renderPaginacion(total) {
-    const totalPaginas = Math.ceil(total / STATE.porPagina);
-    const inicio = (STATE.pagina - 1) * STATE.porPagina + 1;
-    const fin = Math.min(STATE.pagina * STATE.porPagina, total);
-    
-    document.getElementById('paginationInfo').textContent = total > 0 ? `${inicio}-${fin} de ${total}` : '0 resultados';
-    
-    let html = `<button class="pg-btn" onclick="irPagina(1)" ${STATE.pagina === 1 ? 'disabled' : ''}>«</button>`;
-    html += `<button class="pg-btn" onclick="irPagina(${STATE.pagina - 1})" ${STATE.pagina === 1 ? 'disabled' : ''}>‹</button>`;
-    
-    for (let i = Math.max(1, STATE.pagina - 2); i <= Math.min(totalPaginas, STATE.pagina + 2); i++) {
-        html += `<button class="pg-btn ${i === STATE.pagina ? 'active' : ''}" onclick="irPagina(${i})">${i}</button>`;
-    }
-    
-    html += `<button class="pg-btn" onclick="irPagina(${STATE.pagina + 1})" ${STATE.pagina >= totalPaginas ? 'disabled' : ''}>›</button>`;
-    html += `<button class="pg-btn" onclick="irPagina(${totalPaginas})" ${STATE.pagina >= totalPaginas ? 'disabled' : ''}>»</button>`;
-    
-    document.getElementById('paginationControls').innerHTML = html;
-}
-
-function irPagina(pag) {
-    STATE.pagina = pag;
     renderTablaCartas();
 }
 
 function limpiarFiltrosCartas() {
-    ['cfProv', 'cfCliente', 'cfCultivo', 'cfGrado', 'cfAlertas', 'cfCTG', 'cfCampaña'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
+    ['cfProv','cfCultivo','cfCTG'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
     aplicarFiltrosCartas();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// CHATBOT
-// ══════════════════════════════════════════════════════════════════════════════
-
-function toggleChat() {
-    document.getElementById('chatPanel').classList.toggle('open');
+function renderTablaCartas() {
+    const datos = STATE.filtradas;
+    if (STATE.sortCol) {
+        datos.sort((a,b) => {
+            let va = a[STATE.sortCol], vb = b[STATE.sortCol];
+            if (Array.isArray(va)) va = va.length;
+            if (Array.isArray(vb)) vb = vb.length;
+            if (typeof va === 'number' && typeof vb === 'number') return STATE.sortDir === 'asc' ? va-vb : vb-va;
+            return STATE.sortDir === 'asc' ? String(va||'').localeCompare(String(vb||'')) : String(vb||'').localeCompare(String(va||''));
+        });
+    }
+    document.getElementById('cartasHead').innerHTML = COLUMNAS.map(col => {
+        const cls = STATE.sortCol === col.key ? `sorted-${STATE.sortDir}` : '';
+        return `<th class="${cls}" onclick="ordenarCartas('${col.key}')" style="min-width:${col.w}px">${col.label}</th>`;
+    }).join('');
+    const inicio = (STATE.pagina - 1) * STATE.porPagina;
+    const pag = datos.slice(inicio, inicio + STATE.porPagina);
+    document.getElementById('cartasBody').innerHTML = pag.length ? pag.map(row => {
+        const crit = row.Alertas?.some(a => a.tipo === 'critical');
+        const warn = row.Alertas?.some(a => a.tipo === 'warning') && !crit;
+        const cls = crit ? 'row-alert' : (warn ? 'row-warning' : '');
+        return `<tr class="${cls}">${COLUMNAS.map(col => `<td>${formatCelda(col.key, row[col.key], row)}</td>`).join('')}</tr>`;
+    }).join('') : `<tr><td colspan="${COLUMNAS.length}" style="text-align:center;padding:2rem;">Sin datos</td></tr>`;
+    renderPaginacion(datos.length);
+    document.getElementById('cartasInfo').textContent = `${datos.length} cartas`;
 }
 
+function formatCelda(key, val, row) {
+    if (val === undefined || val === null || val === '') return '-';
+    switch (key) {
+        case 'Alertas': if (!val?.length) return '<span class="cell-good">✓</span>'; const c = val.filter(a => a.tipo === 'critical').length, w = val.filter(a => a.tipo === 'warning').length; let h = ''; if (c) h += `<span class="badge badge-g3">${c}</span>`; if (w) h += `<span class="badge badge-g2">${w}</span>`; return h;
+        case 'CTG': return `<span class="cell-mono" style="color:var(--verde-800);font-weight:600;">${val}</span>`;
+        case 'Campaña': return val ? `<span class="badge" style="background:#E3F2FD;color:#1565C0;">${val}</span>` : '-';
+        case 'Peso_kg': case 'Merma_kg': return `<span class="cell-mono">${formatNum(val)}</span>`;
+        case 'Proveedor': return `<span class="badge badge-prov">${val}</span>`;
+        case 'Cultivo': return `<span class="badge badge-cult">${val}</span>`;
+        case 'Grado': return val ? `<span class="badge badge-g${val}">${val}</span>` : '-';
+        case 'Factor': const f = Number(val); return `<span class="cell-mono ${f>=100?'cell-good':f>=98?'':'cell-danger'}">${f.toFixed(2)}%</span>`;
+        case 'Humedad': const hm = Number(val); return `<span class="cell-mono ${hm<=14?'cell-good':hm<=15.5?'cell-warning':'cell-danger'}">${hm.toFixed(1)}%</span>`;
+        case 'MermaPct': const m = Number(val); return `<span class="cell-mono ${m<=5?'cell-good':m<=15?'cell-warning':'cell-danger'}">${m.toFixed(2)}%</span>`;
+        default: return typeof val === 'number' ? formatNum(val, 2) : val;
+    }
+}
+
+function ordenarCartas(col) {
+    if (STATE.sortCol === col) STATE.sortDir = STATE.sortDir === 'asc' ? 'desc' : 'asc';
+    else { STATE.sortCol = col; STATE.sortDir = 'asc'; }
+    renderTablaCartas();
+}
+
+function renderPaginacion(total) {
+    const tp = Math.ceil(total / STATE.porPagina);
+    const ini = (STATE.pagina - 1) * STATE.porPagina + 1;
+    const fin = Math.min(STATE.pagina * STATE.porPagina, total);
+    document.getElementById('paginationInfo').textContent = total ? `${ini}-${fin} de ${total}` : '0';
+    let h = `<button class="pg-btn" onclick="irPagina(1)" ${STATE.pagina===1?'disabled':''}>«</button>`;
+    h += `<button class="pg-btn" onclick="irPagina(${STATE.pagina-1})" ${STATE.pagina===1?'disabled':''}>‹</button>`;
+    for (let i = Math.max(1,STATE.pagina-2); i <= Math.min(tp,STATE.pagina+2); i++) h += `<button class="pg-btn ${i===STATE.pagina?'active':''}" onclick="irPagina(${i})">${i}</button>`;
+    h += `<button class="pg-btn" onclick="irPagina(${STATE.pagina+1})" ${STATE.pagina>=tp?'disabled':''}>›</button>`;
+    h += `<button class="pg-btn" onclick="irPagina(${tp})" ${STATE.pagina>=tp?'disabled':''}>»</button>`;
+    document.getElementById('paginationControls').innerHTML = h;
+}
+
+function irPagina(p) { STATE.pagina = p; renderTablaCartas(); }
+
+// ═══ Chat ═══
+function toggleChat() { document.getElementById('chatPanel').classList.toggle('open'); }
 function sendChat() {
-    const input = document.getElementById('chatInput');
-    const msg = input.value.trim();
-    if (!msg) return;
-    
-    addChatMsg(msg, 'user');
-    input.value = '';
-    
+    const inp = document.getElementById('chatInput'), msg = inp.value.trim(); if (!msg) return;
+    addMsg(msg, 'user'); inp.value = '';
+    setTimeout(() => addMsg(procesarChat(msg), 'bot'), 200);
+}
+function addMsg(t, tipo) {
+    const c = document.getElementById('chatMsgs'), d = document.createElement('div');
+    d.className = 'msg ' + tipo; d.innerHTML = t; c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function procesarChat(msg) {
+    const l = msg.toLowerCase();
+    if (l.includes('resumen')) { const peso = STATE.cartas.reduce((s,c) => s + (c.Peso_kg||0), 0); return `📊 ${formatNum(STATE.cartas.length)} cartas, ${formatNum(peso)} kg`; }
+    if (l.includes('alerta')) { const n = STATE.cartas.filter(c => c.Alertas?.length).length; return n ? `⚠️ ${n} cartas con alertas` : '✅ Sin alertas'; }
+    const ctgM = msg.match(/\d{11}/); if (ctgM) { const c = STATE.cartas.find(x => x.CTG === ctgM[0]); return c ? `📋 CTG ${c.CTG}: ${c.Proveedor}, ${c.Cultivo}, ${formatNum(c.Peso_kg)} kg, Factor ${c.Factor}%` : '❌ No encontrado'; }
+    return '🤔 Probá "resumen", "alertas" o un CTG';
+}
+function quickChat(t) { document.getElementById('chatInput').value = t === 'resumen' ? 'resumen' : 'alertas'; sendChat(); }
+
+// ═══ Export ═══
+function exportarExcel() {
+    if (!STATE.cartas.length) { toast('Sin datos', 'warning'); return; }
+    showLoading('Exportando...');
     setTimeout(() => {
-        const resp = procesarChat(msg);
-        addChatMsg(resp, 'bot');
+        const datos = STATE.cartas.map(c => { const r = {...c}; r.Alertas = c.Alertas?.map(a => a.msg).join(', ') || ''; return r; });
+        const ws = XLSX.utils.json_to_sheet(datos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Cartas');
+        XLSX.writeFile(wb, `LIAG_${new Date().toISOString().split('T')[0]}.xlsx`);
+        hideLoading(); toast('Exportado');
     }, 200);
 }
 
-function addChatMsg(texto, tipo) {
-    const container = document.getElementById('chatMsgs');
-    const div = document.createElement('div');
-    div.className = `msg ${tipo}`;
-    div.innerHTML = texto;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-
-function procesarChat(msg) {
-    const lower = msg.toLowerCase().trim();
-    
-    // Corrección de cliente: "X es Y"
-    const matchEs = lower.match(/^(.+?)\s+es\s+(.+)$/i);
-    if (matchEs) {
-        const desde = matchEs[1].trim();
-        const hasta = matchEs[2].trim().toUpperCase();
-        const clientes = [...new Set(STATE.cartas.map(c => c.ClienteOrig || c.Cliente))];
-        const encontrado = clientes.find(c => c.toLowerCase().includes(desde));
-        
-        if (encontrado) {
-            guardarCorreccion(encontrado, hasta).then(count => {
-                refreshUI();
-            });
-            return `✅ Corrección guardada:<br><code>${encontrado}</code> → <b>${hasta}</b>`;
-        }
-        return `❌ No encontré cliente con "${desde}"`;
-    }
-    
-    // Resumen
-    if (lower.includes('resumen') || lower.includes('estadísticas')) {
-        const peso = STATE.cartas.reduce((s, c) => s + (c.Peso_kg || 0), 0);
-        const alertas = STATE.cartas.filter(c => c.Alertas?.length).length;
-        return `📊 <b>Resumen:</b><br>
-            📋 ${formatNum(STATE.cartas.length)} cartas<br>
-            ⚖️ ${formatNum(peso)} kg<br>
-            🏢 ${[...new Set(STATE.cartas.map(c => c.Proveedor))].length} proveedores<br>
-            ⚠️ ${alertas} con alertas`;
-    }
-    
-    // Alertas
-    if (lower.includes('alerta')) {
-        const criticas = STATE.cartas.filter(c => c.Alertas?.some(a => a.tipo === 'critical'));
-        if (criticas.length === 0) return '✅ Sin alertas críticas';
-        return `⚠️ <b>${criticas.length} alertas críticas:</b><br>` +
-            criticas.slice(0, 5).map(c => `• CTG ${c.CTG.slice(-6)}: ${c.Alertas[0].msg}`).join('<br>');
-    }
-    
-    // Ranking
-    if (lower.includes('ranking') || lower.includes('mejor')) {
-        const stats = {};
-        STATE.cartas.forEach(c => {
-            if (!stats[c.Proveedor]) stats[c.Proveedor] = { sum: 0, n: 0 };
-            stats[c.Proveedor].sum += c.Factor || 100;
-            stats[c.Proveedor].n++;
-        });
-        const ranking = Object.entries(stats)
-            .map(([p, s]) => ({ p, f: s.sum / s.n }))
-            .sort((a, b) => b.f - a.f);
-        return `🏆 <b>Ranking Factor:</b><br>` +
-            ranking.map((r, i) => `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.'} ${r.p}: ${r.f.toFixed(2)}%`).join('<br>');
-    }
-    
-    // Buscar CTG
-    const ctgMatch = msg.match(/\d{11}/);
-    if (ctgMatch) {
-        const carta = STATE.cartas.find(c => c.CTG === ctgMatch[0]);
-        if (carta) {
-            return `📋 <b>CTG ${carta.CTG}:</b><br>
-                📅 ${carta.Fecha} | 🏷️ ${carta.Campaña || '-'}<br>
-                👤 ${carta.Cliente} | 🏢 ${carta.Proveedor}<br>
-                🌾 ${carta.Cultivo} | ⚖️ ${formatNum(carta.Peso_kg)} kg<br>
-                💧 Hum: ${carta.Humedad}% | Factor: ${carta.Factor}%<br>
-                ${carta.GranoVerde ? `🟢 Gr.Verde: ${carta.GranoVerde}%` : ''}`;
-        }
-        return `❌ CTG no encontrado`;
-    }
-    
-    // Campaña
-    if (lower.includes('campaña')) {
-        const campañas = {};
-        STATE.cartas.forEach(c => {
-            const camp = c.Campaña || 'Sin campaña';
-            if (!campañas[camp]) campañas[camp] = { n: 0, peso: 0 };
-            campañas[camp].n++;
-            campañas[camp].peso += c.Peso_kg || 0;
-        });
-        return `📅 <b>Por Campaña:</b><br>` +
-            Object.entries(campañas)
-                .sort((a, b) => b[1].peso - a[1].peso)
-                .map(([c, s]) => `• ${c}: ${s.n} cartas, ${formatNum(s.peso/1000)}t`)
-                .join('<br>');
-    }
-    
-    return `🤔 No entendí. Prueba:<br>• "resumen" o "alertas"<br>• Un CTG de 11 dígitos<br>• "campaña" para ver por campaña<br>• "X es Y" para corregir cliente`;
-}
-
-function quickChat(tipo) {
-    const msgs = {
-        'resumen': 'Dame un resumen',
-        'alertas': 'Mostrar alertas',
-        'ranking': 'Ranking de proveedores'
-    };
-    document.getElementById('chatInput').value = msgs[tipo] || '';
-    sendChat();
-}
-
-function buscarCarta(ctg) {
-    navegarA('cartas');
-    document.getElementById('cfCTG').value = ctg;
-    aplicarFiltrosCartas();
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// EXPORT Y FUNCIONES GLOBALES
-// ══════════════════════════════════════════════════════════════════════════════
-
-function exportarExcel() {
-    if (STATE.cartas.length === 0) {
-        toast('No hay datos para exportar', 'warning');
-        return;
-    }
-    
-    showLoading('Generando Excel...');
-    
-    setTimeout(() => {
-        try {
-            const datos = (STATE.filtradas.length ? STATE.filtradas : STATE.cartas).map(c => {
-                const row = { ...c };
-                row.Alertas = c.Alertas?.map(a => a.msg).join(', ') || '';
-                delete row.ClienteOrig;
-                return row;
-            });
-            
-            const ws = XLSX.utils.json_to_sheet(datos);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Cartas de Porte');
-            
-            const fecha = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(wb, `LIAG_Export_${fecha}.xlsx`);
-            
-            hideLoading();
-            toast('Archivo exportado correctamente', 'success');
-        } catch (err) {
-            hideLoading();
-            console.error(err);
-            toast('Error al exportar', 'error');
-        }
-    }, 300);
-}
-
 async function limpiarBaseDatos() {
-    if (!confirm('¿Estás seguro de eliminar TODOS los datos? Esta acción no se puede deshacer.')) return;
-    
-    showLoading('Limpiando base de datos...');
-    
-    try {
-        await dbLimpiarCartas();
-        STATE.cartas = [];
-        STATE.filtradas = [];
-        hideLoading();
-        toast('Base de datos limpiada', 'success');
-        await refreshUI();
-        document.getElementById('uploadZone').style.display = 'block';
-        document.getElementById('mainContent').style.display = 'none';
-    } catch (err) {
-        hideLoading();
-        console.error(err);
-        toast('Error al limpiar', 'error');
-    }
+    if (!confirm('¿Eliminar TODOS los datos?')) return;
+    showLoading('Limpiando...');
+    await dbLimpiar();
+    STATE.cartas = []; STATE.filtradas = [];
+    hideLoading(); toast('Limpiado');
+    document.getElementById('uploadZone').style.display = 'block';
+    document.getElementById('mainContent').style.display = 'none';
+    await refreshUI();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// NAVEGACIÓN
-// ══════════════════════════════════════════════════════════════════════════════
-
-function navegarA(pagina) {
+// ═══ Navegación ═══
+function navegarA(pag) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    document.querySelector(`[data-page="${pagina}"]`)?.classList.add('active');
-    document.getElementById(`page-${pagina}`)?.classList.add('active');
-    
-    // Cargar datos de la página
-    if (pagina === 'clientes') renderClientes();
-    if (pagina === 'analisis') updateAnalisis();
-    if (pagina === 'cartas') aplicarFiltrosCartas();
+    document.querySelector(`[data-page="${pag}"]`)?.classList.add('active');
+    document.getElementById(`page-${pag}`)?.classList.add('active');
+    if (pag === 'clientes') renderClientes();
+    if (pag === 'analisis') updateAnalisis();
+    if (pag === 'cartas') aplicarFiltrosCartas();
 }
 
-function initNavigation() {
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => navegarA(item.dataset.page));
-    });
-}
+// ═══ Modelador ═══
+const MODELADOR = { columnas: [], conexiones: {}, muestras: {} };
+const CAMPOS_SISTEMA = [
+    {id:'ctg',nombre:'CTG',icono:'🔢',req:true},{id:'fecha',nombre:'Fecha',icono:'📅',req:true},{id:'peso',nombre:'Peso',icono:'⚖️',req:true},
+    {id:'humedad',nombre:'Humedad',icono:'💧'},{id:'factor',nombre:'Factor',icono:'📊'},{id:'grado',nombre:'Grado',icono:'🏅'},
+    {id:'proteina',nombre:'Proteína',icono:'🧪'},{id:'ph',nombre:'PH',icono:'📏'},{id:'granoVerde',nombre:'Gr.Verde',icono:'🟢'},
+    {id:'zaranda',nombre:'Merma Zar.',icono:'🔻'},{id:'volatil',nombre:'Merma Vol.',icono:'💨'},{id:'cosecha',nombre:'Campaña',icono:'🌾'},
+    {id:'campo',nombre:'Origen',icono:'🏠'},{id:'destino',nombre:'Destino',icono:'📍'},{id:'cultivo',nombre:'Cultivo',icono:'🌱'}
+];
 
-// ══════════════════════════════════════════════════════════════════════════════
-// DRAG & DROP
-// ══════════════════════════════════════════════════════════════════════════════
-
-function initDragDrop() {
-    const zone = document.getElementById('uploadZone');
-    if (!zone) return;
-    
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
-        zone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); });
-        document.body.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); });
-    });
-    
-    ['dragenter', 'dragover'].forEach(evt => {
-        zone.addEventListener(evt, () => zone.classList.add('dragover'));
-    });
-    
-    ['dragleave', 'drop'].forEach(evt => {
-        zone.addEventListener(evt, () => zone.classList.remove('dragover'));
-    });
-    
-    zone.addEventListener('drop', e => {
-        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-    });
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// ACTUALIZACIÓN FILTROS DE CAMPAÑA
-// ══════════════════════════════════════════════════════════════════════════════
-
-function updateFiltersCampaña() {
-    const campañas = [...new Set(STATE.cartas.map(c => c.Campaña).filter(c => c))].sort().reverse();
-    const select = document.getElementById('cfCampaña');
-    if (select) {
-        select.innerHTML = '<option value="">Todas</option>' + 
-            campañas.map(c => `<option value="${c}">${c}</option>`).join('');
-    }
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// INICIALIZACIÓN
-// ══════════════════════════════════════════════════════════════════════════════
-
-async function init() {
-    console.log('🚀 Iniciando LIAG v7.0...');
-    showLoading('Conectando base de datos...');
-    
-    try {
-        // Inicializar IndexedDB
-        await initDB();
-        
-        // Cargar correcciones guardadas
-        const corr = await dbObtenerConfig('correcciones');
-        if (corr) STATE.correcciones = corr;
-        
-        // Cargar cartas existentes
-        setLoadingText('Cargando datos...');
-        STATE.cartas = await dbObtenerCartas();
-        STATE.filtradas = [...STATE.cartas];
-        
-        // Inicializar UI
-        initNavigation();
-        initDragDrop();
-        
-        hideLoading();
-        
-        // Refrescar UI
-        await refreshUI();
-        updateFiltersCampaña();
-        
-        console.log(`✅ LIAG v7.0 listo - ${STATE.cartas.length} cartas en BD`);
-        
-        if (STATE.cartas.length > 0) {
-            toast(`${STATE.cartas.length} cartas cargadas desde la base de datos`, 'success');
-        }
-        
-    } catch (err) {
-        hideLoading();
-        console.error('Error inicializando:', err);
-        toast('Error al inicializar la aplicación', 'error');
-    }
-}
-
-// Ejecutar al cargar
-document.addEventListener('DOMContentLoaded', init);
-
-// ══════════════════════════════════════════════════════════════════════════════
-// INTEGRACIÓN DE NUEVOS CLIENTES
-// ══════════════════════════════════════════════════════════════════════════════
-
-let archivoAnalizado = null;
-let headersAnalizado = [];
-
-async function analizarArchivoNuevo(file) {
+async function analizarParaModelador(file) {
     if (!file) return;
-    
-    showLoading('Analizando archivo...');
-    
+    showLoading('Analizando...');
     try {
         const data = await leerArchivo(file);
         hideLoading();
-        
-        archivoAnalizado = file;
-        headersAnalizado = data[0] || [];
-        const filas = data.slice(1, 11);
-        
-        const colsDetectadas = detectarColumnasImportantes(headersAnalizado);
-        
-        document.getElementById('analisisContainer').style.display = 'block';
-        
-        // Info del archivo
-        let infoHTML = `
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem;">
-                <div class="stat-card">
-                    <div class="stat-label">Archivo</div>
-                    <div class="stat-value" style="font-size:0.9rem;word-break:break-all;">${file.name}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Columnas</div>
-                    <div class="stat-value">${headersAnalizado.length}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Filas de Datos</div>
-                    <div class="stat-value">${data.length - 1}</div>
-                </div>
-            </div>
-            
-            <div style="margin-bottom:1rem;">
-                <label style="font-size:0.85rem;font-weight:600;color:var(--gris-700);">Nombre del Cliente:</label>
-                <input type="text" id="nombreNuevoCliente" placeholder="Ej: Bunge, Molinos..." 
-                    style="margin-left:0.5rem;padding:0.5rem;border:1px solid var(--gris-300);border-radius:6px;width:200px;">
-            </div>
-        `;
-        
-        document.getElementById('analisisInfo').innerHTML = infoHTML;
-        
-        // Mapeo interactivo de columnas
-        renderMapeoColumnas(headersAnalizado, colsDetectadas);
-        
-        // Tabla preview
-        let tableHTML = '<thead><tr>';
-        headersAnalizado.forEach((h, i) => {
-            const esImportante = Object.values(colsDetectadas).includes(i);
-            tableHTML += `<th style="${esImportante ? 'background:var(--verde-700);' : ''}">${i + 1}. ${h || '(vacío)'}</th>`;
-        });
-        tableHTML += '</tr></thead><tbody>';
-        
-        filas.forEach(fila => {
-            tableHTML += '<tr>';
-            headersAnalizado.forEach((_, i) => {
-                const val = fila[i];
-                const esImportante = Object.values(colsDetectadas).includes(i);
-                tableHTML += `<td style="${esImportante ? 'background:var(--verde-50);font-weight:600;' : ''}">${val !== undefined && val !== null ? val : '-'}</td>`;
-            });
-            tableHTML += '</tr>';
-        });
-        tableHTML += '</tbody>';
-        
-        document.getElementById('tablaPreview').innerHTML = tableHTML;
-        toast('Archivo analizado - configurá el mapeo de columnas', 'success');
-        
-    } catch (err) {
-        hideLoading();
-        console.error(err);
-        toast('Error al analizar archivo', 'error');
-    }
+        MODELADOR.columnas = data[0] || [];
+        MODELADOR.muestras = {};
+        MODELADOR.columnas.forEach((h,i) => { MODELADOR.muestras[i] = data.slice(1,4).map(r => r[i]).filter(v => v != null); });
+        autoDetectar();
+        document.getElementById('archivoSeleccionado').textContent = `✓ ${file.name}`;
+        document.getElementById('configInicial').style.display = 'block';
+        document.getElementById('modeladorSection').style.display = 'block';
+        renderModelador();
+        toast('Archivo analizado');
+    } catch (err) { hideLoading(); toast('Error', 'error'); }
 }
 
-function renderMapeoColumnas(headers, detectados) {
-    const campos = [
-        { key: 'ctg', label: 'CTG (Carta de Porte)', required: true },
-        { key: 'fecha', label: 'Fecha de Descarga', required: true },
-        { key: 'peso', label: 'Peso Neto', required: true },
-        { key: 'unidadPeso', label: 'Unidad de Peso', type: 'select', options: ['KG', 'TN (x1000)'] },
-        { key: 'humedad', label: 'Humedad %', required: false },
-        { key: 'factor', label: 'Factor', required: false },
-        { key: 'grado', label: 'Grado', required: false },
-        { key: 'proteina', label: 'Proteína %', required: false },
-        { key: 'ph', label: 'Peso Hectolítrico', required: false },
-        { key: 'granoVerde', label: 'Grano Verde %', required: false },
-        { key: 'cosecha', label: 'Campaña/Cosecha', required: false },
-        { key: 'cliente', label: 'Campo/Origen', required: false },
-        { key: 'destino', label: 'Destino/Planta', required: false },
-        { key: 'zaranda', label: 'Merma Zaranda', required: false },
-        { key: 'volatil', label: 'Merma Volátil', required: false }
-    ];
-    
-    // Opciones de columnas
-    const opciones = headers.map((h, i) => `<option value="${i}">${i + 1}. ${h || '(vacío)'}</option>`).join('');
-    
-    const container = document.getElementById('mapeoColumnas');
-    container.innerHTML = campos.map(campo => {
-        if (campo.type === 'select') {
-            return `
-                <div class="filter-group">
-                    <label>${campo.label}</label>
-                    <select id="map_${campo.key}">
-                        ${campo.options.map((o, i) => `<option value="${o}" ${i === 0 ? 'selected' : ''}>${o}</option>`).join('')}
-                    </select>
-                </div>
-            `;
-        }
-        
-        const detectado = detectados[campo.key];
-        return `
-            <div class="filter-group">
-                <label>${campo.label} ${campo.required ? '<span style="color:var(--rojo-500);">*</span>' : ''}</label>
-                <select id="map_${campo.key}">
-                    <option value="-1">No disponible</option>
-                    ${opciones}
-                </select>
-            </div>
-        `;
-    }).join('');
-    
-    // Pre-seleccionar detectados
-    Object.entries(detectados).forEach(([key, idx]) => {
-        const select = document.getElementById(`map_${key}`);
-        if (select && idx !== null) {
-            select.value = idx;
-        }
-    });
-}
-
-function detectarColumnasImportantes(headers) {
-    const result = {
-        ctg: null, fecha: null, peso: null, humedad: null, factor: null,
-        grado: null, proteina: null, ph: null, granoVerde: null,
-        cliente: null, cosecha: null, destino: null, zaranda: null, volatil: null
-    };
-    
-    headers.forEach((h, i) => {
+function autoDetectar() {
+    MODELADOR.conexiones = {};
+    MODELADOR.columnas.forEach((h,i) => {
         if (!h) return;
-        const l = String(h).toLowerCase().trim();
-        
-        if (result.ctg === null && (l.includes('ctg') || l.includes('carta de porte'))) result.ctg = i;
-        if (result.fecha === null && (l.includes('fecha') || l.includes('descarga'))) result.fecha = i;
-        if (result.peso === null && (l.includes('peso') || l.includes('neto') || l.includes('cantidad'))) result.peso = i;
-        if (result.humedad === null && (l.includes('humedad') || l === 'hum' || l === 'h%')) result.humedad = i;
-        if (result.factor === null && l.includes('factor')) result.factor = i;
-        if (result.grado === null && l.includes('grado')) result.grado = i;
-        if (result.proteina === null && (l.includes('proteina') || l.includes('prot'))) result.proteina = i;
-        if (result.ph === null && (l.includes('hectol') || l === 'ph' || l === 'p.h.')) result.ph = i;
-        if (result.granoVerde === null && (l.includes('verde') || l.includes('green'))) result.granoVerde = i;
-        if (result.cliente === null && (l.includes('cliente') || l.includes('procedencia') || l.includes('remitente') || l.includes('origen'))) result.cliente = i;
-        if (result.cosecha === null && (l.includes('cosecha') || l.includes('campaña'))) result.cosecha = i;
-        if (result.destino === null && (l.includes('destino') || l.includes('planta') || l.includes('puerto'))) result.destino = i;
-        if (result.zaranda === null && l.includes('zaranda')) result.zaranda = i;
-        if (result.volatil === null && (l.includes('volátil') || l.includes('volatil'))) result.volatil = i;
+        const l = String(h).toLowerCase();
+        if (l.includes('ctg')) MODELADOR.conexiones.ctg = i;
+        else if (l.includes('fecha')) MODELADOR.conexiones.fecha = i;
+        else if (l.includes('peso') || l.includes('neto')) MODELADOR.conexiones.peso = i;
+        else if (l.includes('humedad') || l === 'hum') MODELADOR.conexiones.humedad = i;
+        else if (l.includes('factor')) MODELADOR.conexiones.factor = i;
+        else if (l.includes('grado')) MODELADOR.conexiones.grado = i;
+        else if (l.includes('proteina')) MODELADOR.conexiones.proteina = i;
+        else if (l.includes('hectol') || l === 'ph') MODELADOR.conexiones.ph = i;
+        else if (l.includes('verde')) MODELADOR.conexiones.granoVerde = i;
+        else if (l.includes('zaranda')) MODELADOR.conexiones.zaranda = i;
+        else if (l.includes('volatil')) MODELADOR.conexiones.volatil = i;
+        else if (l.includes('cosecha') || l.includes('campaña')) MODELADOR.conexiones.cosecha = i;
+        else if (l.includes('procedencia') || l.includes('origen')) MODELADOR.conexiones.campo = i;
+        else if (l.includes('destino') || l.includes('planta')) MODELADOR.conexiones.destino = i;
+        else if (l.includes('producto') || l.includes('cultivo')) MODELADOR.conexiones.cultivo = i;
     });
-    
-    return result;
 }
 
-function guardarMapeoCliente() {
+function renderModelador() {
+    const container = document.getElementById('modeladorContainer');
+    container.innerHTML = `
+        <div class="modelador-wrapper">
+            <div class="modelador-panel"><div class="modelador-panel-header"><span>📄 Columnas Archivo</span><span class="modelador-count">${MODELADOR.columnas.length}</span></div>
+                <div class="modelador-cubos" id="cubosOrigen">${MODELADOR.columnas.map((c,i) => {
+                    const con = Object.values(MODELADOR.conexiones).includes(i);
+                    const m = MODELADOR.muestras[i]?.[0] || '';
+                    return `<div class="cubo cubo-origen ${con?'conectado':''}" draggable="true" data-idx="${i}" id="co-${i}"><div class="cubo-header"><span class="cubo-indice">${i+1}</span><span class="cubo-nombre">${c||'(vacío)'}</span></div><div class="cubo-muestra">${String(m).substring(0,20)}</div>${con?'<div class="cubo-estado">✓</div>':''}</div>`;
+                }).join('')}</div>
+            </div>
+            <div class="modelador-conexiones"><svg id="svgConexiones"></svg></div>
+            <div class="modelador-panel"><div class="modelador-panel-header"><span>🎯 Campos LIAG</span><span class="modelador-count">${CAMPOS_SISTEMA.length}</span></div>
+                <div class="modelador-cubos" id="cubosDestino">${CAMPOS_SISTEMA.map(campo => {
+                    const idx = MODELADOR.conexiones[campo.id];
+                    const con = idx !== undefined;
+                    const nom = con ? MODELADOR.columnas[idx] : null;
+                    return `<div class="cubo cubo-destino ${con?'conectado':''} ${campo.req&&!con?'requerido':''}" data-campo="${campo.id}" id="cd-${campo.id}"><div class="cubo-header"><span>${campo.icono}</span><span class="cubo-nombre">${campo.nombre}</span>${campo.req?'<span style="color:var(--rojo-500)">*</span>':''}</div>${con?`<div class="cubo-conexion"><span>← Col ${idx+1}: ${nom}</span><button class="conexion-quitar" onclick="quitarConexion('${campo.id}')">✕</button></div>`:'<div class="cubo-drop-zone">Arrastrá aquí</div>'}</div>`;
+                }).join('')}</div>
+            </div>
+        </div>
+        <div class="modelador-footer">
+            <div class="modelador-leyenda"><span class="leyenda-item"><span class="dot conectado"></span> Conectado</span><span class="leyenda-item"><span class="dot requerido"></span> Requerido</span></div>
+            <div><button class="btn btn-sm btn-secondary" onclick="autoDetectar();renderModelador();">🔄 Auto</button> <button class="btn btn-success" onclick="guardarModelado()">💾 Guardar</button></div>
+        </div>
+    `;
+    initDragDropModelador();
+    setTimeout(dibujarLineas, 50);
+}
+
+function initDragDropModelador() {
+    document.querySelectorAll('.cubo-origen').forEach(c => {
+        c.ondragstart = (e) => { c.classList.add('arrastrando'); e.dataTransfer.setData('text', c.dataset.idx); };
+        c.ondragend = () => { c.classList.remove('arrastrando'); document.querySelectorAll('.cubo-destino').forEach(d => d.classList.remove('drop-hover','drop-activo')); };
+    });
+    document.querySelectorAll('.cubo-destino').forEach(d => {
+        d.ondragover = (e) => { e.preventDefault(); d.classList.add('drop-hover'); };
+        d.ondragleave = () => d.classList.remove('drop-hover');
+        d.ondrop = (e) => { e.preventDefault(); d.classList.remove('drop-hover'); crearConexion(d.dataset.campo, parseInt(e.dataTransfer.getData('text'))); };
+    });
+}
+
+function crearConexion(campo, idx) {
+    Object.keys(MODELADOR.conexiones).forEach(c => { if (MODELADOR.conexiones[c] === idx) delete MODELADOR.conexiones[c]; });
+    MODELADOR.conexiones[campo] = idx;
+    renderModelador();
+    toast(`✓ ${MODELADOR.columnas[idx]} → ${CAMPOS_SISTEMA.find(c => c.id === campo)?.nombre}`);
+}
+
+function quitarConexion(campo) { delete MODELADOR.conexiones[campo]; renderModelador(); }
+
+function dibujarLineas() {
+    const svg = document.getElementById('svgConexiones'); if (!svg) return;
+    const rect = svg.parentElement.getBoundingClientRect();
+    svg.innerHTML = '';
+    Object.entries(MODELADOR.conexiones).forEach(([campo, idx]) => {
+        const o = document.getElementById(`co-${idx}`), d = document.getElementById(`cd-${campo}`);
+        if (!o || !d) return;
+        const or = o.getBoundingClientRect(), dr = d.getBoundingClientRect();
+        const x1 = or.right - rect.left, y1 = or.top + or.height/2 - rect.top;
+        const x2 = dr.left - rect.left, y2 = dr.top + dr.height/2 - rect.top;
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', `M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`);
+        path.setAttribute('class', 'conexion-linea');
+        svg.appendChild(path);
+    });
+}
+
+function guardarModelado() {
     const nombre = document.getElementById('nombreNuevoCliente')?.value?.trim();
-    if (!nombre) {
-        toast('Ingresá el nombre del cliente', 'warning');
-        return;
-    }
-    
-    const mapeo = {
-        nombre: nombre,
-        archivo: archivoAnalizado?.name,
-        columnas: {}
-    };
-    
-    const campos = ['ctg', 'fecha', 'peso', 'unidadPeso', 'humedad', 'factor', 'grado', 
-                    'proteina', 'ph', 'granoVerde', 'cosecha', 'cliente', 'destino', 'zaranda', 'volatil'];
-    
-    campos.forEach(campo => {
-        const select = document.getElementById(`map_${campo}`);
-        if (select) {
-            const val = select.value;
-            if (campo === 'unidadPeso') {
-                mapeo.columnas[campo] = val;
-            } else {
-                mapeo.columnas[campo] = parseInt(val);
-                // Guardar nombre de columna original
-                if (parseInt(val) >= 0 && headersAnalizado[parseInt(val)]) {
-                    mapeo.columnas[campo + '_nombre'] = headersAnalizado[parseInt(val)];
-                }
-            }
-        }
-    });
-    
-    // Guardar en IndexedDB
-    dbGuardarConfig(`cliente_${nombre.toLowerCase()}`, mapeo);
-    
-    toast(`Configuración de ${nombre} guardada`, 'success');
-    console.log('Mapeo guardado:', mapeo);
+    if (!nombre) { toast('Ingresá nombre', 'warning'); return; }
+    const faltantes = CAMPOS_SISTEMA.filter(c => c.req && MODELADOR.conexiones[c.id] === undefined).map(c => c.nombre);
+    if (faltantes.length) { toast(`Faltan: ${faltantes.join(', ')}`, 'error'); return; }
+    const config = { nombre, unidad: document.getElementById('unidadPeso')?.value || 'KG', columnas: {} };
+    Object.entries(MODELADOR.conexiones).forEach(([c, i]) => { config.columnas[c] = {idx: i, col: MODELADOR.columnas[i]}; });
+    dbConfig(`cliente_${nombre.toLowerCase().replace(/\s+/g,'_')}`, config);
+    toast(`✓ "${nombre}" guardado`);
+    console.log('Config guardada:', config);
 }
 
-function exportarConfigCliente() {
-    const nombre = document.getElementById('nombreNuevoCliente')?.value?.trim() || 'nuevo_cliente';
-    
-    const mapeo = { nombre, columnas: {} };
-    const campos = ['ctg', 'fecha', 'peso', 'unidadPeso', 'humedad', 'factor', 'grado', 
-                    'proteina', 'ph', 'granoVerde', 'cosecha', 'cliente', 'destino', 'zaranda', 'volatil'];
-    
-    campos.forEach(campo => {
-        const select = document.getElementById(`map_${campo}`);
-        if (select) {
-            const val = select.value;
-            if (campo === 'unidadPeso') {
-                mapeo.columnas[campo] = val;
-            } else {
-                const idx = parseInt(val);
-                mapeo.columnas[campo] = {
-                    indice: idx,
-                    nombreColumna: idx >= 0 ? headersAnalizado[idx] : null
-                };
-            }
-        }
-    });
-    
-    // Descargar como JSON
-    const blob = new Blob([JSON.stringify(mapeo, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `config_${nombre.toLowerCase().replace(/\s+/g, '_')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast('Configuración exportada', 'success');
+// ═══ Init ═══
+async function init() {
+    showLoading('Iniciando...');
+    try {
+        await initDB();
+        const corr = await dbConfig('correcciones');
+        if (corr) STATE.correcciones = corr;
+        STATE.cartas = await dbObtener();
+        STATE.filtradas = [...STATE.cartas];
+        document.querySelectorAll('.nav-item').forEach(n => n.onclick = () => navegarA(n.dataset.page));
+        const zone = document.getElementById('uploadZone');
+        ['dragenter','dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.style.borderColor = 'var(--verde-500)'; }));
+        ['dragleave','drop'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.style.borderColor = ''; }));
+        zone.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+        hideLoading();
+        await refreshUI();
+        if (STATE.cartas.length) toast(`${STATE.cartas.length} cartas cargadas`);
+    } catch (err) { hideLoading(); console.error(err); toast('Error iniciando', 'error'); }
 }
 
-function toggleEditarClientes() {
-    toast('Función de edición en desarrollo', 'warning');
-}
-
-console.log('✅ Parte 5 cargada: Tabla, Chat, Export, Init + Grano Verde + Campaña + Integración');
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
