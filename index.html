@@ -374,10 +374,11 @@
 <nav class="nav-container">
     <div class="nav">
         <button class="nav-item active" data-page="ejecutivo">📊 Panel Ejecutivo</button>
-        <button class="nav-item" data-page="clientes">🏢 Por Cliente</button>
+        <button class="nav-item" data-page="proveedores">🏢 Por Proveedor</button>
+        <button class="nav-item" data-page="clientes">👥 Por Cliente</button>
         <button class="nav-item" data-page="analisis">📈 Análisis</button>
         <button class="nav-item" data-page="cartas">📋 Cartas <span class="nav-badge" id="cartasCount">0</span></button>
-        <button class="nav-item" data-page="integracion">🔧 Integrar Cliente</button>
+        <button class="nav-item" data-page="integracion">🔧 Integrar Proveedor</button>
     </div>
 </nav>
 
@@ -408,7 +409,7 @@
         <div class="grid-5" style="margin-bottom:1.25rem;" id="statsRow">
             <div class="stat-card"><div class="stat-label">Total Cartas</div><div class="stat-value" id="statCartas">0</div><div class="stat-sub">en base de datos</div></div>
             <div class="stat-card"><div class="stat-label">Peso Total</div><div class="stat-value" id="statPeso">0</div><div class="stat-sub">kilogramos</div></div>
-            <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value" id="statProvs">0</div><div class="stat-sub">activos</div></div>
+            <div class="stat-card"><div class="stat-label">Proveedores</div><div class="stat-value" id="statProvs">0</div><div class="stat-sub">activos</div></div>
             <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div><div class="stat-sub">únicos</div></div>
             <div class="stat-card danger" id="statAlertasCard" style="display:none;"><div class="stat-label">Alertas</div><div class="stat-value" id="statAlertas">0</div><div class="stat-sub">requieren revisión</div></div>
         </div>
@@ -434,7 +435,7 @@
             <div>
                 <div class="card" style="height:100%;">
                     <div class="card-header">
-                        <span class="card-title">🏆 Ranking Clientes</span>
+                        <span class="card-title">🏆 Ranking Proveedores</span>
                         <select id="rankingMetric" class="btn btn-sm" style="background:var(--gris-100);border:1px solid var(--gris-300);" onchange="updateRanking()">
                             <option value="factor">Por Factor</option>
                             <option value="peso">Por Volumen</option>
@@ -453,35 +454,30 @@
         </div>
     </section>
 
-    <!-- PAGE: CLIENTES (Cargill, ACA, COFCO, LDC, FYO - quienes reciben nuestra mercadería) -->
+    <!-- PAGE: PROVEEDORES -->
+    <section id="page-proveedores" class="page">
+        <div class="card">
+            <div class="card-header"><span class="card-title">🏢 Comparativa por Proveedor</span></div>
+            <div class="table-container">
+                <table><thead><tr>
+                    <th>Proveedor</th><th>Cartas</th><th>Peso (kg)</th><th>Factor</th><th>Humedad</th><th>Proteína</th><th>PH</th><th>Merma %</th><th>Alertas</th>
+                </tr></thead><tbody id="tbodyProveedores"></tbody></table>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE: CLIENTES -->
     <section id="page-clientes" class="page">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">🏢 Análisis por Cliente</span>
-                <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <input type="text" id="searchCliente" placeholder="Buscar cliente..." style="padding:0.5rem;border:1px solid var(--gris-300);border-radius:6px;width:180px;" oninput="renderClientes()">
-                </div>
+                <span class="card-title">👥 Análisis por Cliente</span>
+                <input type="text" id="searchCliente" placeholder="Buscar cliente..." style="padding:0.5rem;border:1px solid var(--gris-300);border-radius:6px;" oninput="renderClientes()">
             </div>
             <div class="table-container">
                 <table><thead><tr>
-                    <th>Cliente</th>
-                    <th>Cartas</th>
-                    <th>Peso Total (kg)</th>
-                    <th>Factor Prom.</th>
-                    <th>Humedad Prom.</th>
-                    <th>Proteína Prom.</th>
-                    <th>PH Prom.</th>
-                    <th>Merma Total (kg)</th>
-                    <th>Merma %</th>
-                    <th>Alertas</th>
-                    <th>Última Descarga</th>
+                    <th>Cliente</th><th>Proveedor</th><th>Cartas</th><th>Peso (kg)</th><th>Factor</th><th>Humedad</th><th>Alertas</th><th>Última</th>
                 </tr></thead><tbody id="tbodyClientes"></tbody></table>
             </div>
-        </div>
-        
-        <!-- Cards visuales por cliente -->
-        <div style="margin-top:1.25rem;">
-            <div class="grid-auto" id="clienteCards"></div>
         </div>
     </section>
 
@@ -512,7 +508,7 @@
             <div class="card-header"><span class="card-title">📋 Detalle de Cartas</span><span id="cartasInfo" style="font-size:0.8rem;color:var(--gris-500);"></span></div>
             <div class="card-body" style="padding:1rem;">
                 <div class="filters-bar">
-                    <div class="filter-group"><label>Campaña</label><select id="cfCampaña" onchange="aplicarFiltrosCartas()"><option value="">Todas</option></select></div>
+                    <div class="filter-group"><label>Campaña</label><select id="cfCampana" onchange="aplicarFiltrosCartas()"><option value="">Todas</option></select></div>
                     <div class="filter-group"><label>Proveedor</label><select id="cfProv" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
                     <div class="filter-group"><label>Cliente</label><select id="cfCliente" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
                     <div class="filter-group"><label>Cultivo</label><select id="cfCultivo" onchange="aplicarFiltrosCartas()"><option value="">Todos</option></select></div>
@@ -527,112 +523,116 @@
         </div>
     </section>
 
-    <!-- PAGE: INTEGRACIÓN DE NUEVOS CLIENTES -->
+    <!-- PAGE: INTEGRACIÓN DE NUEVOS PROVEEDORES -->
     <section id="page-integracion" class="page">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">🔧 Integrar Nuevo Cliente</span>
+                <span class="card-title">🔧 Integrar Nuevo Proveedor</span>
             </div>
             <div class="card-body">
-                <!-- Paso 1: Subir archivo -->
                 <div style="background:var(--verde-50);border:1px solid var(--verde-200);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;">
-                    <h3 style="color:var(--verde-800);margin-bottom:0.75rem;font-size:1rem;">📤 Paso 1: Subí un archivo de muestra del nuevo cliente</h3>
+                    <h3 style="color:var(--verde-800);margin-bottom:0.75rem;font-size:1rem;">📤 ¿Tenés archivos de un proveedor no soportado?</h3>
                     <p style="color:var(--gris-600);font-size:0.9rem;margin-bottom:1rem;">
-                        El sistema analizará las columnas y te permitirá mapearlas visualmente.
+                        Subí un archivo de muestra y te ayudo a integrarlo al sistema. Actualmente soportamos:
+                        <strong>Cargill, ACA, COFCO, LDC, FYO</strong>
                     </p>
-                    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+                    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
                         <button class="btn btn-success" onclick="document.getElementById('fileIntegracion').click()">
-                            📎 Seleccionar Archivo
+                            📎 Subir Archivo de Muestra
                         </button>
-                        <input type="file" id="fileIntegracion" accept=".xlsx,.xls,.csv" style="display:none;" onchange="analizarParaModelador(this.files[0])">
-                        <span id="archivoSeleccionado" style="font-size:0.85rem;color:var(--gris-600);"></span>
+                        <input type="file" id="fileIntegracion" accept=".xlsx,.xls,.csv" style="display:none;" onchange="analizarArchivoNuevo(this.files[0])">
                     </div>
                 </div>
 
-                <!-- Paso 2: Configuración inicial (se muestra después de cargar archivo) -->
-                <div id="configInicialContainer" style="display:none;margin-bottom:1.5rem;">
-                    <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:10px;padding:1.25rem;">
-                        <h3 style="color:#1565C0;margin-bottom:0.75rem;font-size:1rem;">⚙️ Paso 2: Configuración básica</h3>
-                        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
-                            <div class="filter-group">
-                                <label>Nombre del Cliente *</label>
-                                <input type="text" id="nombreNuevoCliente" placeholder="Ej: Bunge, Molinos..." style="width:200px;">
-                            </div>
-                            <div class="filter-group">
-                                <label>Unidad de Peso</label>
-                                <select id="unidadPeso">
-                                    <option value="KG">Kilogramos (KG)</option>
-                                    <option value="TN">Toneladas (TN) → convertir x1000</option>
-                                </select>
-                            </div>
+                <div id="analisisContainer" style="display:none;">
+                    <div class="card" style="margin-bottom:1rem;">
+                        <div class="card-header" style="background:var(--gris-100);">
+                            <span class="card-title">📊 Análisis del Archivo</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="analisisInfo"></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Paso 3: Modelador visual -->
-                <div id="modeladorSection" style="display:none;">
-                    <h3 style="color:var(--gris-800);margin-bottom:1rem;font-size:1rem;">
-                        🔗 Paso 3: Arrastrá las columnas del archivo hacia los campos del sistema
-                    </h3>
-                    <div id="modeladorContainer"></div>
-                </div>
-
-                <!-- Info de clientes existentes -->
-                <div style="margin-top:2rem;border-top:1px solid var(--gris-200);padding-top:1.5rem;" id="clientesExistentes">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-                        <h3 style="font-size:1rem;color:var(--gris-800);">📚 Clientes Configurados</h3>
+                    
+                    <div class="card">
+                        <div class="card-header" style="background:var(--gris-100);">
+                            <span class="card-title">📋 Vista Previa de Columnas</span>
+                        </div>
+                        <div class="table-container" style="max-height:400px;">
+                            <table id="tablaPreview"></table>
+                        </div>
                     </div>
+                    
+                    <div style="margin-top:1.5rem;padding:1.25rem;background:#FFF8E1;border:1px solid #FFC107;border-radius:10px;">
+                        <h4 style="color:#F57F17;margin-bottom:0.5rem;">💡 Siguiente Paso</h4>
+                        <p style="color:var(--gris-700);font-size:0.9rem;">
+                            Una vez analizado el archivo, compártilo con el equipo de desarrollo junto con esta información
+                            para que podamos agregar el procesador específico para este proveedor.
+                        </p>
+                        <p style="color:var(--gris-600);font-size:0.85rem;margin-top:0.5rem;">
+                            <strong>Datos necesarios:</strong> Nombre del proveedor, columna de CTG, columna de peso (y si está en kg o toneladas), 
+                            columnas de calidad disponibles (humedad, factor, proteína, grano verde, etc.)
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-top:2rem;border-top:1px solid var(--gris-200);padding-top:1.5rem;">
+                    <h3 style="font-size:1rem;margin-bottom:1rem;color:var(--gris-800);">📚 Proveedores Soportados y Campos</h3>
                     <div class="table-container">
-                        <table id="tablaClientesConfig">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th>Cliente</th>
-                                    <th>CTG</th>
+                                    <th>Proveedor</th>
                                     <th>Peso</th>
-                                    <th>Humedad</th>
                                     <th>Factor</th>
+                                    <th>Humedad</th>
                                     <th>Proteína</th>
                                     <th>PH</th>
                                     <th>Gr.Verde</th>
-                                    <th>Mermas</th>
+                                    <th>Grado</th>
                                     <th>Campaña</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><span class="badge badge-prov">Cargill</span></td>
-                                    <td><code>ctg</code></td>
-                                    <td>KG <small>peso neto</small></td>
-                                    <td>✅ <small>humedad%</small></td>
-                                    <td>✅ <small>factor total</small></td>
-                                    <td>✅ <small>proteina</small></td>
-                                    <td>✅ <small>peso hectolitrico</small></td>
-                                    <td>✅ <small>grano verde</small></td>
-                                    <td>✅ <small>zaranda+volatil</small></td>
-                                    <td>✅ <small>cosecha</small></td>
-                                </tr>
-                                <tr>
-                                    <td><span class="badge badge-prov">COFCO</span></td>
-                                    <td><code>número de ctg</code></td>
-                                    <td>TN→KG</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅ <small>proteinas</small></td>
-                                    <td>✅ <small>peso hectolítrico</small></td>
-                                    <td>⚠️</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                </tr>
-                                <tr>
-                                    <td><span class="badge badge-prov">LDC</span></td>
-                                    <td><code>ctg</code></td>
-                                    <td>TN→KG</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅ <small>ph</small></td>
-                                    <td>⚠️</td>
-                                    <td>✅</td>
+                                <tr><td><span class="badge badge-prov">Cargill</span></td><td>KG</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                                <tr><td><span class="badge badge-prov">COFCO</span></td><td>TN→KG</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>✅</td><td>✅</td></tr>
+                                <tr><td><span class="badge badge-prov">LDC</span></td><td>TN→KG</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>⚠️</td><td>✅</td><td>✅</td></tr>
+                                <tr><td><span class="badge badge-prov">ACA</span></td><td>TN→KG</td><td>⚠️</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️</td></tr>
+                                <tr><td><span class="badge badge-prov">FYO</span></td><td>KG</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>⚠️</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="font-size:0.75rem;color:var(--gris-500);margin-top:0.5rem;">
+                        ✅ = Disponible | ⚠️ = Parcial/Calculado | ❌ = No disponible en el archivo fuente
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- CHAT -->
+<button class="chat-toggle" onclick="toggleChat()"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+<div class="chat-panel" id="chatPanel">
+    <div class="chat-header"><h4>🌾 Asistente LIAG</h4><button class="chat-close" onclick="toggleChat()">✕</button></div>
+    <div class="chat-messages" id="chatMsgs"><div class="msg bot">¡Hola! Escribe "resumen", "alertas", un CTG, o "X es Y" para corregir clientes.</div></div>
+    <div class="chat-quick">
+        <button class="quick-btn" onclick="quickChat('resumen')">📊 Resumen</button>
+        <button class="quick-btn" onclick="quickChat('alertas')">⚠️ Alertas</button>
+        <button class="quick-btn" onclick="quickChat('ranking')">🏆 Ranking</button>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Escribe aquí..." onkeypress="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+    </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading"><div class="spinner"></div><div class="loading-text" id="loadingText">Cargando...</div></div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toasts"></div>
+
 <script>
 // ╔════════════════════════════════════════════════════════════════════════════╗
 // ║  LIAG v7.0 - PARTE 2: IndexedDB + Estado + Normalización                   ║
@@ -827,34 +827,28 @@ const COLORES = [
 ];
 
 // Umbrales para alertas de calidad
-// Merma: normal hasta 5%, warning hasta 15%, crítico >15%
 const UMBRALES = {
     humedadAlta: 14,
     humedadCritica: 15.5,
     factorBajo: 98,
     factorCritico: 95,
-    mermaPctAlta: 5,       // Warning si merma > 5%
-    mermaPctCritica: 15    // Crítico si merma > 15%
+    mermaPctAlta: 2,
+    mermaPctCritica: 4
 };
 
-// TERMINOLOGÍA:
-// - "Cliente" = Cargill, ACA, COFCO, LDC, FYO (quienes COMPRAN/reciben nuestra mercadería)
-// - "Campo/Origen" = De dónde sale la mercadería (campos de LIAG)
-// - LIAG Argentina = Nosotros, el proveedor de la mercadería
-
+// Columnas de la tabla de cartas (con Campaña y GranoVerde)
 const COLUMNAS_BASE = [
     { key: 'Alertas', label: '⚠️', width: 50 },
     { key: 'CTG', label: 'CTG', width: 110 },
     { key: 'Fecha', label: 'Fecha', width: 90 },
-    { key: 'Campaña', label: 'Campaña', width: 80 },
-    { key: 'Proveedor', label: 'Cliente', width: 90 },        // Cargill, ACA, etc.
-    { key: 'Cliente', label: 'Campo/Origen', width: 150 },    // De dónde sale
+    { key: 'Campana', label: 'Campana', width: 80 },
+    { key: 'Cliente', label: 'Cliente', width: 150 },
+    { key: 'Proveedor', label: 'Proveedor', width: 90 },
     { key: 'Cultivo', label: 'Cultivo', width: 80 },
     { key: 'Peso_kg', label: 'Peso (kg)', width: 100 },
     { key: 'Humedad', label: 'Hum %', width: 65 },
     { key: 'Grado', label: 'Grado', width: 55 },
     { key: 'Factor', label: 'Factor', width: 65 },
-    { key: 'Merma_kg', label: 'Merma (kg)', width: 85 },
     { key: 'MermaPct', label: 'Merma %', width: 70 }
 ];
 
@@ -1126,7 +1120,7 @@ function detectarProveedor(filename) {
 /**
  * Normaliza formato de campaña a "AAAA/AA" (ej: "2024/25")
  */
-function normCampaña(valor) {
+function normCampana(valor) {
     if (!valor) return '';
     const s = String(valor).trim();
     
@@ -1164,64 +1158,47 @@ function normCampaña(valor) {
 function procesarCargill(data) {
     const registros = [];
     const headers = data[0] || [];
-    let descartados = { sinCultivo: 0, sinCTG: 0, ctgInvalido: 0 };
-    
-    console.log('🔄 Procesando Cargill, headers:', headers.slice(0, 8));
     
     for (let i = 1; i < data.length; i++) {
         const row = data[i];
         if (!row || row.length === 0) continue;
         
         // Cultivo
-        const cultivoRaw = getVal(row, headers, 'producto', 'material', 'grano');
-        const cultivo = normCultivo(cultivoRaw);
-        if (!cultivo) {
-            descartados.sinCultivo++;
-            continue;
-        }
+        const cultivo = normCultivo(getVal(row, headers, 'producto'));
+        if (!cultivo) continue;
         
         // CTG
-        const ctgRaw = getVal(row, headers, 'ctg', 'carta de porte', 'nro ctg');
-        const ctg = normCTG(ctgRaw);
-        if (!ctg) {
-            descartados.sinCTG++;
-            continue;
-        }
-        if (ctg.length !== 11) {
-            descartados.ctgInvalido++;
-            continue;
-        }
+        const ctg = normCTG(getVal(row, headers, 'ctg'));
+        if (ctg.length !== 11) continue;
         
         // Cliente
-        let cliente = getVal(row, headers, 'cliente', 'productor', 'remitente');
+        let cliente = getVal(row, headers, 'cliente');
         const clienteOrig = cliente;
         if (esLIAG(cliente)) cliente = 'Cargill';
-        cliente = aplicarCorreccion(cliente) || 'Cargill';
+        cliente = aplicarCorreccion(cliente);
         
         // Peso (ya en KG)
-        const peso = parseFloat(getVal(row, headers, 'peso neto a certificar', 'peso neto', 'peso', 'neto')) || 0;
+        const peso = parseFloat(getVal(row, headers, 'peso neto a certificar', 'peso neto')) || 0;
         
         // Calidad
         const grado = parseInt(getVal(row, headers, 'grado')) || 0;
         const factor = parseFloat(getVal(row, headers, 'factor total', 'factor')) || 100;
-        const humedad = parseFloat(getVal(row, headers, 'humedad%', 'humedad', 'hum')) || 0;
-        const proteina = parseFloat(getVal(row, headers, 'proteina', 'prot')) || 0;
-        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph', 'p.h.')) || 0;
+        const humedad = parseFloat(getVal(row, headers, 'humedad%', 'humedad')) || 0;
+        const proteina = parseFloat(getVal(row, headers, 'proteina')) || 0;
+        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph')) || 0;
         
-        // Mermas - EN CARGILL YA VIENEN EN KG (no en toneladas ni %)
+        // Mermas
         const zaranda = parseFloat(getVal(row, headers, 'zaranda')) || 0;
         const volatil = parseFloat(getVal(row, headers, 'volatil', 'volátil')) || 0;
         const mermaKg = zaranda + volatil;
-        // Calcular % sobre peso bruto (peso + merma = bruto aproximado)
-        const pesoBruto = peso + mermaKg;
-        const mermaPct = pesoBruto > 0 ? parseFloat(((mermaKg / pesoBruto) * 100).toFixed(2)) : 0;
+        const mermaPct = peso > 0 ? parseFloat(((mermaKg / peso) * 100).toFixed(2)) : 0;
         
         // Grano Verde
         const granoVerde = parseFloat(getVal(row, headers, 'grano verde', 'granos verdes', 'verde')) || 0;
         
         // Campaña (normalizar formato)
         let campaña = String(getVal(row, headers, 'cosecha', 'campaña') || '');
-        campaña = normCampaña(campaña);
+        campaña = normCampana(campaña);
         
         const registro = {
             CTG: ctg,
@@ -1230,7 +1207,7 @@ function procesarCargill(data) {
             ClienteOrig: clienteOrig,
             Proveedor: 'Cargill',
             Cultivo: cultivo,
-            Campaña: campaña,
+            Campana: campaña,
             Peso_kg: peso,
             Humedad: humedad,
             Grado: grado,
@@ -1252,7 +1229,6 @@ function procesarCargill(data) {
         registros.push(registro);
     }
     
-    console.log(`📊 Cargill: ${registros.length} válidos, descartados:`, descartados);
     return registros;
 }
 
@@ -1611,12 +1587,8 @@ function leerArchivo(file) {
  * Procesa múltiples archivos
  */
 async function handleFiles(files) {
-    if (!files || files.length === 0) {
-        console.log('⚠️ No se recibieron archivos');
-        return;
-    }
+    if (!files || files.length === 0) return;
     
-    console.log(`📁 Procesando ${files.length} archivo(s)...`);
     showLoading('Procesando archivos...');
     
     try {
@@ -1625,32 +1597,10 @@ async function handleFiles(files) {
         let totalNuevos = 0;
         
         for (const file of files) {
-            console.log(`📄 Archivo: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
             setLoadingText(`Leyendo ${file.name}...`);
-            
             const data = await leerArchivo(file);
-            console.log(`📊 Datos leídos: ${data.length} filas, ${data[0]?.length || 0} columnas`);
             
-            if (data.length < 2) {
-                console.warn('⚠️ Archivo vacío o sin datos');
-                toast(`${file.name}: archivo vacío`, 'warning');
-                continue;
-            }
-            
-            // Mostrar headers para debug
-            console.log('📋 Headers:', data[0]?.slice(0, 10));
-            
-            // Detectar proveedor por nombre de archivo
-            let proveedor = detectarProveedor(file.name);
-            
-            // Si no se detectó, intentar por contenido
-            if (proveedor === 'Otro') {
-                proveedor = detectarProveedorPorContenido(data[0]);
-                console.log(`🔍 Proveedor detectado por contenido: ${proveedor}`);
-            } else {
-                console.log(`🔍 Proveedor detectado por nombre: ${proveedor}`);
-            }
-            
+            const proveedor = detectarProveedor(file.name);
             setLoadingText(`Procesando ${proveedor}...`);
             
             let registros = [];
@@ -1661,39 +1611,31 @@ async function handleFiles(files) {
                 case 'LDC': registros = procesarLDC(data); break;
                 case 'FYO': registros = procesarFYO(data); break;
                 default:
-                    console.warn(`⚠️ Proveedor "${proveedor}" no soportado`);
-                    toast(`Proveedor "${proveedor}" no reconocido. Renombrá el archivo incluyendo: cargill, aca, cofco, ldc o fyo`, 'warning');
+                    console.warn('Proveedor no reconocido:', proveedor);
+                    toast(`Proveedor "${proveedor}" no soportado`, 'warning');
                     continue;
-            }
-            
-            console.log(`📝 Registros procesados: ${registros.length}`);
-            
-            if (registros.length === 0) {
-                console.warn('⚠️ No se encontraron registros válidos');
-                toast(`${file.name}: no se encontraron cartas válidas`, 'warning');
-                continue;
             }
             
             // Filtrar duplicados
             const nuevos = registros.filter(r => !ctgsExistentes.has(r.CTG));
             nuevos.forEach(r => ctgsExistentes.add(r.CTG));
             
-            console.log(`✅ Nuevos: ${nuevos.length}, Duplicados: ${registros.length - nuevos.length}`);
-            
             if (nuevos.length > 0) {
-                setLoadingText(`Guardando ${nuevos.length} cartas...`);
+                setLoadingText(`Guardando ${nuevos.length} cartas de ${proveedor}...`);
                 await dbGuardarCartas(nuevos);
                 STATE.cartas.push(...nuevos);
                 totalNuevos += nuevos.length;
+                
+                console.log(`✓ ${proveedor}: ${nuevos.length} nuevas (${registros.length - nuevos.length} duplicadas)`);
+            } else {
+                console.log(`✓ ${proveedor}: 0 nuevas (${registros.length} duplicadas)`);
             }
         }
         
-        STATE.filtradas = [...STATE.cartas];
         hideLoading();
         
         if (totalNuevos > 0) {
-            toast(`✅ ${totalNuevos} cartas nuevas agregadas`, 'success');
-            console.log(`🎉 Total: ${totalNuevos} cartas nuevas, ${STATE.cartas.length} en total`);
+            toast(`${totalNuevos} cartas nuevas agregadas`, 'success');
             await refreshUI();
         } else {
             toast('No se encontraron cartas nuevas', 'warning');
@@ -1701,33 +1643,9 @@ async function handleFiles(files) {
         
     } catch (err) {
         hideLoading();
-        console.error('❌ Error procesando archivos:', err);
-        toast('Error al procesar archivos: ' + err.message, 'error');
+        console.error('Error procesando archivos:', err);
+        toast('Error al procesar archivos', 'error');
     }
-}
-
-// Detectar proveedor por contenido de headers
-function detectarProveedorPorContenido(headers) {
-    if (!headers || !Array.isArray(headers)) return 'Otro';
-    
-    const h = headers.map(x => String(x || '').toLowerCase()).join(' ');
-    
-    // Cargill: tiene "peso neto a certificar", "factor total"
-    if (h.includes('peso neto a certificar') || h.includes('factor total')) return 'Cargill';
-    
-    // COFCO: tiene "número de ctg", "titular cpe"
-    if (h.includes('número de ctg') || h.includes('numero de ctg') || h.includes('titular cpe')) return 'COFCO';
-    
-    // LDC: tiene "cant. neta", "fecha movimiento"
-    if (h.includes('cant. neta') || h.includes('fecha movimiento')) return 'LDC';
-    
-    // ACA: tiene "kg.netos", "procedencia" sin otros campos específicos
-    if (h.includes('kg.netos') || (h.includes('procedencia') && h.includes('zaran'))) return 'ACA';
-    
-    // FYO: estructura por índices, verificar si columna 1 parece CTG
-    if (headers.length > 15 && !h.includes('ctg')) return 'FYO';
-    
-    return 'Otro';
 }
 
 console.log('✅ Parte 3 cargada: Procesadores de Proveedores');
@@ -1855,29 +1773,26 @@ function updateQuality() {
 }
 
 /**
- * Actualiza ranking de clientes (Cargill, ACA, COFCO, etc)
+ * Actualiza ranking de proveedores
  */
 function updateRanking() {
     const metric = document.getElementById('rankingMetric')?.value || 'factor';
     const stats = {};
     
-    // Agrupar por Proveedor (que son los CLIENTES)
     STATE.cartas.forEach(c => {
         if (!stats[c.Proveedor]) {
-            stats[c.Proveedor] = { cartas: 0, peso: 0, factor: 0, mermaKg: 0 };
+            stats[c.Proveedor] = { cartas: 0, peso: 0, factor: 0 };
         }
         stats[c.Proveedor].cartas++;
         stats[c.Proveedor].peso += c.Peso_kg || 0;
         stats[c.Proveedor].factor += c.Factor || 100;
-        stats[c.Proveedor].mermaKg += c.Merma_kg || 0;
     });
     
-    const lista = Object.entries(stats).map(([cli, s]) => ({
-        nombre: cli,
+    const lista = Object.entries(stats).map(([prov, s]) => ({
+        nombre: prov,
         cartas: s.cartas,
         peso: s.peso,
-        factor: s.factor / s.cartas,
-        mermaKg: s.mermaKg
+        factor: s.factor / s.cartas
     }));
     
     // Ordenar según métrica
@@ -2090,31 +2005,27 @@ function renderProveedores() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// PÁGINA: CLIENTES (Cargill, ACA, COFCO, LDC, FYO - quienes reciben mercadería)
+// PÁGINA: CLIENTES
 // ══════════════════════════════════════════════════════════════════════════════
 
 function renderClientes() {
     const stats = {};
     
-    // Agrupar por "Proveedor" que en realidad son los CLIENTES (Cargill, ACA, etc)
     STATE.cartas.forEach(c => {
-        const cli = c.Proveedor || 'Sin cliente';
+        const cli = c.Cliente || 'Sin cliente';
         if (!stats[cli]) {
             stats[cli] = {
-                cartas: 0, peso: 0, factor: 0, hum: 0, humN: 0,
-                prot: 0, protN: 0, ph: 0, phN: 0,
-                mermaKg: 0, alertas: 0, ultima: ''
+                cartas: 0, peso: 0, factor: 0, hum: 0,
+                alertas: 0, provs: {}, ultima: ''
             };
         }
         const s = stats[cli];
         s.cartas++;
         s.peso += c.Peso_kg || 0;
         s.factor += c.Factor || 100;
-        if (c.Humedad > 0) { s.hum += c.Humedad; s.humN++; }
-        if (c.Proteina > 0) { s.prot += c.Proteina; s.protN++; }
-        if (c.PesoHL > 0) { s.ph += c.PesoHL; s.phN++; }
-        s.mermaKg += c.Merma_kg || 0;
+        s.hum += c.Humedad || 0;
         if (c.Alertas?.length) s.alertas++;
+        s.provs[c.Proveedor] = (s.provs[c.Proveedor] || 0) + 1;
         if (!s.ultima || c.Fecha > s.ultima) s.ultima = c.Fecha;
     });
     
@@ -2124,67 +2035,23 @@ function renderClientes() {
         .filter(([cli]) => cli.toLowerCase().includes(buscar))
         .sort((a, b) => b[1].peso - a[1].peso);
     
-    // Calcular merma % sobre total
-    const calcMermaPct = (s) => {
-        const bruto = s.peso + s.mermaKg;
-        return bruto > 0 ? ((s.mermaKg / bruto) * 100) : 0;
-    };
-    
     const tbody = document.getElementById('tbodyClientes');
-    tbody.innerHTML = filtrados.map(([cli, s]) => {
-        const factorProm = s.factor / s.cartas;
-        const factorClass = factorProm >= 100 ? 'cell-good' : factorProm >= 98 ? '' : 'cell-danger';
-        const mermaPct = calcMermaPct(s);
-        const mermaClass = mermaPct <= 5 ? 'cell-good' : mermaPct <= 15 ? 'cell-warning' : 'cell-danger';
+    tbody.innerHTML = filtrados.slice(0, 100).map(([cli, s]) => {
+        const provPrinc = Object.entries(s.provs).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
         
         return `
             <tr>
-                <td><span class="badge badge-prov">${cli}</span></td>
+                <td><strong>${cli}</strong></td>
+                <td><span class="badge badge-prov">${provPrinc}</span></td>
                 <td class="cell-mono">${formatNum(s.cartas)}</td>
                 <td class="cell-mono">${formatNum(s.peso)}</td>
-                <td class="cell-mono ${factorClass}">${factorProm.toFixed(2)}%</td>
-                <td class="cell-mono">${s.humN > 0 ? (s.hum / s.humN).toFixed(1) + '%' : '-'}</td>
-                <td class="cell-mono">${s.protN > 0 ? (s.prot / s.protN).toFixed(1) + '%' : '-'}</td>
-                <td class="cell-mono">${s.phN > 0 ? (s.ph / s.phN).toFixed(1) : '-'}</td>
-                <td class="cell-mono">${formatNum(s.mermaKg)}</td>
-                <td class="cell-mono ${mermaClass}">${mermaPct.toFixed(2)}%</td>
-                <td>${s.alertas > 0 ? `<span class="badge badge-g3">${s.alertas}</span>` : '<span class="cell-good">✓</span>'}</td>
+                <td class="cell-mono">${(s.factor / s.cartas).toFixed(2)}%</td>
+                <td class="cell-mono">${(s.hum / s.cartas).toFixed(1)}%</td>
+                <td>${s.alertas > 0 ? `<span class="badge badge-g3">${s.alertas}</span>` : '✓'}</td>
                 <td class="cell-mono">${s.ultima || '-'}</td>
             </tr>
         `;
     }).join('');
-    
-    // Cards visuales
-    const cardsContainer = document.getElementById('clienteCards');
-    if (cardsContainer) {
-        cardsContainer.innerHTML = filtrados.slice(0, 6).map(([cli, s]) => {
-            const factorProm = s.factor / s.cartas;
-            return `
-                <div class="card">
-                    <div class="card-header" style="padding:0.85rem 1rem;">
-                        <span class="card-title"><span class="badge badge-prov">${cli}</span></span>
-                        <span style="font-size:0.75rem;color:var(--gris-500);">${s.cartas} cartas</span>
-                    </div>
-                    <div class="card-body" style="padding:1rem;">
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;text-align:center;">
-                            <div>
-                                <div style="font-size:1.1rem;font-weight:700;color:var(--verde-700);font-family:'JetBrains Mono',monospace;">${formatNum(s.peso/1000,1)}t</div>
-                                <div style="font-size:0.65rem;color:var(--gris-500);text-transform:uppercase;">Peso</div>
-                            </div>
-                            <div>
-                                <div style="font-size:1.1rem;font-weight:700;color:${factorProm >= 100 ? 'var(--verde-700)' : factorProm >= 98 ? 'var(--gris-700)' : 'var(--rojo-700)'};font-family:'JetBrains Mono',monospace;">${factorProm.toFixed(1)}%</div>
-                                <div style="font-size:0.65rem;color:var(--gris-500);text-transform:uppercase;">Factor</div>
-                            </div>
-                            <div>
-                                <div style="font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${formatNum(s.mermaKg)}</div>
-                                <div style="font-size:0.65rem;color:var(--gris-500);text-transform:uppercase;">Merma kg</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2369,7 +2236,7 @@ function aplicarFiltrosCartas() {
     const fGrado = document.getElementById('cfGrado')?.value;
     const fAlertas = document.getElementById('cfAlertas')?.value;
     const fCTG = document.getElementById('cfCTG')?.value?.trim();
-    const fCampaña = document.getElementById('cfCampaña')?.value;
+    const fCampaña = document.getElementById('cfCampana')?.value;
     
     if (fProv) datos = datos.filter(c => c.Proveedor === fProv);
     if (fCliente) datos = datos.filter(c => c.Cliente === fCliente);
@@ -2378,7 +2245,7 @@ function aplicarFiltrosCartas() {
     if (fAlertas === 'si') datos = datos.filter(c => c.Alertas?.length > 0);
     if (fAlertas === 'no') datos = datos.filter(c => !c.Alertas?.length);
     if (fCTG) datos = datos.filter(c => c.CTG.includes(fCTG));
-    if (fCampaña) datos = datos.filter(c => c.Campaña === fCampaña);
+    if (fCampaña) datos = datos.filter(c => c.Campana === fCampaña);
     
     STATE.filtradas = datos;
     STATE.pagina = 1;
@@ -2462,7 +2329,7 @@ function formatCelda(key, val, row) {
             return html;
         case 'CTG':
             return `<span class="cell-mono" style="color:var(--verde-800);font-weight:600;">${val}</span>`;
-        case 'Campaña':
+        case 'Campana':
             return val ? `<span class="badge" style="background:#E3F2FD;color:#1565C0;">${val}</span>` : '-';
         case 'Peso_kg':
         case 'Merma_kg':
@@ -2485,7 +2352,7 @@ function formatCelda(key, val, row) {
             return `<span class="cell-mono ${hCls}">${h.toFixed(1)}%</span>`;
         case 'MermaPct':
             const m = Number(val);
-            const mCls = m <= 5 ? 'cell-good' : m <= 15 ? 'cell-warning' : 'cell-danger';
+            const mCls = m <= 2 ? 'cell-good' : m <= 4 ? 'cell-warning' : 'cell-danger';
             return `<span class="cell-mono ${mCls}">${m.toFixed(2)}%</span>`;
         case 'GranoVerde':
             if (!val || val === 0) return '-';
@@ -2536,7 +2403,7 @@ function irPagina(pag) {
 }
 
 function limpiarFiltrosCartas() {
-    ['cfProv', 'cfCliente', 'cfCultivo', 'cfGrado', 'cfAlertas', 'cfCTG', 'cfCampaña'].forEach(id => {
+    ['cfProv', 'cfCliente', 'cfCultivo', 'cfGrado', 'cfAlertas', 'cfCTG', 'cfCampana'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
@@ -2647,12 +2514,12 @@ function procesarChat(msg) {
     if (lower.includes('campaña')) {
         const campañas = {};
         STATE.cartas.forEach(c => {
-            const camp = c.Campaña || 'Sin campaña';
+            const camp = c.Campana || 'Sin campaña';
             if (!campañas[camp]) campañas[camp] = { n: 0, peso: 0 };
             campañas[camp].n++;
             campañas[camp].peso += c.Peso_kg || 0;
         });
-        return `📅 <b>Por Campaña:</b><br>` +
+        return `📅 <b>Por Campana:</b><br>` +
             Object.entries(campañas)
                 .sort((a, b) => b[1].peso - a[1].peso)
                 .map(([c, s]) => `• ${c}: ${s.n} cartas, ${formatNum(s.peso/1000)}t`)
@@ -2749,9 +2616,11 @@ function navegarA(pagina) {
     document.getElementById(`page-${pagina}`)?.classList.add('active');
     
     // Cargar datos de la página
+    if (pagina === 'proveedores') renderProveedores();
     if (pagina === 'clientes') renderClientes();
     if (pagina === 'analisis') updateAnalisis();
     if (pagina === 'cartas') aplicarFiltrosCartas();
+    if (pagina === 'integracion') {}; // página de integración
 }
 
 function initNavigation() {
@@ -2790,9 +2659,9 @@ function initDragDrop() {
 // ACTUALIZACIÓN FILTROS DE CAMPAÑA
 // ══════════════════════════════════════════════════════════════════════════════
 
-function updateFiltersCampaña() {
-    const campañas = [...new Set(STATE.cartas.map(c => c.Campaña).filter(c => c))].sort().reverse();
-    const select = document.getElementById('cfCampaña');
+function updateFiltersCampana() {
+    const campañas = [...new Set(STATE.cartas.map(c => c.Campana).filter(c => c))].sort().reverse();
+    const select = document.getElementById('cfCampana');
     if (select) {
         select.innerHTML = '<option value="">Todas</option>' + 
             campañas.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -2828,7 +2697,7 @@ async function init() {
         
         // Refrescar UI
         await refreshUI();
-        updateFiltersCampaña();
+        updateFiltersCampana();
         
         console.log(`✅ LIAG v7.0 listo - ${STATE.cartas.length} cartas en BD`);
         
@@ -2847,11 +2716,8 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 // ══════════════════════════════════════════════════════════════════════════════
-// INTEGRACIÓN DE NUEVOS CLIENTES
+// INTEGRACIÓN DE NUEVOS PROVEEDORES
 // ══════════════════════════════════════════════════════════════════════════════
-
-let archivoAnalizado = null;
-let headersAnalizado = [];
 
 async function analizarArchivoNuevo(file) {
     if (!file) return;
@@ -2862,24 +2728,24 @@ async function analizarArchivoNuevo(file) {
         const data = await leerArchivo(file);
         hideLoading();
         
-        archivoAnalizado = file;
-        headersAnalizado = data[0] || [];
-        const filas = data.slice(1, 11);
+        const headers = data[0] || [];
+        const filas = data.slice(1, 11); // Primeras 10 filas de datos
         
-        const colsDetectadas = detectarColumnasImportantes(headersAnalizado);
+        // Detectar columnas importantes
+        const colsDetectadas = detectarColumnasImportantes(headers);
         
+        // Mostrar análisis
         document.getElementById('analisisContainer').style.display = 'block';
         
-        // Info del archivo
         let infoHTML = `
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1rem;">
                 <div class="stat-card">
                     <div class="stat-label">Archivo</div>
-                    <div class="stat-value" style="font-size:0.9rem;word-break:break-all;">${file.name}</div>
+                    <div class="stat-value" style="font-size:1rem;">${file.name}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Columnas</div>
-                    <div class="stat-value">${headersAnalizado.length}</div>
+                    <div class="stat-value">${headers.length}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Filas de Datos</div>
@@ -2887,21 +2753,43 @@ async function analizarArchivoNuevo(file) {
                 </div>
             </div>
             
-            <div style="margin-bottom:1rem;">
-                <label style="font-size:0.85rem;font-weight:600;color:var(--gris-700);">Nombre del Cliente:</label>
-                <input type="text" id="nombreNuevoCliente" placeholder="Ej: Bunge, Molinos..." 
-                    style="margin-left:0.5rem;padding:0.5rem;border:1px solid var(--gris-300);border-radius:6px;width:200px;">
-            </div>
+            <h4 style="margin-bottom:0.75rem;color:var(--verde-800);">🔍 Columnas Detectadas Automáticamente:</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
         `;
+        
+        const campos = [
+            { key: 'ctg', label: 'CTG', icon: '🔢' },
+            { key: 'fecha', label: 'Fecha', icon: '📅' },
+            { key: 'peso', label: 'Peso', icon: '⚖️' },
+            { key: 'humedad', label: 'Humedad', icon: '💧' },
+            { key: 'factor', label: 'Factor', icon: '📊' },
+            { key: 'grado', label: 'Grado', icon: '🏅' },
+            { key: 'proteina', label: 'Proteína', icon: '🧪' },
+            { key: 'ph', label: 'Peso HL', icon: '📏' },
+            { key: 'granoVerde', label: 'Grano Verde', icon: '🟢' },
+            { key: 'cliente', label: 'Cliente', icon: '👤' },
+            { key: 'cosecha', label: 'Campana', icon: '🌾' },
+            { key: 'destino', label: 'Destino', icon: '📍' }
+        ];
+        
+        campos.forEach(campo => {
+            const encontrado = colsDetectadas[campo.key];
+            const estilo = encontrado !== null 
+                ? 'background:var(--verde-100);color:var(--verde-800);border:1px solid var(--verde-300);'
+                : 'background:var(--gris-100);color:var(--gris-500);border:1px solid var(--gris-300);';
+            const texto = encontrado !== null 
+                ? `${campo.icon} ${campo.label}: Col ${encontrado + 1} (${headers[encontrado]?.substring(0, 15) || ''})`
+                : `${campo.icon} ${campo.label}: No encontrado`;
+            infoHTML += `<span style="padding:0.4rem 0.75rem;border-radius:6px;font-size:0.8rem;${estilo}">${texto}</span>`;
+        });
+        
+        infoHTML += '</div>';
         
         document.getElementById('analisisInfo').innerHTML = infoHTML;
         
-        // Mapeo interactivo de columnas
-        renderMapeoColumnas(headersAnalizado, colsDetectadas);
-        
         // Tabla preview
         let tableHTML = '<thead><tr>';
-        headersAnalizado.forEach((h, i) => {
+        headers.forEach((h, i) => {
             const esImportante = Object.values(colsDetectadas).includes(i);
             tableHTML += `<th style="${esImportante ? 'background:var(--verde-700);' : ''}">${i + 1}. ${h || '(vacío)'}</th>`;
         });
@@ -2909,7 +2797,7 @@ async function analizarArchivoNuevo(file) {
         
         filas.forEach(fila => {
             tableHTML += '<tr>';
-            headersAnalizado.forEach((_, i) => {
+            headers.forEach((_, i) => {
                 const val = fila[i];
                 const esImportante = Object.values(colsDetectadas).includes(i);
                 tableHTML += `<td style="${esImportante ? 'background:var(--verde-50);font-weight:600;' : ''}">${val !== undefined && val !== null ? val : '-'}</td>`;
@@ -2919,7 +2807,8 @@ async function analizarArchivoNuevo(file) {
         tableHTML += '</tbody>';
         
         document.getElementById('tablaPreview').innerHTML = tableHTML;
-        toast('Archivo analizado - configurá el mapeo de columnas', 'success');
+        
+        toast('Archivo analizado correctamente', 'success');
         
     } catch (err) {
         hideLoading();
@@ -2928,981 +2817,44 @@ async function analizarArchivoNuevo(file) {
     }
 }
 
-function renderMapeoColumnas(headers, detectados) {
-    const campos = [
-        { key: 'ctg', label: 'CTG (Carta de Porte)', required: true },
-        { key: 'fecha', label: 'Fecha de Descarga', required: true },
-        { key: 'peso', label: 'Peso Neto', required: true },
-        { key: 'unidadPeso', label: 'Unidad de Peso', type: 'select', options: ['KG', 'TN (x1000)'] },
-        { key: 'humedad', label: 'Humedad %', required: false },
-        { key: 'factor', label: 'Factor', required: false },
-        { key: 'grado', label: 'Grado', required: false },
-        { key: 'proteina', label: 'Proteína %', required: false },
-        { key: 'ph', label: 'Peso Hectolítrico', required: false },
-        { key: 'granoVerde', label: 'Grano Verde %', required: false },
-        { key: 'cosecha', label: 'Campaña/Cosecha', required: false },
-        { key: 'cliente', label: 'Campo/Origen', required: false },
-        { key: 'destino', label: 'Destino/Planta', required: false },
-        { key: 'zaranda', label: 'Merma Zaranda', required: false },
-        { key: 'volatil', label: 'Merma Volátil', required: false }
-    ];
-    
-    // Opciones de columnas
-    const opciones = headers.map((h, i) => `<option value="${i}">${i + 1}. ${h || '(vacío)'}</option>`).join('');
-    
-    const container = document.getElementById('mapeoColumnas');
-    container.innerHTML = campos.map(campo => {
-        if (campo.type === 'select') {
-            return `
-                <div class="filter-group">
-                    <label>${campo.label}</label>
-                    <select id="map_${campo.key}">
-                        ${campo.options.map((o, i) => `<option value="${o}" ${i === 0 ? 'selected' : ''}>${o}</option>`).join('')}
-                    </select>
-                </div>
-            `;
-        }
-        
-        const detectado = detectados[campo.key];
-        return `
-            <div class="filter-group">
-                <label>${campo.label} ${campo.required ? '<span style="color:var(--rojo-500);">*</span>' : ''}</label>
-                <select id="map_${campo.key}">
-                    <option value="-1">No disponible</option>
-                    ${opciones}
-                </select>
-            </div>
-        `;
-    }).join('');
-    
-    // Pre-seleccionar detectados
-    Object.entries(detectados).forEach(([key, idx]) => {
-        const select = document.getElementById(`map_${key}`);
-        if (select && idx !== null) {
-            select.value = idx;
-        }
-    });
-}
-
 function detectarColumnasImportantes(headers) {
     const result = {
-        ctg: null, fecha: null, peso: null, humedad: null, factor: null,
-        grado: null, proteina: null, ph: null, granoVerde: null,
-        cliente: null, cosecha: null, destino: null, zaranda: null, volatil: null
+        ctg: null,
+        fecha: null,
+        peso: null,
+        humedad: null,
+        factor: null,
+        grado: null,
+        proteina: null,
+        ph: null,
+        granoVerde: null,
+        cliente: null,
+        cosecha: null,
+        destino: null
     };
     
     headers.forEach((h, i) => {
         if (!h) return;
-        const l = String(h).toLowerCase().trim();
+        const l = String(h).toLowerCase();
         
-        if (result.ctg === null && (l.includes('ctg') || l.includes('carta de porte'))) result.ctg = i;
-        if (result.fecha === null && (l.includes('fecha') || l.includes('descarga'))) result.fecha = i;
+        if (result.ctg === null && (l.includes('ctg') || l.includes('carta'))) result.ctg = i;
+        if (result.fecha === null && (l.includes('fecha') || l.includes('date'))) result.fecha = i;
         if (result.peso === null && (l.includes('peso') || l.includes('neto') || l.includes('cantidad'))) result.peso = i;
-        if (result.humedad === null && (l.includes('humedad') || l === 'hum' || l === 'h%')) result.humedad = i;
+        if (result.humedad === null && (l.includes('humedad') || l.includes('hum') || l === 'h')) result.humedad = i;
         if (result.factor === null && l.includes('factor')) result.factor = i;
         if (result.grado === null && l.includes('grado')) result.grado = i;
         if (result.proteina === null && (l.includes('proteina') || l.includes('prot'))) result.proteina = i;
-        if (result.ph === null && (l.includes('hectol') || l === 'ph' || l === 'p.h.')) result.ph = i;
+        if (result.ph === null && (l.includes('hectol') || l.includes('ph') || l === 'p.h.')) result.ph = i;
         if (result.granoVerde === null && (l.includes('verde') || l.includes('green'))) result.granoVerde = i;
-        if (result.cliente === null && (l.includes('cliente') || l.includes('procedencia') || l.includes('remitente') || l.includes('origen'))) result.cliente = i;
-        if (result.cosecha === null && (l.includes('cosecha') || l.includes('campaña'))) result.cosecha = i;
+        if (result.cliente === null && (l.includes('cliente') || l.includes('procedencia') || l.includes('remitente'))) result.cliente = i;
+        if (result.cosecha === null && (l.includes('cosecha') || l.includes('campaña') || l.includes('campaign'))) result.cosecha = i;
         if (result.destino === null && (l.includes('destino') || l.includes('planta') || l.includes('puerto'))) result.destino = i;
-        if (result.zaranda === null && l.includes('zaranda')) result.zaranda = i;
-        if (result.volatil === null && (l.includes('volátil') || l.includes('volatil'))) result.volatil = i;
     });
     
     return result;
 }
 
-function guardarMapeoCliente() {
-    const nombre = document.getElementById('nombreNuevoCliente')?.value?.trim();
-    if (!nombre) {
-        toast('Ingresá el nombre del cliente', 'warning');
-        return;
-    }
-    
-    const mapeo = {
-        nombre: nombre,
-        archivo: archivoAnalizado?.name,
-        columnas: {}
-    };
-    
-    const campos = ['ctg', 'fecha', 'peso', 'unidadPeso', 'humedad', 'factor', 'grado', 
-                    'proteina', 'ph', 'granoVerde', 'cosecha', 'cliente', 'destino', 'zaranda', 'volatil'];
-    
-    campos.forEach(campo => {
-        const select = document.getElementById(`map_${campo}`);
-        if (select) {
-            const val = select.value;
-            if (campo === 'unidadPeso') {
-                mapeo.columnas[campo] = val;
-            } else {
-                mapeo.columnas[campo] = parseInt(val);
-                // Guardar nombre de columna original
-                if (parseInt(val) >= 0 && headersAnalizado[parseInt(val)]) {
-                    mapeo.columnas[campo + '_nombre'] = headersAnalizado[parseInt(val)];
-                }
-            }
-        }
-    });
-    
-    // Guardar en IndexedDB
-    dbGuardarConfig(`cliente_${nombre.toLowerCase()}`, mapeo);
-    
-    toast(`Configuración de ${nombre} guardada`, 'success');
-    console.log('Mapeo guardado:', mapeo);
-}
-
-function exportarConfigCliente() {
-    const nombre = document.getElementById('nombreNuevoCliente')?.value?.trim() || 'nuevo_cliente';
-    
-    const mapeo = { nombre, columnas: {} };
-    const campos = ['ctg', 'fecha', 'peso', 'unidadPeso', 'humedad', 'factor', 'grado', 
-                    'proteina', 'ph', 'granoVerde', 'cosecha', 'cliente', 'destino', 'zaranda', 'volatil'];
-    
-    campos.forEach(campo => {
-        const select = document.getElementById(`map_${campo}`);
-        if (select) {
-            const val = select.value;
-            if (campo === 'unidadPeso') {
-                mapeo.columnas[campo] = val;
-            } else {
-                const idx = parseInt(val);
-                mapeo.columnas[campo] = {
-                    indice: idx,
-                    nombreColumna: idx >= 0 ? headersAnalizado[idx] : null
-                };
-            }
-        }
-    });
-    
-    // Descargar como JSON
-    const blob = new Blob([JSON.stringify(mapeo, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `config_${nombre.toLowerCase().replace(/\s+/g, '_')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast('Configuración exportada', 'success');
-}
-
-function toggleEditarClientes() {
-    toast('Función de edición en desarrollo', 'warning');
-}
-
 console.log('✅ Parte 5 cargada: Tabla, Chat, Export, Init + Grano Verde + Campaña + Integración');
-
-// ╔════════════════════════════════════════════════════════════════════════════╗
-// ║  LIAG v7.0 - MODELADOR VISUAL DE COLUMNAS (estilo Power BI)               ║
-// ║  Drag & Drop para vincular columnas del archivo con campos del sistema    ║
-// ╚════════════════════════════════════════════════════════════════════════════╝
-
-// Estado del modelador
-const MODELADOR = {
-    columnas: [],           // Columnas del archivo cargado
-    conexiones: {},         // { campoSistema: indiceColumna }
-    arrastrando: null,      // Elemento siendo arrastrado
-    lineas: [],             // Líneas SVG de conexión
-    muestras: {}            // Valores de muestra por columna
-};
-
-// Campos del sistema LIAG
-const CAMPOS_SISTEMA = [
-    { id: 'ctg', nombre: 'CTG', icono: '🔢', requerido: true, descripcion: 'Carta de Porte (11 dígitos)' },
-    { id: 'fecha', nombre: 'Fecha', icono: '📅', requerido: true, descripcion: 'Fecha de descarga' },
-    { id: 'peso', nombre: 'Peso', icono: '⚖️', requerido: true, descripcion: 'Peso neto', extra: 'unidad' },
-    { id: 'humedad', nombre: 'Humedad %', icono: '💧', requerido: false, descripcion: 'Porcentaje de humedad' },
-    { id: 'factor', nombre: 'Factor', icono: '📊', requerido: false, descripcion: 'Factor de calidad' },
-    { id: 'grado', nombre: 'Grado', icono: '🏅', requerido: false, descripcion: 'Grado 1, 2 o 3' },
-    { id: 'proteina', nombre: 'Proteína %', icono: '🧪', requerido: false, descripcion: 'Porcentaje de proteína' },
-    { id: 'ph', nombre: 'Peso HL', icono: '📏', requerido: false, descripcion: 'Peso hectolítrico' },
-    { id: 'granoVerde', nombre: 'Grano Verde', icono: '🟢', requerido: false, descripcion: 'Porcentaje grano verde' },
-    { id: 'zaranda', nombre: 'Merma Zaranda', icono: '🔻', requerido: false, descripcion: 'Descuento por zaranda' },
-    { id: 'volatil', nombre: 'Merma Volátil', icono: '💨', requerido: false, descripcion: 'Descuento por volátil' },
-    { id: 'cosecha', nombre: 'Campaña', icono: '🌾', requerido: false, descripcion: 'Campaña/Cosecha' },
-    { id: 'campo', nombre: 'Campo/Origen', icono: '🏠', requerido: false, descripcion: 'Procedencia' },
-    { id: 'destino', nombre: 'Destino', icono: '📍', requerido: false, descripcion: 'Planta/Puerto destino' },
-    { id: 'cultivo', nombre: 'Cultivo', icono: '🌱', requerido: false, descripcion: 'Tipo de grano' }
-];
-
-/**
- * Inicializa el modelador visual
- */
-function initModelador(headers, datosMuestra) {
-    MODELADOR.columnas = headers;
-    MODELADOR.conexiones = {};
-    MODELADOR.muestras = {};
-    
-    // Extraer muestras de datos
-    headers.forEach((h, i) => {
-        const valores = datosMuestra.map(fila => fila[i]).filter(v => v !== undefined && v !== null && v !== '');
-        MODELADOR.muestras[i] = valores.slice(0, 3);
-    });
-    
-    // Auto-detectar conexiones
-    autoDetectarConexiones(headers);
-    
-    // Renderizar
-    renderModelador();
-}
-
-/**
- * Auto-detecta conexiones basándose en nombres de columnas
- */
-function autoDetectarConexiones(headers) {
-    headers.forEach((h, i) => {
-        if (!h) return;
-        const l = String(h).toLowerCase().trim();
-        
-        if (!MODELADOR.conexiones.ctg && (l.includes('ctg') || l.includes('carta de porte'))) 
-            MODELADOR.conexiones.ctg = i;
-        if (!MODELADOR.conexiones.fecha && (l.includes('fecha') || l.includes('descarga'))) 
-            MODELADOR.conexiones.fecha = i;
-        if (!MODELADOR.conexiones.peso && (l.includes('peso') || l.includes('neto') || l.includes('cantidad neta'))) 
-            MODELADOR.conexiones.peso = i;
-        if (!MODELADOR.conexiones.humedad && (l.includes('humedad') || l === 'hum' || l === 'h%')) 
-            MODELADOR.conexiones.humedad = i;
-        if (!MODELADOR.conexiones.factor && l.includes('factor')) 
-            MODELADOR.conexiones.factor = i;
-        if (!MODELADOR.conexiones.grado && l.includes('grado')) 
-            MODELADOR.conexiones.grado = i;
-        if (!MODELADOR.conexiones.proteina && (l.includes('proteina') || l.includes('prot'))) 
-            MODELADOR.conexiones.proteina = i;
-        if (!MODELADOR.conexiones.ph && (l.includes('hectol') || l === 'ph' || l === 'p.h.')) 
-            MODELADOR.conexiones.ph = i;
-        if (!MODELADOR.conexiones.granoVerde && (l.includes('verde') || l.includes('green'))) 
-            MODELADOR.conexiones.granoVerde = i;
-        if (!MODELADOR.conexiones.zaranda && l.includes('zaranda')) 
-            MODELADOR.conexiones.zaranda = i;
-        if (!MODELADOR.conexiones.volatil && (l.includes('volátil') || l.includes('volatil'))) 
-            MODELADOR.conexiones.volatil = i;
-        if (!MODELADOR.conexiones.cosecha && (l.includes('cosecha') || l.includes('campaña'))) 
-            MODELADOR.conexiones.cosecha = i;
-        if (!MODELADOR.conexiones.campo && (l.includes('procedencia') || l.includes('origen') || l.includes('remitente'))) 
-            MODELADOR.conexiones.campo = i;
-        if (!MODELADOR.conexiones.destino && (l.includes('destino') || l.includes('planta') || l.includes('puerto'))) 
-            MODELADOR.conexiones.destino = i;
-        if (!MODELADOR.conexiones.cultivo && (l.includes('producto') || l.includes('material') || l.includes('cultivo'))) 
-            MODELADOR.conexiones.cultivo = i;
-    });
-}
-
-/**
- * Renderiza el modelador completo
- */
-function renderModelador() {
-    const container = document.getElementById('modeladorContainer');
-    if (!container) return;
-    
-    container.innerHTML = `
-        <div class="modelador-wrapper">
-            <!-- Panel izquierdo: Columnas del archivo -->
-            <div class="modelador-panel modelador-origen">
-                <div class="modelador-panel-header">
-                    <span>📄 Columnas del Archivo</span>
-                    <span class="modelador-count">${MODELADOR.columnas.length}</span>
-                </div>
-                <div class="modelador-cubos" id="cubosOrigen">
-                    ${renderCubosOrigen()}
-                </div>
-            </div>
-            
-            <!-- Área central: Conexiones SVG -->
-            <div class="modelador-conexiones" id="areaConexiones">
-                <svg id="svgConexiones" width="100%" height="100%"></svg>
-            </div>
-            
-            <!-- Panel derecho: Campos del sistema -->
-            <div class="modelador-panel modelador-destino">
-                <div class="modelador-panel-header">
-                    <span>🎯 Campos LIAG</span>
-                    <span class="modelador-count">${CAMPOS_SISTEMA.length}</span>
-                </div>
-                <div class="modelador-cubos" id="cubosDestino">
-                    ${renderCubosDestino()}
-                </div>
-            </div>
-        </div>
-        
-        <!-- Leyenda y acciones -->
-        <div class="modelador-footer">
-            <div class="modelador-leyenda">
-                <span class="leyenda-item"><span class="dot conectado"></span> Conectado</span>
-                <span class="leyenda-item"><span class="dot requerido"></span> Requerido</span>
-                <span class="leyenda-item"><span class="dot opcional"></span> Opcional</span>
-            </div>
-            <div class="modelador-acciones">
-                <button class="btn btn-sm btn-secondary" onclick="limpiarConexiones()">🗑️ Limpiar</button>
-                <button class="btn btn-sm btn-secondary" onclick="autoConectar()">🔄 Auto-detectar</button>
-                <button class="btn btn-success" onclick="guardarModelado()">💾 Guardar Configuración</button>
-            </div>
-        </div>
-    `;
-    
-    // Agregar estilos del modelador si no existen
-    if (!document.getElementById('modeladorStyles')) {
-        const styles = document.createElement('style');
-        styles.id = 'modeladorStyles';
-        styles.textContent = getModeladorStyles();
-        document.head.appendChild(styles);
-    }
-    
-    // Inicializar drag & drop
-    initDragDropModelador();
-    
-    // Dibujar conexiones existentes
-    setTimeout(() => dibujarConexiones(), 100);
-}
-
-/**
- * Renderiza los cubos de columnas del archivo (origen)
- */
-function renderCubosOrigen() {
-    return MODELADOR.columnas.map((col, i) => {
-        const conectado = Object.values(MODELADOR.conexiones).includes(i);
-        const muestras = MODELADOR.muestras[i] || [];
-        const muestra = muestras.length > 0 ? muestras[0] : '';
-        const muestraCorta = String(muestra).substring(0, 20) + (String(muestra).length > 20 ? '...' : '');
-        
-        return `
-            <div class="cubo cubo-origen ${conectado ? 'conectado' : ''}" 
-                 draggable="true" 
-                 data-indice="${i}"
-                 data-tipo="origen"
-                 id="cubo-origen-${i}">
-                <div class="cubo-header">
-                    <span class="cubo-indice">${i + 1}</span>
-                    <span class="cubo-nombre" title="${col || '(vacío)'}">${col || '(vacío)'}</span>
-                </div>
-                <div class="cubo-muestra" title="${muestra}">${muestraCorta || '-'}</div>
-                ${conectado ? '<div class="cubo-estado">✓</div>' : ''}
-            </div>
-        `;
-    }).join('');
-}
-
-/**
- * Renderiza los cubos de campos del sistema (destino)
- */
-function renderCubosDestino() {
-    return CAMPOS_SISTEMA.map(campo => {
-        const indiceConectado = MODELADOR.conexiones[campo.id];
-        const conectado = indiceConectado !== undefined;
-        const nombreColumna = conectado ? MODELADOR.columnas[indiceConectado] : null;
-        
-        return `
-            <div class="cubo cubo-destino ${conectado ? 'conectado' : ''} ${campo.requerido ? 'requerido' : 'opcional'}" 
-                 data-campo="${campo.id}"
-                 data-tipo="destino"
-                 id="cubo-destino-${campo.id}">
-                <div class="cubo-header">
-                    <span class="cubo-icono">${campo.icono}</span>
-                    <span class="cubo-nombre">${campo.nombre}</span>
-                    ${campo.requerido ? '<span class="cubo-req">*</span>' : ''}
-                </div>
-                <div class="cubo-descripcion">${campo.descripcion}</div>
-                ${conectado ? `
-                    <div class="cubo-conexion">
-                        <span class="conexion-col">← Col ${indiceConectado + 1}: ${nombreColumna}</span>
-                        <button class="conexion-quitar" onclick="quitarConexion('${campo.id}')" title="Quitar">✕</button>
-                    </div>
-                ` : '<div class="cubo-drop-zone">Arrastrá una columna aquí</div>'}
-            </div>
-        `;
-    }).join('');
-}
-
-/**
- * Inicializa eventos de drag & drop
- */
-function initDragDropModelador() {
-    // Cubos de origen (arrastrables)
-    document.querySelectorAll('.cubo-origen').forEach(cubo => {
-        cubo.addEventListener('dragstart', handleDragStart);
-        cubo.addEventListener('dragend', handleDragEnd);
-    });
-    
-    // Cubos de destino (zonas de drop)
-    document.querySelectorAll('.cubo-destino').forEach(cubo => {
-        cubo.addEventListener('dragover', handleDragOver);
-        cubo.addEventListener('dragleave', handleDragLeave);
-        cubo.addEventListener('drop', handleDrop);
-    });
-}
-
-function handleDragStart(e) {
-    MODELADOR.arrastrando = e.target.closest('.cubo-origen');
-    MODELADOR.arrastrando.classList.add('arrastrando');
-    e.dataTransfer.setData('text/plain', MODELADOR.arrastrando.dataset.indice);
-    e.dataTransfer.effectAllowed = 'link';
-    
-    // Resaltar destinos válidos
-    document.querySelectorAll('.cubo-destino').forEach(d => d.classList.add('drop-activo'));
-}
-
-function handleDragEnd(e) {
-    if (MODELADOR.arrastrando) {
-        MODELADOR.arrastrando.classList.remove('arrastrando');
-    }
-    document.querySelectorAll('.cubo-destino').forEach(d => {
-        d.classList.remove('drop-activo', 'drop-hover');
-    });
-    MODELADOR.arrastrando = null;
-}
-
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'link';
-    e.target.closest('.cubo-destino')?.classList.add('drop-hover');
-}
-
-function handleDragLeave(e) {
-    e.target.closest('.cubo-destino')?.classList.remove('drop-hover');
-}
-
-function handleDrop(e) {
-    e.preventDefault();
-    const destino = e.target.closest('.cubo-destino');
-    if (!destino) return;
-    
-    const indiceOrigen = parseInt(e.dataTransfer.getData('text/plain'));
-    const campoDestino = destino.dataset.campo;
-    
-    // Crear conexión
-    crearConexion(campoDestino, indiceOrigen);
-    
-    destino.classList.remove('drop-hover');
-}
-
-/**
- * Crea una conexión entre columna y campo
- */
-function crearConexion(campo, indice) {
-    // Si esta columna ya está conectada a otro campo, la desconectamos
-    Object.keys(MODELADOR.conexiones).forEach(c => {
-        if (MODELADOR.conexiones[c] === indice && c !== campo) {
-            delete MODELADOR.conexiones[c];
-        }
-    });
-    
-    MODELADOR.conexiones[campo] = indice;
-    renderModelador();
-    
-    const nombreColumna = MODELADOR.columnas[indice];
-    const nombreCampo = CAMPOS_SISTEMA.find(c => c.id === campo)?.nombre;
-    toast(`✓ "${nombreColumna}" → ${nombreCampo}`, 'success');
-}
-
-/**
- * Quita una conexión
- */
-function quitarConexion(campo) {
-    delete MODELADOR.conexiones[campo];
-    renderModelador();
-}
-
-/**
- * Dibuja las líneas de conexión en SVG
- */
-function dibujarConexiones() {
-    const svg = document.getElementById('svgConexiones');
-    if (!svg) return;
-    
-    const areaRect = svg.parentElement.getBoundingClientRect();
-    svg.innerHTML = '';
-    
-    Object.entries(MODELADOR.conexiones).forEach(([campo, indice]) => {
-        const origen = document.getElementById(`cubo-origen-${indice}`);
-        const destino = document.getElementById(`cubo-destino-${campo}`);
-        
-        if (!origen || !destino) return;
-        
-        const origenRect = origen.getBoundingClientRect();
-        const destinoRect = destino.getBoundingClientRect();
-        
-        const x1 = origenRect.right - areaRect.left;
-        const y1 = origenRect.top + origenRect.height / 2 - areaRect.top;
-        const x2 = destinoRect.left - areaRect.left;
-        const y2 = destinoRect.top + destinoRect.height / 2 - areaRect.top;
-        
-        // Curva bezier
-        const cx = (x1 + x2) / 2;
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`);
-        path.setAttribute('class', 'conexion-linea');
-        svg.appendChild(path);
-        
-        // Círculo en el destino
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', x2);
-        circle.setAttribute('cy', y2);
-        circle.setAttribute('r', 5);
-        circle.setAttribute('class', 'conexion-punto');
-        svg.appendChild(circle);
-    });
-}
-
-/**
- * Limpia todas las conexiones
- */
-function limpiarConexiones() {
-    if (!confirm('¿Limpiar todas las conexiones?')) return;
-    MODELADOR.conexiones = {};
-    renderModelador();
-    toast('Conexiones eliminadas', 'warning');
-}
-
-/**
- * Re-ejecuta la auto-detección
- */
-function autoConectar() {
-    MODELADOR.conexiones = {};
-    autoDetectarConexiones(MODELADOR.columnas);
-    renderModelador();
-    
-    const conectadas = Object.keys(MODELADOR.conexiones).length;
-    toast(`${conectadas} columnas detectadas automáticamente`, 'success');
-}
-
-/**
- * Guarda el modelado configurado
- */
-function guardarModelado() {
-    const nombre = document.getElementById('nombreNuevoCliente')?.value?.trim();
-    if (!nombre) {
-        toast('Ingresá el nombre del cliente primero', 'warning');
-        document.getElementById('nombreNuevoCliente')?.focus();
-        return;
-    }
-    
-    // Verificar campos requeridos
-    const faltantes = CAMPOS_SISTEMA
-        .filter(c => c.requerido && MODELADOR.conexiones[c.id] === undefined)
-        .map(c => c.nombre);
-    
-    if (faltantes.length > 0) {
-        toast(`Faltan campos requeridos: ${faltantes.join(', ')}`, 'error');
-        return;
-    }
-    
-    // Construir configuración
-    const config = {
-        nombre: nombre,
-        fechaCreacion: new Date().toISOString(),
-        columnas: {},
-        unidadPeso: document.getElementById('unidadPeso')?.value || 'KG'
-    };
-    
-    Object.entries(MODELADOR.conexiones).forEach(([campo, indice]) => {
-        config.columnas[campo] = {
-            indice: indice,
-            nombreColumna: MODELADOR.columnas[indice]
-        };
-    });
-    
-    // Guardar en IndexedDB
-    dbGuardarConfig(`cliente_${nombre.toLowerCase().replace(/\s+/g, '_')}`, config);
-    
-    console.log('Configuración guardada:', config);
-    toast(`✓ Configuración de "${nombre}" guardada`, 'success');
-    
-    // Mostrar resumen
-    mostrarResumenConfig(config);
-}
-
-/**
- * Muestra resumen de la configuración guardada
- */
-function mostrarResumenConfig(config) {
-    const container = document.getElementById('analisisContainer');
-    
-    const resumenHTML = `
-        <div class="card" style="margin-top:1.5rem;border:2px solid var(--verde-500);">
-            <div class="card-header" style="background:var(--verde-100);">
-                <span class="card-title">✅ Configuración Guardada: ${config.nombre}</span>
-            </div>
-            <div class="card-body">
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem;">
-                    ${Object.entries(config.columnas).map(([campo, info]) => {
-                        const campoInfo = CAMPOS_SISTEMA.find(c => c.id === campo);
-                        return `
-                            <div style="background:var(--gris-100);padding:0.6rem;border-radius:6px;font-size:0.85rem;">
-                                <strong>${campoInfo?.icono} ${campoInfo?.nombre}:</strong><br>
-                                <code style="color:var(--verde-800);">Col ${info.indice + 1}</code> - ${info.nombreColumna}
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-                <div style="margin-top:1rem;display:flex;gap:0.5rem;">
-                    <button class="btn btn-sm btn-secondary" onclick="exportarConfigJSON()">📥 Exportar JSON</button>
-                    <button class="btn btn-sm btn-success" onclick="probarProcesamiento()">▶️ Probar Procesamiento</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    container.insertAdjacentHTML('beforeend', resumenHTML);
-}
-
-/**
- * Exporta la configuración como JSON
- */
-function exportarConfigJSON() {
-    const nombre = document.getElementById('nombreNuevoCliente')?.value?.trim() || 'nuevo_cliente';
-    
-    const config = {
-        nombre: nombre,
-        columnas: {}
-    };
-    
-    Object.entries(MODELADOR.conexiones).forEach(([campo, indice]) => {
-        config.columnas[campo] = {
-            indice: indice,
-            nombreColumna: MODELADOR.columnas[indice]
-        };
-    });
-    
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `config_${nombre.toLowerCase().replace(/\s+/g, '_')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast('Configuración exportada', 'success');
-}
-
-/**
- * Estilos CSS del modelador
- */
-function getModeladorStyles() {
-    return `
-        .modelador-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 120px 1fr;
-            gap: 0;
-            min-height: 500px;
-            background: var(--gris-100);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--gris-300);
-        }
-        
-        .modelador-panel {
-            background: var(--blanco);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .modelador-panel-header {
-            padding: 0.85rem 1rem;
-            background: var(--gris-100);
-            border-bottom: 1px solid var(--gris-200);
-            font-weight: 700;
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modelador-count {
-            background: var(--verde-600);
-            color: white;
-            padding: 0.15rem 0.5rem;
-            border-radius: 10px;
-            font-size: 0.75rem;
-        }
-        
-        .modelador-cubos {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .modelador-conexiones {
-            background: linear-gradient(90deg, var(--gris-200), var(--gris-100), var(--gris-200));
-            position: relative;
-        }
-        
-        #svgConexiones {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        .conexion-linea {
-            fill: none;
-            stroke: var(--verde-500);
-            stroke-width: 2;
-            stroke-dasharray: 5, 3;
-            animation: flujo 1s linear infinite;
-        }
-        
-        .conexion-punto {
-            fill: var(--verde-600);
-        }
-        
-        @keyframes flujo {
-            to { stroke-dashoffset: -8; }
-        }
-        
-        /* Cubos */
-        .cubo {
-            background: var(--blanco);
-            border: 2px solid var(--gris-300);
-            border-radius: 8px;
-            padding: 0.6rem 0.75rem;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            position: relative;
-        }
-        
-        .cubo:hover {
-            border-color: var(--verde-400);
-            box-shadow: 0 2px 8px rgba(46,125,50,0.15);
-        }
-        
-        .cubo.conectado {
-            border-color: var(--verde-500);
-            background: var(--verde-50);
-        }
-        
-        .cubo.requerido:not(.conectado) {
-            border-color: var(--amarillo-500);
-            background: var(--amarillo-100);
-        }
-        
-        .cubo-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .cubo-indice {
-            background: var(--gris-200);
-            color: var(--gris-600);
-            font-size: 0.65rem;
-            padding: 0.1rem 0.35rem;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-        
-        .cubo.conectado .cubo-indice {
-            background: var(--verde-600);
-            color: white;
-        }
-        
-        .cubo-icono {
-            font-size: 1rem;
-        }
-        
-        .cubo-nombre {
-            font-weight: 600;
-            font-size: 0.82rem;
-            color: var(--gris-800);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-        }
-        
-        .cubo-req {
-            color: var(--rojo-500);
-            font-weight: 700;
-        }
-        
-        .cubo-muestra {
-            font-size: 0.72rem;
-            color: var(--gris-500);
-            font-family: 'JetBrains Mono', monospace;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .cubo-descripcion {
-            font-size: 0.7rem;
-            color: var(--gris-500);
-        }
-        
-        .cubo-drop-zone {
-            margin-top: 0.5rem;
-            padding: 0.4rem;
-            border: 1px dashed var(--gris-400);
-            border-radius: 4px;
-            text-align: center;
-            font-size: 0.7rem;
-            color: var(--gris-500);
-        }
-        
-        .cubo-conexion {
-            margin-top: 0.4rem;
-            padding: 0.35rem 0.5rem;
-            background: var(--verde-100);
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .conexion-col {
-            font-size: 0.72rem;
-            color: var(--verde-800);
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .conexion-quitar {
-            background: none;
-            border: none;
-            color: var(--rojo-500);
-            cursor: pointer;
-            font-size: 0.85rem;
-            padding: 0 0.25rem;
-            opacity: 0.7;
-        }
-        
-        .conexion-quitar:hover {
-            opacity: 1;
-        }
-        
-        .cubo-estado {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 18px;
-            height: 18px;
-            background: var(--verde-500);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-            font-weight: 700;
-        }
-        
-        /* Estados de drag & drop */
-        .cubo-origen.arrastrando {
-            opacity: 0.5;
-            border-style: dashed;
-        }
-        
-        .cubo-destino.drop-activo {
-            border-color: var(--verde-400);
-        }
-        
-        .cubo-destino.drop-hover {
-            border-color: var(--verde-600);
-            background: var(--verde-100);
-            transform: scale(1.02);
-        }
-        
-        /* Footer */
-        .modelador-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--gris-100);
-            border-top: 1px solid var(--gris-200);
-            margin-top: 1rem;
-            border-radius: 8px;
-        }
-        
-        .modelador-leyenda {
-            display: flex;
-            gap: 1.5rem;
-        }
-        
-        .leyenda-item {
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-            font-size: 0.75rem;
-            color: var(--gris-600);
-        }
-        
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-        
-        .dot.conectado { background: var(--verde-500); }
-        .dot.requerido { background: var(--amarillo-500); }
-        .dot.opcional { background: var(--gris-400); }
-        
-        .modelador-acciones {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        @media (max-width: 900px) {
-            .modelador-wrapper {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto;
-            }
-            
-            .modelador-conexiones {
-                height: 60px;
-            }
-        }
-    `;
-}
-
-console.log('✅ Modelador visual cargado');
-
-// ══════════════════════════════════════════════════════════════════════════════
-// INICIALIZACIÓN ROBUSTA
-// ══════════════════════════════════════════════════════════════════════════════
-
-// Fallback si DOMContentLoaded ya pasó
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    // DOM ya está listo
-    init();
-}
-
-// También agregar listeners de navegación directamente por si fallan
-window.addEventListener('load', function() {
-    console.log('🔄 Window load - verificando navegación...');
-    
-    // Verificar que la navegación funciona
-    const navItems = document.querySelectorAll('.nav-item');
-    if (navItems.length > 0) {
-        console.log(`✅ ${navItems.length} items de navegación encontrados`);
-        navItems.forEach(item => {
-            item.onclick = function() {
-                const page = this.getAttribute('data-page');
-                console.log('📍 Navegando a:', page);
-                navegarA(page);
-            };
-        });
-    } else {
-        console.error('❌ No se encontraron items de navegación');
-    }
-    
-    // Verificar input de archivos
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
-        fileInput.onchange = function() {
-            console.log('📁 Archivos seleccionados:', this.files.length);
-            handleFiles(this.files);
-        };
-        console.log('✅ Input de archivos configurado');
-    }
-});
 </script>
 </body>
 </html>
