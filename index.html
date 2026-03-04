@@ -1164,34 +1164,49 @@ function normCampaña(valor) {
 function procesarCargill(data) {
     const registros = [];
     const headers = data[0] || [];
+    let descartados = { sinCultivo: 0, sinCTG: 0, ctgInvalido: 0 };
+    
+    console.log('🔄 Procesando Cargill, headers:', headers.slice(0, 8));
     
     for (let i = 1; i < data.length; i++) {
         const row = data[i];
         if (!row || row.length === 0) continue;
         
         // Cultivo
-        const cultivo = normCultivo(getVal(row, headers, 'producto'));
-        if (!cultivo) continue;
+        const cultivoRaw = getVal(row, headers, 'producto', 'material', 'grano');
+        const cultivo = normCultivo(cultivoRaw);
+        if (!cultivo) {
+            descartados.sinCultivo++;
+            continue;
+        }
         
         // CTG
-        const ctg = normCTG(getVal(row, headers, 'ctg'));
-        if (ctg.length !== 11) continue;
+        const ctgRaw = getVal(row, headers, 'ctg', 'carta de porte', 'nro ctg');
+        const ctg = normCTG(ctgRaw);
+        if (!ctg) {
+            descartados.sinCTG++;
+            continue;
+        }
+        if (ctg.length !== 11) {
+            descartados.ctgInvalido++;
+            continue;
+        }
         
         // Cliente
-        let cliente = getVal(row, headers, 'cliente');
+        let cliente = getVal(row, headers, 'cliente', 'productor', 'remitente');
         const clienteOrig = cliente;
         if (esLIAG(cliente)) cliente = 'Cargill';
-        cliente = aplicarCorreccion(cliente);
+        cliente = aplicarCorreccion(cliente) || 'Cargill';
         
         // Peso (ya en KG)
-        const peso = parseFloat(getVal(row, headers, 'peso neto a certificar', 'peso neto')) || 0;
+        const peso = parseFloat(getVal(row, headers, 'peso neto a certificar', 'peso neto', 'peso', 'neto')) || 0;
         
         // Calidad
         const grado = parseInt(getVal(row, headers, 'grado')) || 0;
         const factor = parseFloat(getVal(row, headers, 'factor total', 'factor')) || 100;
-        const humedad = parseFloat(getVal(row, headers, 'humedad%', 'humedad')) || 0;
-        const proteina = parseFloat(getVal(row, headers, 'proteina')) || 0;
-        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph')) || 0;
+        const humedad = parseFloat(getVal(row, headers, 'humedad%', 'humedad', 'hum')) || 0;
+        const proteina = parseFloat(getVal(row, headers, 'proteina', 'prot')) || 0;
+        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph', 'p.h.')) || 0;
         
         // Mermas - EN CARGILL YA VIENEN EN KG (no en toneladas ni %)
         const zaranda = parseFloat(getVal(row, headers, 'zaranda')) || 0;
@@ -1237,6 +1252,7 @@ function procesarCargill(data) {
         registros.push(registro);
     }
     
+    console.log(`📊 Cargill: ${registros.length} válidos, descartados:`, descartados);
     return registros;
 }
 
@@ -1595,8 +1611,12 @@ function leerArchivo(file) {
  * Procesa múltiples archivos
  */
 async function handleFiles(files) {
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {
+        console.log('⚠️ No se recibieron archivos');
+        return;
+    }
     
+    console.log(`📁 Procesando ${files.length} archivo(s)...`);
     showLoading('Procesando archivos...');
     
     try {
@@ -1605,10 +1625,32 @@ async function handleFiles(files) {
         let totalNuevos = 0;
         
         for (const file of files) {
+            console.log(`📄 Archivo: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
             setLoadingText(`Leyendo ${file.name}...`);
-            const data = await leerArchivo(file);
             
-            const proveedor = detectarProveedor(file.name);
+            const data = await leerArchivo(file);
+            console.log(`📊 Datos leídos: ${data.length} filas, ${data[0]?.length || 0} columnas`);
+            
+            if (data.length < 2) {
+                console.warn('⚠️ Archivo vacío o sin datos');
+                toast(`${file.name}: archivo vacío`, 'warning');
+                continue;
+            }
+            
+            // Mostrar headers para debug
+            console.log('📋 Headers:', data[0]?.slice(0, 10));
+            
+            // Detectar proveedor por nombre de archivo
+            let proveedor = detectarProveedor(file.name);
+            
+            // Si no se detectó, intentar por contenido
+            if (proveedor === 'Otro') {
+                proveedor = detectarProveedorPorContenido(data[0]);
+                console.log(`🔍 Proveedor detectado por contenido: ${proveedor}`);
+            } else {
+                console.log(`🔍 Proveedor detectado por nombre: ${proveedor}`);
+            }
+            
             setLoadingText(`Procesando ${proveedor}...`);
             
             let registros = [];
@@ -1619,31 +1661,39 @@ async function handleFiles(files) {
                 case 'LDC': registros = procesarLDC(data); break;
                 case 'FYO': registros = procesarFYO(data); break;
                 default:
-                    console.warn('Proveedor no reconocido:', proveedor);
-                    toast(`Proveedor "${proveedor}" no soportado`, 'warning');
+                    console.warn(`⚠️ Proveedor "${proveedor}" no soportado`);
+                    toast(`Proveedor "${proveedor}" no reconocido. Renombrá el archivo incluyendo: cargill, aca, cofco, ldc o fyo`, 'warning');
                     continue;
+            }
+            
+            console.log(`📝 Registros procesados: ${registros.length}`);
+            
+            if (registros.length === 0) {
+                console.warn('⚠️ No se encontraron registros válidos');
+                toast(`${file.name}: no se encontraron cartas válidas`, 'warning');
+                continue;
             }
             
             // Filtrar duplicados
             const nuevos = registros.filter(r => !ctgsExistentes.has(r.CTG));
             nuevos.forEach(r => ctgsExistentes.add(r.CTG));
             
+            console.log(`✅ Nuevos: ${nuevos.length}, Duplicados: ${registros.length - nuevos.length}`);
+            
             if (nuevos.length > 0) {
-                setLoadingText(`Guardando ${nuevos.length} cartas de ${proveedor}...`);
+                setLoadingText(`Guardando ${nuevos.length} cartas...`);
                 await dbGuardarCartas(nuevos);
                 STATE.cartas.push(...nuevos);
                 totalNuevos += nuevos.length;
-                
-                console.log(`✓ ${proveedor}: ${nuevos.length} nuevas (${registros.length - nuevos.length} duplicadas)`);
-            } else {
-                console.log(`✓ ${proveedor}: 0 nuevas (${registros.length} duplicadas)`);
             }
         }
         
+        STATE.filtradas = [...STATE.cartas];
         hideLoading();
         
         if (totalNuevos > 0) {
-            toast(`${totalNuevos} cartas nuevas agregadas`, 'success');
+            toast(`✅ ${totalNuevos} cartas nuevas agregadas`, 'success');
+            console.log(`🎉 Total: ${totalNuevos} cartas nuevas, ${STATE.cartas.length} en total`);
             await refreshUI();
         } else {
             toast('No se encontraron cartas nuevas', 'warning');
@@ -1651,9 +1701,33 @@ async function handleFiles(files) {
         
     } catch (err) {
         hideLoading();
-        console.error('Error procesando archivos:', err);
-        toast('Error al procesar archivos', 'error');
+        console.error('❌ Error procesando archivos:', err);
+        toast('Error al procesar archivos: ' + err.message, 'error');
     }
+}
+
+// Detectar proveedor por contenido de headers
+function detectarProveedorPorContenido(headers) {
+    if (!headers || !Array.isArray(headers)) return 'Otro';
+    
+    const h = headers.map(x => String(x || '').toLowerCase()).join(' ');
+    
+    // Cargill: tiene "peso neto a certificar", "factor total"
+    if (h.includes('peso neto a certificar') || h.includes('factor total')) return 'Cargill';
+    
+    // COFCO: tiene "número de ctg", "titular cpe"
+    if (h.includes('número de ctg') || h.includes('numero de ctg') || h.includes('titular cpe')) return 'COFCO';
+    
+    // LDC: tiene "cant. neta", "fecha movimiento"
+    if (h.includes('cant. neta') || h.includes('fecha movimiento')) return 'LDC';
+    
+    // ACA: tiene "kg.netos", "procedencia" sin otros campos específicos
+    if (h.includes('kg.netos') || (h.includes('procedencia') && h.includes('zaran'))) return 'ACA';
+    
+    // FYO: estructura por índices, verificar si columna 1 parece CTG
+    if (headers.length > 15 && !h.includes('ctg')) return 'FYO';
+    
+    return 'Otro';
 }
 
 console.log('✅ Parte 3 cargada: Procesadores de Proveedores');
