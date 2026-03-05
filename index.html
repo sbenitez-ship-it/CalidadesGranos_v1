@@ -1082,15 +1082,28 @@ console.log('✅ Parte 2 cargada: IndexedDB + Estado + Normalización');
 // ══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Busca índice de columna por nombre parcial
+ * Busca índice de columna por nombre
+ * Primero busca coincidencia exacta, luego parcial
  */
 function findCol(headers, ...nombres) {
+    // Primero buscar coincidencia EXACTA (ignorando mayusculas)
     for (const nombre of nombres) {
+        const nombreLower = nombre.toLowerCase().trim();
         const idx = headers.findIndex(h => 
-            String(h || '').toLowerCase().includes(nombre.toLowerCase())
+            String(h || '').toLowerCase().trim() === nombreLower
         );
         if (idx >= 0) return idx;
     }
+    
+    // Si no hay exacta, buscar coincidencia PARCIAL
+    for (const nombre of nombres) {
+        const nombreLower = nombre.toLowerCase();
+        const idx = headers.findIndex(h => 
+            String(h || '').toLowerCase().includes(nombreLower)
+        );
+        if (idx >= 0) return idx;
+    }
+    
     return -1;
 }
 
@@ -1114,6 +1127,7 @@ function detectarProveedor(filename) {
     if (l.includes('fyo') || l.includes('calidades')) return 'FYO';
     if (l.includes('bunge')) return 'Bunge';
     if (l.includes('cass')) return 'CASS';
+    if (l.includes('ardion') || l.match(/^\d+-\d+/)) return 'Ardion'; // Formato "5-3428"
     if (l.includes('molinos')) return 'Molinos';
     return 'Otro';
 }
@@ -1160,64 +1174,59 @@ function procesarCargill(data) {
     const registros = [];
     const headers = data[0] || [];
     
-    console.log('[CARGILL] Headers:', headers.slice(0, 15));
+    console.log('[CARGILL] Headers:', headers);
     
     for (let i = 1; i < data.length; i++) {
         const row = data[i];
         if (!row || row.length === 0) continue;
         
-        // Cultivo
-        const cultivo = normCultivo(getVal(row, headers, 'producto'));
-        if (!cultivo) continue;
+        // Cultivo - columna "Producto"
+        const productoRaw = getVal(row, headers, 'producto');
+        const cultivo = normCultivo(productoRaw);
+        if (!cultivo) continue; // Saltar fertilizantes, etc.
         
-        // CTG
+        // CTG - columna "CTG"
         const ctg = normCTG(getVal(row, headers, 'ctg'));
         if (ctg.length !== 11) continue;
         
-        // Cliente
-        let cliente = getVal(row, headers, 'cliente');
+        // Cliente - columna "Cliente" 
+        let cliente = String(getVal(row, headers, 'cliente') || '').trim();
         const clienteOrig = cliente;
-        if (esLIAG(cliente)) cliente = 'Cargill';
+        // Si el cliente es LIAG, usar el Destino o Origen como referencia
+        if (esLIAG(cliente)) {
+            const destino = String(getVal(row, headers, 'destino') || '').trim();
+            const origen = String(getVal(row, headers, 'origen') || '').trim();
+            cliente = destino || origen || 'Cargill';
+        }
         cliente = aplicarCorreccion(cliente) || 'Cargill';
         
-        // Peso (ya en KG) - usar "Peso Neto a Certificar" primero
-        let peso = parseFloat(getVal(row, headers, 'peso neto a certificar')) || 0;
-        if (peso <= 0) {
-            peso = parseFloat(getVal(row, headers, 'peso neto')) || 0;
-        }
-        if (peso <= 0) continue; // Saltar si no hay peso
+        // Peso - columna "Peso Neto a Certificar" (ya en KG)
+        const peso = parseFloat(getVal(row, headers, 'peso neto a certificar')) || 0;
+        if (peso <= 0) continue;
         
         // Calidad
         const grado = parseInt(getVal(row, headers, 'grado')) || 0;
-        const factor = parseFloat(getVal(row, headers, 'factor total', 'factor')) || 100;
-        const humedad = parseFloat(getVal(row, headers, 'humedad%', 'humedad')) || 0;
-        const proteina = parseFloat(getVal(row, headers, 'proteina')) || 0;
-        const ph = parseFloat(getVal(row, headers, 'peso hectolitrico', 'ph')) || 0;
+        const factor = parseFloat(getVal(row, headers, 'factor total')) || 100;
         
-        // Mermas - CARGILL las tiene en KG directamente
-        // Pero debemos validar que sean valores razonables (< peso)
-        let zaranda = parseFloat(getVal(row, headers, 'zaranda')) || 0;
-        let volatil = parseFloat(getVal(row, headers, 'volatil')) || 0;
+        // Humedad - IMPORTANTE: usar "Humedad%" no "Humedad" (que es en kg)
+        const humedad = parseFloat(getVal(row, headers, 'humedad%')) || 0;
         
-        // Validar que mermas no sean mayores al peso (error de datos)
-        if (zaranda > peso) zaranda = 0;
-        if (volatil > peso) volatil = 0;
+        // Mermas - Volatil y Zaranda (ya en KG)
+        const volatil = parseFloat(getVal(row, headers, 'volatil')) || 0;
+        const zaranda = parseFloat(getVal(row, headers, 'zaranda')) || 0;
+        const mermaKg = volatil + zaranda;
         
-        const mermaKg = zaranda + volatil;
-        
-        // Calcular % sobre peso bruto estimado
+        // Calcular % de merma sobre peso bruto
         const pesoBruto = peso + mermaKg;
         const mermaPct = pesoBruto > 0 ? parseFloat(((mermaKg / pesoBruto) * 100).toFixed(2)) : 0;
         
-        // Validar que mermaPct sea razonable (< 30%)
-        const mermaPctFinal = mermaPct > 30 ? 0 : mermaPct;
+        // Campaña/Cosecha
+        const cosecha = String(getVal(row, headers, 'cosecha') || '');
+        const campana = normCampana(cosecha);
         
-        // Grano Verde
-        const granoVerde = parseFloat(getVal(row, headers, 'grano verde', 'granos verdes', 'verde')) || 0;
-        
-        // Campaña (normalizar formato)
-        let campana = String(getVal(row, headers, 'cosecha', 'campana') || '');
-        campana = normCampana(campana);
+        // Origen y Destino
+        const origen = String(getVal(row, headers, 'origen') || '').trim();
+        const destino = String(getVal(row, headers, 'destino') || '').trim();
         
         const registro = {
             CTG: ctg,
@@ -1235,12 +1244,12 @@ function procesarCargill(data) {
             Zaranda: zaranda,
             Volatil: volatil,
             Merma_kg: mermaKg,
-            MermaPct: mermaPctFinal,
-            GranoVerde: granoVerde,
-            Proteina: proteina,
-            PesoHL: ph,
-            Origen: String(getVal(row, headers, 'origen') || ''),
-            Destino: String(getVal(row, headers, 'destino') || ''),
+            MermaPct: mermaPct,
+            GranoVerde: 0,
+            Proteina: 0,
+            PesoHL: 0,
+            Origen: origen,
+            Destino: destino,
             Cosecha: campana
         };
         
@@ -1249,6 +1258,15 @@ function procesarCargill(data) {
     }
     
     console.log('[CARGILL] Registros procesados:', registros.length);
+    if (registros.length > 0) {
+        console.log('[CARGILL] Ejemplo:', {
+            CTG: registros[0].CTG,
+            Peso: registros[0].Peso_kg,
+            Humedad: registros[0].Humedad,
+            MermaPct: registros[0].MermaPct
+        });
+    }
+    
     return registros;
 }
 
@@ -1515,41 +1533,40 @@ function procesarLDC(data) {
 function procesarFYO(data) {
     const registros = [];
     
-    // FYO tiene headers en fila 0, pero pueden estar como "Unnamed"
-    // Buscar la fila real de headers
+    // FYO: la fila 0 puede estar vacía o tener "Unnamed"
+    // Los headers reales están en la fila que contiene "CTG" o "Carta de Porte"
     let headerRow = 0;
-    if (data[0] && String(data[0][0] || '').includes('Unnamed')) {
-        // Headers estan en la fila que tiene "Carta de Porte" o "CTG"
-        for (let i = 0; i < Math.min(5, data.length); i++) {
-            const rowStr = (data[i] || []).join(' ').toLowerCase();
-            if (rowStr.includes('ctg') || rowStr.includes('carta')) {
-                headerRow = i;
-                break;
-            }
+    
+    for (let i = 0; i < Math.min(10, data.length); i++) {
+        const row = data[i] || [];
+        // Verificar si esta fila tiene headers
+        const rowStr = row.map(c => String(c || '').toLowerCase()).join(' ');
+        if (rowStr.includes('ctg') && (rowStr.includes('kg') || rowStr.includes('peso') || rowStr.includes('descarg'))) {
+            headerRow = i;
+            break;
         }
     }
     
     const headers = data[headerRow] || [];
     const startRow = headerRow + 1;
     
-    console.log('[FYO] Headers en fila:', headerRow, headers.slice(0, 8));
+    console.log('[FYO] Headers en fila:', headerRow);
+    console.log('[FYO] Headers:', headers.slice(0, 12));
     
     for (let i = startRow; i < data.length; i++) {
         const row = data[i];
         if (!row || row.length === 0) continue;
         
-        // CTG - puede estar en columna 1 o buscar por header
-        let ctgVal = row[1];
+        // CTG - buscar por header primero
         const ctgIdx = findCol(headers, 'ctg');
-        if (ctgIdx >= 0) ctgVal = row[ctgIdx];
-        
+        const ctgVal = ctgIdx >= 0 ? row[ctgIdx] : row[1];
         const ctg = normCTG(ctgVal);
         if (ctg.length !== 11) continue;
         
-        // Peso - columna 4 o buscar "Kg. Descargados"
-        let pesoKg = parseFloat(row[4]) || 0;
+        // Peso - buscar "Kg. Descargados" o "Kg Descargados"
         const pesoIdx = findCol(headers, 'kg. descargados', 'kg descargados', 'kilos');
-        if (pesoIdx >= 0) pesoKg = parseFloat(row[pesoIdx]) || 0;
+        let pesoKg = pesoIdx >= 0 ? parseFloat(row[pesoIdx]) : parseFloat(row[4]);
+        pesoKg = pesoKg || 0;
         if (pesoKg <= 0) continue;
         
         // Grado y Factor
@@ -1564,6 +1581,7 @@ function procesarFYO(data) {
         const vendedor = String(row[vendedorIdx >= 0 ? vendedorIdx : 5] || '').trim();
         const comprador = String(row[compradorIdx >= 0 ? compradorIdx : 6] || '').trim();
         
+        // Si vendedor es LIAG, el cliente es el comprador
         let cliente = esLIAG(vendedor) ? comprador : vendedor;
         const clienteOrig = cliente;
         if (!cliente) cliente = 'FYO';
@@ -1571,12 +1589,19 @@ function procesarFYO(data) {
         
         // Humedad
         const humIdx = findCol(headers, 'humedad');
-        const humRaw = String(row[humIdx >= 0 ? humIdx : 16] || '0');
-        const humedad = parseFloat(humRaw.replace(',', '.')) || 0;
+        let humedad = 0;
+        if (humIdx >= 0) {
+            const humRaw = String(row[humIdx] || '0').replace('-', '0');
+            humedad = parseFloat(humRaw.replace(',', '.')) || 0;
+        }
+        
+        // Fecha
+        const fechaIdx = findCol(headers, 'fecha');
+        const fecha = fechaIdx >= 0 ? row[fechaIdx] : row[3];
         
         const registro = {
             CTG: ctg,
-            Fecha: normFecha(row[3]),
+            Fecha: normFecha(fecha),
             Cliente: cliente,
             ClienteOrig: clienteOrig,
             Proveedor: 'FYO',
@@ -1592,7 +1617,7 @@ function procesarFYO(data) {
             MermaPct: 0,
             Proteina: 0,
             PesoHL: 0,
-            Origen: String(row[7] || ''),
+            Origen: String(row[7] || ''), // Localidad
             Destino: comprador,
             Cosecha: ''
         };
@@ -1602,6 +1627,15 @@ function procesarFYO(data) {
     }
     
     console.log('[FYO] Registros procesados:', registros.length);
+    if (registros.length > 0) {
+        console.log('[FYO] Ejemplo:', {
+            CTG: registros[0].CTG,
+            Peso: registros[0].Peso_kg,
+            Factor: registros[0].Factor,
+            Cliente: registros[0].Cliente
+        });
+    }
+    
     return registros;
 }
 
@@ -1761,6 +1795,132 @@ function procesarCASS(data) {
     }
     
     console.log('[CASS] Registros procesados:', registros.length);
+    return registros;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PROCESADOR: ARDION
+// Headers en fila 2, datos desde fila 3
+// Pesos en KG, tiene Merma en %
+// ══════════════════════════════════════════════════════════════════════════════
+
+function procesarArdion(data) {
+    const registros = [];
+    
+    // Buscar fila de headers (contiene "C.P." o "Neto")
+    let headerRow = 2; // Default
+    for (let i = 0; i < Math.min(10, data.length); i++) {
+        const row = data[i] || [];
+        const rowStr = row.map(c => String(c || '').toLowerCase()).join(' ');
+        if (rowStr.includes('c.p.') || (rowStr.includes('neto') && rowStr.includes('bruto'))) {
+            headerRow = i;
+            break;
+        }
+    }
+    
+    const headers = data[headerRow] || [];
+    const startRow = headerRow + 1;
+    
+    console.log('[ARDION] Headers en fila:', headerRow);
+    console.log('[ARDION] Headers:', headers);
+    
+    // Extraer info del contrato (fila 1 generalmente)
+    let cultivo = 'Maíz';
+    let comprador = 'Ardion';
+    for (let i = 0; i < headerRow; i++) {
+        const infoRow = String(data[i]?.[0] || '').toLowerCase();
+        if (infoRow.includes('maíz') || infoRow.includes('maiz')) cultivo = 'Maíz';
+        if (infoRow.includes('soja')) cultivo = 'Soja';
+        if (infoRow.includes('trigo')) cultivo = 'Trigo';
+        if (infoRow.includes('comprador:')) {
+            const match = infoRow.match(/comprador:\s*([^-]+)/i);
+            if (match) comprador = match[1].trim();
+        }
+    }
+    
+    for (let i = startRow; i < data.length; i++) {
+        const row = data[i];
+        if (!row || row.length === 0) continue;
+        
+        // CTG - columna "C.P." (índice 0)
+        const ctgIdx = findCol(headers, 'c.p.', 'cp', 'ctg');
+        const ctg = normCTG(row[ctgIdx >= 0 ? ctgIdx : 0]);
+        if (ctg.length !== 11) continue;
+        
+        // Peso - usar "NetoFinal" o "Neto"
+        const pesoFinalIdx = findCol(headers, 'netofinal', 'neto final');
+        const pesoNetoIdx = findCol(headers, 'neto');
+        let pesoKg = 0;
+        if (pesoFinalIdx >= 0) {
+            pesoKg = parseFloat(row[pesoFinalIdx]) || 0;
+        } else if (pesoNetoIdx >= 0) {
+            pesoKg = parseFloat(row[pesoNetoIdx]) || 0;
+        }
+        if (pesoKg <= 0) continue;
+        
+        // Humedad - columna "Hdad"
+        const humIdx = findCol(headers, 'hdad', 'humedad', 'hum');
+        const humedad = parseFloat(row[humIdx >= 0 ? humIdx : 7]) || 0;
+        
+        // Merma % - columna "Merma" (ya viene en %)
+        const mermaIdx = findCol(headers, 'merma');
+        const mermaPct = parseFloat(row[mermaIdx >= 0 ? mermaIdx : 8]) || 0;
+        
+        // Calcular merma en KG
+        const pesoNetoOriginal = parseFloat(row[pesoNetoIdx >= 0 ? pesoNetoIdx : 6]) || pesoKg;
+        const mermaKg = pesoNetoOriginal - pesoKg;
+        
+        // Fecha
+        const fechaIdx = findCol(headers, 'fecha');
+        const fecha = row[fechaIdx >= 0 ? fechaIdx : 12];
+        
+        // Observaciones (puede tener info de grado)
+        const obsIdx = findCol(headers, 'observaciones', 'obs');
+        const obs = String(row[obsIdx >= 0 ? obsIdx : 11] || '');
+        let grado = 0;
+        if (obs.toLowerCase().includes('grado 1')) grado = 1;
+        if (obs.toLowerCase().includes('grado 2')) grado = 2;
+        if (obs.toLowerCase().includes('grado 3')) grado = 3;
+        
+        const registro = {
+            CTG: ctg,
+            Fecha: normFecha(fecha),
+            Cliente: comprador,
+            ClienteOrig: comprador,
+            Proveedor: 'Ardion',
+            Cultivo: cultivo,
+            Campana: '',
+            Peso_kg: pesoKg,
+            Humedad: humedad,
+            Grado: grado,
+            Factor: 100,
+            VarFactor: 0,
+            Zaranda: 0,
+            Volatil: 0,
+            Merma_kg: mermaKg > 0 ? mermaKg : 0,
+            MermaPct: mermaPct,
+            Proteina: 0,
+            PesoHL: 0,
+            Origen: '',
+            Destino: 'Ardion',
+            Cosecha: '',
+            Observaciones: obs
+        };
+        
+        registro.Alertas = calcAlertas(registro);
+        registros.push(registro);
+    }
+    
+    console.log('[ARDION] Registros procesados:', registros.length);
+    if (registros.length > 0) {
+        console.log('[ARDION] Ejemplo:', {
+            CTG: registros[0].CTG,
+            Peso: registros[0].Peso_kg,
+            Humedad: registros[0].Humedad,
+            MermaPct: registros[0].MermaPct
+        });
+    }
+    
     return registros;
 }
 
@@ -2257,6 +2417,7 @@ async function handleFiles(files) {
                 case 'FYO': registros = procesarFYO(data); break;
                 case 'Bunge': registros = procesarBunge(data); break;
                 case 'CASS': registros = procesarCASS(data); break;
+                case 'Ardion': registros = procesarArdion(data); break;
                 default:
                     // AUTO-DETECTOR: intentar procesar automaticamente
                     console.log('[AUTO] Proveedor no reconocido, intentando auto-deteccion...');
